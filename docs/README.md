@@ -14,6 +14,7 @@ riscos e o desenho técnico; só então construir.
 6. [Design de APIs](05-apis.md)
 7. [Diagramas de arquitetura](06-diagramas.md)
 8. [Estrutura de pastas do projeto](07-estrutura-projeto.md)
+9. [Revisão estratégica — diferenciação para a América Latina](08-revisao-estrategica-latam.md)
 
 ## Como ler isso
 
@@ -33,6 +34,14 @@ resolvidas.
 - **Maior risco técnico:** depender de scraping para dados de preço é frágil e viola
   termos de uso dos motores de busca; o produto precisa nascer sobre APIs oficiais
   (Amadeus, Duffel, Kiwi Tequila), mesmo que isso limite o volume de buscas no início.
-- **MVP recomendado:** monitoramento de preço + alertas por e-mail, sem compra
-  integrada e sem cobrança — validar demanda e precisão da recomendação antes de
-  investir em emissão de bilhetes e em múltiplos canais de notificação pagos.
+- **MVP recomendado:** monitoramento de preço + alertas por e-mail **e WhatsApp**,
+  consultor de milhas-lite, sinal de câmbio e feed público de ofertas para SEO — sem
+  compra integrada e sem cobrança. O core de monitoramento continua enxuto; o que
+  muda é o canal (WhatsApp) e o contexto (milhas, câmbio) que já nascem pensados
+  para o viajante latino-americano, sem inflar custo (ver
+  [`08-revisao-estrategica-latam.md`](08-revisao-estrategica-latam.md)).
+- **Ambição de longo prazo:** ser a plataforma de referência de descoberta,
+  monitoramento e compra inteligente de viagens da América Latina — competindo não
+  em cobertura de busca (onde Google Flights/Kayak/Skyscanner já vencem), mas em
+  inteligência de compra localizada, confiança e canal nativo (WhatsApp), pontos
+  estruturalmente fracos dos concorrentes globais e da Decolar.

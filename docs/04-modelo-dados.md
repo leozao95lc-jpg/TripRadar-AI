@@ -136,7 +136,54 @@ erDiagram
     }
 ```
 
-## 5.2 Notas de modelagem
+## 5.2 Extensão do modelo — revisão estratégica (consultor de milhas e câmbio)
+
+Novas tabelas de referência, introduzidas já no MVP (ver `08-revisao-estrategica-latam.md`
+e `03-arquitetura.md`, seção 4.1.2). São tabelas de **dado de referência** (baixa
+frequência de escrita, mantidas por job periódico ou atualização manual), não
+integrações em tempo real:
+
+```mermaid
+erDiagram
+    MILEAGE_PROGRAMS ||--o{ MILEAGE_VALUATIONS : possui
+    AI_RECOMMENDATIONS }o--o{ MILEAGE_VALUATIONS : referencia
+    AI_RECOMMENDATIONS }o--o{ EXCHANGE_RATES : referencia
+
+    MILEAGE_PROGRAMS {
+        string code PK
+        string name
+        string country
+    }
+    MILEAGE_VALUATIONS {
+        uuid id PK
+        string program_code FK
+        float reference_cents_per_mile
+        string currency
+        string source
+        timestamp updated_at
+    }
+    EXCHANGE_RATES {
+        uuid id PK
+        string base_currency
+        string quote_currency
+        float rate
+        timestamp collected_at
+    }
+```
+
+- **`MILEAGE_PROGRAMS`**: catálogo dos programas suportados no lançamento (Smiles,
+  Latam Pass, TudoAzul, LifeMiles).
+- **`MILEAGE_VALUATIONS`**: valor de referência por milha, curado manualmente no MVP
+  (fonte pública/estimativa de mercado) — evolui para integração dinâmica por
+  programa apenas se a fase Beta validar que os usuários usam essa informação para
+  decidir.
+- **`EXCHANGE_RATES`**: taxa diária das moedas relevantes (USD, EUR → BRL no
+  lançamento), consumida pelo fator `currency_signal` da recomendação.
+- Nenhuma mudança de schema é necessária em `AI_RECOMMENDATIONS`: o campo `factors`
+  (jsonb) já comporta as novas chaves (`mileage_comparison`, `currency_signal`) sem
+  migração adicional — só nova lógica de preenchimento.
+
+## 5.3 Notas de modelagem
 
 - **`SEARCH_ALERTS` × `ALERT_AIRPORTS`**: um alerta pode ter múltiplos aeroportos de
   origem e/ou destino (campo `role` = `origin`/`destination`), atendendo ao requisito

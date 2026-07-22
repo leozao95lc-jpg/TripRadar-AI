@@ -23,6 +23,48 @@ internos de outro módulo diretamente). Isso torna a extração futura um recort
 pastas + troca de "chamada em processo" por "chamada de rede/fila", não uma
 reescrita.
 
+> **Atualização (revisão estratégica, `08-revisao-estrategica-latam.md`):** os
+> módulos `notifications` e `recommendations` ganham capacidades novas já no MVP —
+> detalhadas em 4.1.1 e 4.1.2 — e o `price_monitoring` passa a expor uma superfície
+> pública de leitura para o feed de ofertas/SEO.
+
+### 4.1.1 `notifications` — WhatsApp desde o MVP
+
+O canal WhatsApp deixa de ser uma feature de Beta e entra no MVP, por ser o principal
+diferencial de canal frente a concorrentes globais (ver seção 9 da revisão
+estratégica). Implementação deliberadamente simples para controlar custo/risco:
+- Envio via **WhatsApp Cloud API** (Meta), usando templates de mensagem utilitária
+  aprovados (alerta de queda de preço, confirmação de alerta criado).
+- Criação/gestão de alerta por **bot de menu estruturado** (respostas de botão/lista,
+  sem NLU livre) — evita custo e imprevisibilidade de um assistente conversacional
+  aberto, que fica para a Fase de Escala (copiloto de viagem).
+- Consumido via `interface/whatsapp_webhook.py` dentro do módulo, reaproveitando os
+  mesmos casos de uso de `alerts` (`CreateAlert`, `UpdateAlert`) que a interface REST
+  usa — o canal é só mais uma porta de entrada para o mesmo `application layer`.
+
+### 4.1.2 `recommendations` — consultor de milhas e sinal de câmbio
+
+Duas novas capacidades, ambas de baixo custo por dependerem de **dado de referência**,
+não de integração em tempo real:
+- **`mileage_advisor`**: consulta a tabela `mileage_valuations` (valor de referência
+  de cents-per-mile por programa, atualizada manualmente/periodicamente) e devolve
+  "pagar R$X vs. resgatar N milhas (~R$Y)" como parte da explicação da recomendação.
+- **`currency_signal`**: consulta `exchange_rates` (ingestão diária via job simples)
+  e adiciona ao `factors` da recomendação um sinal de câmbio favorável/desfavorável
+  para rotas internacionais.
+
+Ambas entram como **fatores adicionais no mesmo veredito explicável** já desenhado em
+`AI_RECOMMENDATIONS.factors` (`04-modelo-dados.md`) — não exigem novo fluxo, só novas
+fontes de dado.
+
+### 4.1.3 `price_monitoring` — superfície pública para SEO/feed de ofertas
+
+Um *read model* somente-leitura sobre `price_snapshots`, exposto em
+`/api/v1/routes/{origin}/{destination}/deals` (ver `05-apis.md`) e renderizado como
+páginas de rota no Next.js (SSG/ISR). Não introduz escrita nova — é uma projeção dos
+dados que o monitoramento já coleta, mantendo o princípio de reaproveitar o core em
+vez de construir um pipeline paralelo.
+
 **Primeiros candidatos a virar serviço/worker independente (Fase 4):**
 1. `price_monitoring` (jobs de polling contínuo em APIs externas — perfil de
    I/O e agendamento muito diferente do resto).

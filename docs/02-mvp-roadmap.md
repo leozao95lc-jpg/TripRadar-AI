@@ -1,11 +1,20 @@
 # 3. MVP e Roadmap
 
+> **Revisado após a análise estratégica de `08-revisao-estrategica-latam.md`.** O
+> MVP abaixo já incorpora as quatro funcionalidades de baixo custo e alto impacto de
+> diferenciação identificadas naquela revisão (WhatsApp, consultor de milhas-lite,
+> sinal de câmbio, feed público de ofertas). O restante das ideias levantadas na
+> revisão (comunidade, price freeze, planejamento em grupo, visto/documentação,
+> copiloto de IA, produto de dados B2B) foi deliberadamente distribuído nas fases
+> seguintes para não comprometer o prazo e o custo do primeiro lançamento.
+
 ## 3.1 Princípio norteador
 
 Lançar o menor produto que valida a hipótese central — **"usuários querem ser
-avisados de quando comprar, não só de quanto custa agora"** — com o menor custo e
-menor risco regulatório possível. Compra dentro da plataforma e canais pagos de
-notificação vêm depois de validar isso.
+avisados de quando comprar, não só de quanto custa agora, e querem isso onde já
+vivem (WhatsApp), com contexto que só faz sentido pra quem viaja da América
+Latina (milhas, câmbio)"** — com o menor custo e menor risco regulatório possível.
+Compra dentro da plataforma e canais pagos adicionais vêm depois de validar isso.
 
 ## 3.2 Fase 0 — Discovery (2–4 semanas)
 
@@ -15,7 +24,7 @@ notificação vêm depois de validar isso.
   notificação elas realmente usariam?
 - **Critério de saída:** ≥ 200 e-mails na waitlist ou validação qualitativa forte.
 
-## 3.3 Fase 1 — MVP (6–10 semanas)
+## 3.3 Fase 1 — MVP (8–12 semanas)
 
 **Escopo incluído:**
 - Cadastro/login (e-mail+senha e Google OAuth).
@@ -27,30 +36,48 @@ notificação vêm depois de validar isso.
 - Heurística de recomendação (sem ML ainda): comparação do preço atual com
   média/mínimo histórico da própria rota + regra de sazonalidade básica (feriados
   nacionais).
-- Notificação **somente por e-mail** (AWS SES).
+- **Notificação por e-mail (AWS SES) e WhatsApp** (WhatsApp Cloud API, mensagens
+  utilitárias): o alerta pode ser criado e gerenciado por um bot de **menu
+  estruturado** no WhatsApp (sem NLU livre — mantém o custo/risco baixo), além do
+  fluxo web.
+- **Consultor de milhas "lite"**: tabela de referência estática de valor por milha
+  (cents-per-mile) dos principais programas (Smiles, Latam Pass, TudoAzul, LifeMiles)
+  exibida junto ao preço, respondendo "vale mais pagar ou resgatar?".
+- **Sinal de câmbio**: ingestão diária de câmbio (USD/EUR → BRL) somado como fator na
+  explicação da recomendação para rotas internacionais.
+- **Feed público de ofertas + páginas de rota indexáveis** (SEO), alimentado pela
+  própria tabela de histórico de preço — canal de aquisição orgânica desde o dia 1.
 - Dashboard com: alertas ativos, últimas quedas, histórico de busca.
 - **Sem compra integrada** — botão "Ver oferta" redireciona a um parceiro/afiliado.
 - **Sem cobrança** — tudo gratuito nesta fase (ou waitlist para Premium).
 
-**Fora de escopo (explicitamente adiado):** múltiplos aeroportos por alerta, WhatsApp/
-Telegram/SMS, IA com ML, comparação de aeroportos, multidestino, emissão própria.
+**Fora de escopo (explicitamente adiado):** múltiplos aeroportos por alerta, Telegram/
+SMS, IA com ML, comparação de aeroportos, multidestino, emissão própria, comunidade
+de curadoria de ofertas, price freeze, planejamento em grupo, inteligência de
+visto/documentação, copiloto conversacional livre.
 
-**Critério de saída:** taxa de abertura/clique de e-mail de alerta > benchmark de
-mercado (~20%+), retenção de usuários com pelo menos 1 alerta ativo após 30 dias.
+**Critério de saída:** taxa de abertura/clique de alerta (e-mail + WhatsApp) acima do
+benchmark de mercado (~20%+ para e-mail; WhatsApp tende a ser maior), retenção de
+usuários com pelo menos 1 alerta ativo após 30 dias, tráfego orgânico mensurável
+vindo das páginas de rota.
 
 ## 3.4 Fase 2 — Beta fechado (4–8 semanas)
 
 - Convites controlados (lista de espera da Fase 0).
 - Múltiplos aeroportos de origem/destino por alerta.
-- Telegram e WhatsApp (via provedor tipo Twilio/Meta Business API) como canais.
+- Telegram como canal adicional.
 - Plano Premium pago via Stripe (alertas ilimitados, histórico completo, canais
   extras) — valida disposição a pagar.
 - Melhoria da heurística de recomendação com mais sinais (tendência dos últimos N
   dias, comparação com médias por temporada).
+- Recomendação proativa sem alerta explícito (baseada em aeroportos/rotas
+  pesquisados).
+- Primeira versão do feed de ofertas com curadoria/validação de usuários (semente da
+  comunidade de caçadores de promoção).
 - Observabilidade básica em produção (logs estruturados, métricas, alertas de erro).
 
 **Critério de saída:** conversão free→Premium mensurável, custo de notificação por
-usuário dentro do orçamento projetado.
+usuário dentro do orçamento projetado, engajamento mensurável no feed de ofertas.
 
 ## 3.5 Fase 3 — V1 pública
 
@@ -61,8 +88,11 @@ usuário dentro do orçamento projetado.
   companhias preferidas/proibidas.
 - Modelo de recomendação evoluído (features de sazonalidade, eventos, séries
   temporais) — primeira versão com ML supervisionado leve, não só heurística.
+- Congelamento de preço (price freeze), condicionado à parceria de emissão já estar
+  madura o suficiente para sustentar a garantia financeira da feature.
+- Planejamento de viagem em grupo (alerta compartilhado, votação de datas).
+- Inteligência de visto/documentação por nacionalidade de passaporte.
 - App como PWA (mobile-first).
-- SEO programático (páginas de rota: "voos de São Paulo para Lisboa").
 
 ## 3.6 Fase 4 — Escala
 
@@ -70,9 +100,12 @@ usuário dentro do orçamento projetado.
   perfil de escala diferente (ver `03-arquitetura.md`, seção de evolução).
 - Expansão de produto: hotéis, aluguel de carro, seguro viagem, eSIM, sala VIP,
   programa de afiliados.
+- Copiloto de viagem conversacional (IA livre) via WhatsApp, como capacidade Premium.
+- Produto de dados B2B (tendências agregadas e anonimizadas de tarifa para
+  companhias/agências), sujeito a revisão de compliance/LGPD.
 - Avaliação de acreditação IATA própria / operação como agência licenciada.
 - Internacionalização (outros mercados além do Brasil).
-- Migração de mensageria RabbitMQ/SQS → Kafka se o volume de eventos de
+- Migração de mensageria SQS → Kafka se o volume de eventos de
   monitoramento/analytics justificar (ver justificativa em `03-arquitetura.md`).
 
 ## 3.7 Métrica norte (North Star)
