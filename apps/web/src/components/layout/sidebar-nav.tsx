@@ -4,14 +4,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { NAV_ITEMS } from "@/components/layout/nav-items";
+import { useAuth } from "@/lib/auth/auth-context";
 import { cn } from "@/lib/utils";
 
 export function SidebarNav() {
   const pathname = usePathname();
+  const { user } = useAuth();
+  const items = NAV_ITEMS.filter((item) => !item.adminOnly || user?.role === "admin");
 
   return (
     <nav aria-label="Principal" className="flex flex-1 flex-col gap-1 p-3">
-      {NAV_ITEMS.map((item) => {
+      {items.map((item) => {
         const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
         const Icon = item.icon;
         return (
@@ -37,6 +40,8 @@ export function SidebarNav() {
 
 export function MobileBottomNav() {
   const pathname = usePathname();
+  const { user } = useAuth();
+  const items = NAV_ITEMS.filter((item) => !item.adminOnly || user?.role === "admin");
 
   return (
     <nav
@@ -44,7 +49,7 @@ export function MobileBottomNav() {
       className="fixed inset-x-0 bottom-0 z-40 flex border-t border-border bg-card lg:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      {NAV_ITEMS.map((item) => {
+      {items.map((item) => {
         const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
         const Icon = item.icon;
         return (

@@ -1,7 +1,8 @@
-import { Bell, LayoutDashboard, Settings } from "lucide-react";
+import { Bell, LayoutDashboard, Settings, ShieldCheck } from "lucide-react";
 
 export const NAV_ITEMS = [
-  { href: "/dashboard", label: "Painel", icon: LayoutDashboard },
-  { href: "/alerts", label: "Alertas", icon: Bell },
-  { href: "/settings/notifications", label: "Configurações", icon: Settings },
+  { href: "/dashboard", label: "Painel", icon: LayoutDashboard, adminOnly: false },
+  { href: "/alerts", label: "Alertas", icon: Bell, adminOnly: false },
+  { href: "/settings/notifications", label: "Configurações", icon: Settings, adminOnly: false },
+  { href: "/admin", label: "Admin", icon: ShieldCheck, adminOnly: true },
 ] as const;

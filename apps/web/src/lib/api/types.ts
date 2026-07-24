@@ -104,3 +104,46 @@ export interface NotificationPreference {
   enabled: boolean;
   pending_verification: boolean;
 }
+
+export interface WorkerRun {
+  worker_name: string;
+  started_at: string;
+  finished_at: string;
+  success: boolean;
+  routes_ok: number;
+  routes_failed: number;
+  error_message: string | null;
+  recorded_at: string;
+}
+
+export interface FeatureFlagSummary {
+  key: string;
+  enabled: boolean;
+  rollout_percentage: number;
+}
+
+export interface FeatureFlag extends FeatureFlagSummary {
+  description: string;
+  updated_at: string;
+}
+
+export interface SetFeatureFlagInput {
+  enabled: boolean;
+  rollout_percentage: number;
+  description?: string | null;
+}
+
+export interface AdminDashboard {
+  users_total: number;
+  users_new_7d: number;
+  alerts_active_total: number;
+  alerts_created_7d: number;
+  alert_triggers_7d: number;
+  notifications_sent_7d_by_channel: Record<string, number>;
+  notifications_sent_7d_by_status: Record<string, number>;
+  price_snapshots_24h: number;
+  product_events_7d: Record<string, number>;
+  worker_runs: WorkerRun[];
+  feature_flags: FeatureFlagSummary[];
+  generated_at: string;
+}
