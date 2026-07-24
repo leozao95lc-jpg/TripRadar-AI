@@ -313,13 +313,34 @@ Para não repetir o erro de construir abstração para um requisito hipotético:
 A integração com a Amadeus só é considerada pronta quando, além de retornar
 dado real:
 
-- [ ] `AmadeusFlightProvider` implementa `FlightSearchProvider` sem que
-      nenhum outro módulo precise mudar uma linha.
-- [ ] Timeout, retry e circuit breaker configurados e testados com falha
-      simulada (não só o caminho feliz).
-- [ ] Erro do provedor nunca vira 500 para o usuário final, em nenhuma tela.
-- [ ] Métricas da Seção 7 emitindo e visíveis.
+- [x] `AmadeusFlightProvider` implementa `FlightSearchProvider` sem que
+      nenhum outro módulo precise mudar uma linha. `price_monitoring`,
+      `alerts` e o worker não mudaram — só `provider_factory.py` decide a
+      composição.
+- [x] Timeout, retry e circuit breaker configurados e testados com falha
+      simulada (não só o caminho feliz) — 30 testes automatizados
+      (`tests/unit/test_amadeus_provider.py`, `test_circuit_breaker.py`,
+      `test_provider_resilience.py`) cobrindo 401/400 sem retry, 5xx com
+      retry e exaustão, `Retry-After` respeitado, timeout, circuito abrindo
+      após o limiar — e um teste manual de ponta a ponta com o worker de
+      verdade contra um host inexistente (ver §6 abaixo).
+- [x] Erro do provedor nunca vira 500 para o usuário final, em nenhuma tela
+      — o worker degrada para o `MockFlightProvider` e continua coletando
+      snapshot; nenhum endpoint HTTP chama o provedor de forma síncrona
+      ainda, então não há request-path onde isso pudesse acontecer hoje.
+- [x] Métricas da Seção 7 emitindo e visíveis — gauges `provider_last_run_*`
+      e `provider_circuit_breaker_state` em `/metrics`, e o mesmo dado no
+      card "Saúde dos workers" do dashboard administrativo (`/admin`).
 - [ ] Limite de uso (Seção 2) configurado com o valor real do contrato antes
-      do primeiro deploy em produção, não depois.
-- [ ] Fallback para mock em caso de indisponibilidade total é explícito e
-      logado, testado manualmente derrubando o acesso à Amadeus em sandbox.
+      do primeiro deploy em produção, não depois. O mecanismo existe
+      (`amadeus_max_requests_per_minute`, `RateLimitedFlightProvider`) e
+      está testado; o valor default (60/min) é um placeholder de sandbox,
+      **não** o número contratado — isso continua pendente até haver um
+      contrato real.
+- [x] Fallback para mock em caso de indisponibilidade total é explícito e
+      logado, testado manualmente derrubando o acesso à Amadeus (host
+      inexistente, credenciais inválidas): `provider_fallback_used` logado
+      por rota, `PriceSnapshot.source_provider` corretamente gravado como
+      `"mock"` (não `"amadeus"`) para os snapshots que degradaram, e
+      `provider_circuit_breaker_state_changed` logado ao abrir o circuito
+      após o limiar de falhas.
