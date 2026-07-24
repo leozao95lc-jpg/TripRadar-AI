@@ -7,8 +7,11 @@ from sqlalchemy import engine_from_config, pool
 # Ao adicionar um novo módulo com tabelas próprias, basta importar seu `models`
 # aqui — nenhuma outra mudança de configuração é necessária.
 from modules.alerts.infrastructure import models as alerts_models  # noqa: F401
+from modules.analytics.infrastructure import models as analytics_models  # noqa: F401
+from modules.feature_flags.infrastructure import models as feature_flags_models  # noqa: F401
 from modules.identity.infrastructure import models as identity_models  # noqa: F401
 from modules.notifications.infrastructure import models as notifications_models  # noqa: F401
+from modules.observability.infrastructure import models as observability_models  # noqa: F401
 from modules.price_monitoring.infrastructure import models as price_monitoring_models  # noqa: F401
 from modules.recommendations.infrastructure import models as recommendations_models  # noqa: F401
 from shared.config import settings

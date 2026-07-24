@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
 from uuid import UUID
 
 from modules.identity.domain.entities import OAuthAccount, User
@@ -13,6 +14,12 @@ class UserRepository(ABC):
 
     @abstractmethod
     def add(self, user: User) -> None: ...
+
+    @abstractmethod
+    def count_total(self) -> int: ...
+
+    @abstractmethod
+    def count_created_since(self, since: datetime) -> int: ...
 
 
 class OAuthAccountRepository(ABC):

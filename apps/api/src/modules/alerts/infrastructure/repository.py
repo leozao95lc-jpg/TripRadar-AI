@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from uuid import UUID
 
 from sqlalchemy import func, or_, select
@@ -140,6 +140,18 @@ class SqlAlchemyAlertRepository(AlertRepository):
             unique.append(_to_domain(row))
         return unique
 
+    def count_active_total(self) -> int:
+        return self._session.execute(
+            select(func.count())
+            .select_from(SearchAlertModel)
+            .where(SearchAlertModel.status == AlertStatus.ACTIVE.value)
+        ).scalar_one()
+
+    def count_created_since(self, since: datetime) -> int:
+        return self._session.execute(
+            select(func.count()).select_from(SearchAlertModel).where(SearchAlertModel.created_at >= since)
+        ).scalar_one()
+
 
 class SqlAlchemyAlertTriggerRepository(AlertTriggerRepository):
     def __init__(self, session: Session) -> None:
@@ -167,6 +179,11 @@ class SqlAlchemyAlertTriggerRepository(AlertTriggerRepository):
             .all()
         )
         return [_trigger_to_domain(row) for row in rows]
+
+    def count_since(self, since: datetime) -> int:
+        return self._session.execute(
+            select(func.count()).select_from(AlertTriggerModel).where(AlertTriggerModel.triggered_at >= since)
+        ).scalar_one()
 
 
 class InMemoryAlertRepository(AlertRepository):
@@ -208,6 +225,12 @@ class InMemoryAlertRepository(AlertRepository):
     def list_distinct_active_routes(self) -> list[SearchAlert]:
         return [a for a in self._alerts.values() if a.status == AlertStatus.ACTIVE]
 
+    def count_active_total(self) -> int:
+        return sum(1 for a in self._alerts.values() if a.status == AlertStatus.ACTIVE)
+
+    def count_created_since(self, since: datetime) -> int:
+        return sum(1 for a in self._alerts.values() if a.created_at >= since)
+
 
 class InMemoryAlertTriggerRepository(AlertTriggerRepository):
     def __init__(self) -> None:
@@ -218,3 +241,6 @@ class InMemoryAlertTriggerRepository(AlertTriggerRepository):
 
     def list_by_alert(self, alert_id: UUID) -> list[AlertTrigger]:
         return [t for t in self._triggers if t.alert_id == alert_id]
+
+    def count_since(self, since: datetime) -> int:
+        return sum(1 for t in self._triggers if t.triggered_at >= since)

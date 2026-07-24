@@ -30,3 +30,13 @@ def get_current_user(
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
     return user
+
+
+def require_admin(current_user: User = Depends(get_current_user)) -> User:
+    """Dependência para rotas administrativas (dashboard, feature flags). Checa o
+    mesmo `role` já usado no domínio (`UserRole.ADMIN`) — não é um sistema de
+    permissão novo, é o campo que já existe em `User` desde a Fase 1, só sem
+    nenhuma rota que o exigisse até agora."""
+    if current_user.role.value != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
+    return current_user

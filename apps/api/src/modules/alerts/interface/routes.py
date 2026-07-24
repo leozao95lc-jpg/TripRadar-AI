@@ -20,6 +20,7 @@ from modules.identity.domain.entities import User
 from modules.identity.infrastructure.repository import SqlAlchemyUserRepository
 from modules.identity.interface.dependencies import get_current_user
 from shared.database import get_db
+from shared.events import event_bus
 from shared.rate_limit import rate_limit
 
 router = APIRouter(prefix="/api/v1/alerts", tags=["alerts"])
@@ -78,6 +79,7 @@ def create_alert(
         )
     except AlertLimitReachedError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+    event_bus.dispatch(use_case.pending_events, db)
     return _to_response(alert)
 
 

@@ -15,6 +15,7 @@ Task / Lambda), não de um processo de longa duração.
 """
 
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 
 _SRC_DIR = Path(__file__).resolve().parent.parent / "src"
@@ -23,6 +24,8 @@ if str(_SRC_DIR) not in sys.path:
 
 from bootstrap import register_event_handlers  # noqa: E402
 from modules.alerts.infrastructure.repository import SqlAlchemyAlertRepository  # noqa: E402
+from modules.observability.application.use_cases import RecordWorkerRun  # noqa: E402
+from modules.observability.infrastructure.repository import SqlAlchemyWorkerRunRepository  # noqa: E402
 from modules.price_monitoring.application.use_cases import PollRoutePrice, RouteQuery  # noqa: E402
 from modules.price_monitoring.infrastructure.repository import (  # noqa: E402
     SqlAlchemyPriceSnapshotRepository,
@@ -35,6 +38,8 @@ from shared.logging import configure_logging, get_logger  # noqa: E402
 
 configure_logging(settings.environment, settings.log_level)
 logger = get_logger(__name__)
+
+WORKER_NAME = "price_polling_worker"
 
 # Rotas populares Brasil <-> exterior usadas como semente até existir algum alerta ativo.
 SEED_ROUTES: list[RouteQuery] = [
@@ -93,6 +98,7 @@ def _poll_single_route(provider, route: RouteQuery) -> None:
 def run() -> None:
     register_event_handlers()
     provider = build_provider()
+    started_at = datetime.now(UTC)
 
     with session_scope() as db:
         routes = _load_routes(db)
@@ -116,6 +122,21 @@ def run() -> None:
         routes_ok=routes_ok,
         routes_failed=routes_failed,
     )
+
+    # Registro do heartbeat numa transação própria, depois do lote inteiro: se isto
+    # falhar não deve reverter nenhum snapshot já commitado, e um worker sem nenhuma
+    # rota pra pollar ainda deve deixar claro "eu rodei e não tinha nada pra fazer",
+    # não silêncio (que não se distingue de "o cron parou de disparar").
+    with session_scope() as db:
+        RecordWorkerRun(SqlAlchemyWorkerRunRepository(db)).execute(
+            worker_name=WORKER_NAME,
+            started_at=started_at,
+            finished_at=datetime.now(UTC),
+            success=routes_failed == 0,
+            routes_ok=routes_ok,
+            routes_failed=routes_failed,
+            error_message=None if routes_failed == 0 else f"{routes_failed} rota(s) falharam no polling",
+        )
 
 
 if __name__ == "__main__":

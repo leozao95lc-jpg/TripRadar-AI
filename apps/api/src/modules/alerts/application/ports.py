@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
 from uuid import UUID
 
 from modules.alerts.domain.entities import AlertTrigger, SearchAlert
@@ -37,6 +38,12 @@ class AlertRepository(ABC):
         o que monitorar, sem que o motor de preços precise conhecer o módulo `alerts`."""
         ...
 
+    @abstractmethod
+    def count_active_total(self) -> int: ...
+
+    @abstractmethod
+    def count_created_since(self, since: datetime) -> int: ...
+
 
 class AlertTriggerRepository(ABC):
     @abstractmethod
@@ -44,6 +51,9 @@ class AlertTriggerRepository(ABC):
 
     @abstractmethod
     def list_by_alert(self, alert_id: UUID) -> list[AlertTrigger]: ...
+
+    @abstractmethod
+    def count_since(self, since: datetime) -> int: ...
 
 
 class UserPlanPort(ABC):

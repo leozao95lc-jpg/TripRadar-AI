@@ -1,7 +1,7 @@
 from datetime import UTC, date, datetime
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from modules.price_monitoring.application.ports import PriceSnapshotRepository
@@ -65,6 +65,13 @@ class SqlAlchemyPriceSnapshotRepository(PriceSnapshotRepository):
         )
         return [_to_domain(row) for row in rows]
 
+    def count_since(self, since: datetime) -> int:
+        return self._session.execute(
+            select(func.count())
+            .select_from(PriceSnapshotModel)
+            .where(PriceSnapshotModel.collected_at >= since)
+        ).scalar_one()
+
 
 class InMemoryPriceSnapshotRepository(PriceSnapshotRepository):
     """Usada em testes de unidade do motor de monitoramento, sem tocar banco."""
@@ -87,3 +94,6 @@ class InMemoryPriceSnapshotRepository(PriceSnapshotRepository):
             and s.cabin_class == cabin_class
             and s.collected_at >= since_dt
         ]
+
+    def count_since(self, since: datetime) -> int:
+        return sum(1 for s in self._snapshots if s.collected_at >= since)

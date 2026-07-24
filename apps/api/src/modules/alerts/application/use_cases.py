@@ -6,6 +6,7 @@ from modules.alerts.domain.entities import AlertTrigger, CabinClass, SearchAlert
 from shared.events import DomainEvent
 
 ALERT_TRIGGERED = "alert_triggered"
+ALERT_CREATED = "alert_created"
 
 
 class AlertLimitReachedError(Exception):
@@ -38,13 +39,18 @@ class CreateAlertInput:
 
 
 class CreateAlert:
-    """Aplica a regra de negócio do plano Gratuito (até 3 alertas ativos) antes de criar."""
+    """Aplica a regra de negócio do plano Gratuito (até 3 alertas ativos) antes de criar.
+    Acumula `alert_created` em `pending_events` — hoje só o módulo `analytics` reage
+    a ele (ver `bootstrap.py`), mas a rota HTTP já despacha, então qualquer novo
+    assinante futuro não exige mudar nada aqui nem em `alerts/interface/routes.py`."""
 
     def __init__(self, alerts: AlertRepository, plan: UserPlanPort) -> None:
         self._alerts = alerts
         self._plan = plan
+        self.pending_events: list[DomainEvent] = []
 
     def execute(self, data: CreateAlertInput) -> SearchAlert:
+        self.pending_events = []
         max_alerts = self._plan.get_max_active_alerts(data.user_id)
         if max_alerts is not None and self._alerts.count_active_by_user(data.user_id) >= max_alerts:
             raise AlertLimitReachedError(
@@ -67,6 +73,17 @@ class CreateAlert:
             alternative_airports_ok=data.alternative_airports_ok,
         )
         self._alerts.add(alert)
+        self.pending_events.append(
+            DomainEvent(
+                name=ALERT_CREATED,
+                payload={
+                    "alert_id": str(alert.id),
+                    "user_id": str(alert.user_id),
+                    "origin_iata": alert.origin_iata,
+                    "destination_iata": alert.destination_iata,
+                },
+            )
+        )
         return alert
 
 

@@ -1,6 +1,7 @@
+from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from modules.identity.application.ports import OAuthAccountRepository, UserRepository
@@ -50,6 +51,14 @@ class SqlAlchemyUserRepository(UserRepository):
         )
         self._session.flush()
 
+    def count_total(self) -> int:
+        return self._session.execute(select(func.count()).select_from(UserModel)).scalar_one()
+
+    def count_created_since(self, since: datetime) -> int:
+        return self._session.execute(
+            select(func.count()).select_from(UserModel).where(UserModel.created_at >= since)
+        ).scalar_one()
+
 
 class InMemoryUserRepository(UserRepository):
     """Implementação em memória — usada em testes de unidade dos casos de uso, sem tocar banco."""
@@ -65,6 +74,12 @@ class InMemoryUserRepository(UserRepository):
 
     def add(self, user: User) -> None:
         self._by_id[user.id] = user
+
+    def count_total(self) -> int:
+        return len(self._by_id)
+
+    def count_created_since(self, since: datetime) -> int:
+        return sum(1 for u in self._by_id.values() if u.created_at >= since)
 
 
 class SqlAlchemyOAuthAccountRepository(OAuthAccountRepository):

@@ -3,6 +3,8 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
+from shared.metrics import domain_events_dispatched_total
+
 # Event bus em processo: módulos se comunicam publicando/assinando eventos de domínio,
 # sem se importarem diretamente (ver src/bootstrap.py). Um caso de uso NUNCA publica
 # direto no bus — ele só acumula em `self.pending_events`; é o composition root (rota
@@ -37,6 +39,7 @@ class EventBus:
         queue = list(events)
         while queue:
             event = queue.pop(0)
+            domain_events_dispatched_total.labels(event_name=event.name).inc()
             for handler in self._handlers.get(event.name, []):
                 new_events = handler(event, session)
                 if new_events:

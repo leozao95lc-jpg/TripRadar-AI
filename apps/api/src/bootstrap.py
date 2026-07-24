@@ -22,11 +22,13 @@ disputando a mesma transação ainda aberta (ver docs/03-arquitetura.md, seção
 
 from uuid import UUID
 
-from modules.alerts.application.use_cases import ALERT_TRIGGERED, EvaluateAlertsForRoute
+from modules.alerts.application.use_cases import ALERT_CREATED, ALERT_TRIGGERED, EvaluateAlertsForRoute
 from modules.alerts.infrastructure.repository import (
     SqlAlchemyAlertRepository,
     SqlAlchemyAlertTriggerRepository,
 )
+from modules.analytics.application.use_cases import RecordProductEvent
+from modules.analytics.infrastructure.repository import SqlAlchemyProductEventRepository
 from modules.identity.application.use_cases import USER_REGISTERED
 from modules.notifications.application.use_cases import (
     CreateDefaultEmailPreference,
@@ -47,10 +49,19 @@ logger = get_logger(__name__)
 _registered = False
 
 
+def _record_product_event(event: DomainEvent, session) -> None:
+    user_id = event.payload.get("user_id")
+    properties = {k: v for k, v in event.payload.items() if k != "user_id"}
+    RecordProductEvent(SqlAlchemyProductEventRepository(session)).execute(
+        event.name, UUID(user_id) if user_id else None, **properties
+    )
+
+
 def _on_user_registered(event: DomainEvent, session) -> list[DomainEvent] | None:
     CreateDefaultEmailPreference(SqlAlchemyNotificationPreferenceRepository(session)).execute(
         UUID(event.payload["user_id"]), event.payload["email"]
     )
+    _record_product_event(event, session)
     return None
 
 
@@ -71,6 +82,11 @@ def _on_price_snapshot_collected(event: DomainEvent, session) -> list[DomainEven
     return use_case.pending_events
 
 
+def _on_alert_created(event: DomainEvent, session) -> list[DomainEvent] | None:
+    _record_product_event(event, session)
+    return None
+
+
 def _on_alert_triggered(event: DomainEvent, session) -> list[DomainEvent] | None:
     payload = event.payload
     subject = f"TripRadar: {payload['origin_iata']} -> {payload['destination_iata']} caiu de preço"
@@ -89,6 +105,7 @@ def _on_alert_triggered(event: DomainEvent, session) -> list[DomainEvent] | None
         subject=subject,
         message=message,
     )
+    _record_product_event(event, session)
     return None
 
 
@@ -99,6 +116,7 @@ def register_event_handlers() -> None:
 
     event_bus.subscribe(USER_REGISTERED, _on_user_registered)
     event_bus.subscribe(PRICE_SNAPSHOT_COLLECTED, _on_price_snapshot_collected)
+    event_bus.subscribe(ALERT_CREATED, _on_alert_created)
     event_bus.subscribe(ALERT_TRIGGERED, _on_alert_triggered)
     _registered = True
     logger.info("event_handlers_registered")

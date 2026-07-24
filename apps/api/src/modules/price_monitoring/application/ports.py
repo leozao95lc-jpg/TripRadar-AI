@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from datetime import date
+from datetime import date, datetime
 
 from modules.price_monitoring.domain.entities import PriceSnapshot
 
@@ -12,3 +12,6 @@ class PriceSnapshotRepository(ABC):
     def history(
         self, origin_iata: str, destination_iata: str, cabin_class: str, since: date
     ) -> list[PriceSnapshot]: ...
+
+    @abstractmethod
+    def count_since(self, since: datetime) -> int: ...

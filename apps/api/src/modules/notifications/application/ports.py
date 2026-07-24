@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
 from uuid import UUID
 
 from modules.notifications.domain.entities import Notification, NotificationChannel, NotificationPreference
@@ -36,3 +37,10 @@ class NotificationRepository(ABC):
 
     @abstractmethod
     def list_by_alert_trigger(self, alert_trigger_id: UUID) -> list[Notification]: ...
+
+    @abstractmethod
+    def list_since(self, since: datetime) -> list[Notification]:
+        """Usado só pelo dashboard administrativo para agregar por canal/status —
+        volume baixo o suficiente no MVP para agregar em Python, mesmo raciocínio já
+        aplicado em `AlertRepository.list_distinct_active_routes`."""
+        ...

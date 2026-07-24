@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import select
@@ -22,6 +23,16 @@ def _preference_to_domain(row: NotificationPreferenceModel) -> NotificationPrefe
         enabled=row.enabled,
         verification_code_hash=row.verification_code_hash,
         verification_expires_at=row.verification_expires_at,
+    )
+
+
+def _notification_to_domain(row: NotificationModel) -> Notification:
+    return Notification(
+        id=UUID(str(row.id)),
+        alert_trigger_id=UUID(str(row.alert_trigger_id)),
+        channel=NotificationChannel(row.channel),
+        status=NotificationStatus(row.status),
+        sent_at=row.sent_at,
     )
 
 
@@ -115,16 +126,15 @@ class SqlAlchemyNotificationRepository(NotificationRepository):
             .scalars()
             .all()
         )
-        return [
-            Notification(
-                id=UUID(str(r.id)),
-                alert_trigger_id=UUID(str(r.alert_trigger_id)),
-                channel=NotificationChannel(r.channel),
-                status=NotificationStatus(r.status),
-                sent_at=r.sent_at,
-            )
-            for r in rows
-        ]
+        return [_notification_to_domain(r) for r in rows]
+
+    def list_since(self, since: datetime) -> list[Notification]:
+        rows = (
+            self._session.execute(select(NotificationModel).where(NotificationModel.sent_at >= since))
+            .scalars()
+            .all()
+        )
+        return [_notification_to_domain(r) for r in rows]
 
 
 class InMemoryNotificationPreferenceRepository(NotificationPreferenceRepository):
@@ -155,3 +165,6 @@ class InMemoryNotificationRepository(NotificationRepository):
 
     def list_by_alert_trigger(self, alert_trigger_id: UUID) -> list[Notification]:
         return [n for n in self._notifications if n.alert_trigger_id == alert_trigger_id]
+
+    def list_since(self, since: datetime) -> list[Notification]:
+        return [n for n in self._notifications if n.sent_at >= since]
