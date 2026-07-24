@@ -11,6 +11,13 @@ class WorkerRunResponse(BaseModel):
     routes_ok: int
     routes_failed: int
     error_message: str | None
+    provider_name: str | None
+    provider_requests: int
+    provider_requests_failed: int
+    provider_cache_hits: int
+    provider_cache_misses: int
+    provider_fallback_used: int
+    provider_circuit_state: str | None
     recorded_at: datetime
 
 

@@ -105,6 +105,8 @@ export interface NotificationPreference {
   pending_verification: boolean;
 }
 
+export type ProviderCircuitState = "closed" | "half_open" | "open";
+
 export interface WorkerRun {
   worker_name: string;
   started_at: string;
@@ -113,6 +115,13 @@ export interface WorkerRun {
   routes_ok: number;
   routes_failed: number;
   error_message: string | null;
+  provider_name: string | null;
+  provider_requests: number;
+  provider_requests_failed: number;
+  provider_cache_hits: number;
+  provider_cache_misses: number;
+  provider_fallback_used: number;
+  provider_circuit_state: ProviderCircuitState | null;
   recorded_at: string;
 }
 

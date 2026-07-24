@@ -40,6 +40,13 @@ def _to_response(summary: AdminDashboardSummary) -> AdminDashboardResponse:
                 routes_ok=r.routes_ok,
                 routes_failed=r.routes_failed,
                 error_message=r.error_message,
+                provider_name=r.provider_name,
+                provider_requests=r.provider_requests,
+                provider_requests_failed=r.provider_requests_failed,
+                provider_cache_hits=r.provider_cache_hits,
+                provider_cache_misses=r.provider_cache_misses,
+                provider_fallback_used=r.provider_fallback_used,
+                provider_circuit_state=r.provider_circuit_state,
                 recorded_at=r.recorded_at,
             )
             for r in summary.worker_runs

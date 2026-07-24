@@ -57,6 +57,54 @@ worker_last_run_routes_failed = Gauge(
     registry=registry,
 )
 
+# Métricas por provedor de voo (Amadeus, mock, ...) — ver
+# docs/11-provider-integration-strategy.md §7. Como o único chamador de
+# `FlightSearchProvider` hoje é o worker de polling (processo curto, sem `/metrics`
+# próprio), estas são Gauges de "última execução", preenchidas a partir do
+# `WorkerRun` persistido — mesmo padrão dos `worker_last_run_*` acima, não uma
+# segunda convenção. Se um caminho síncrono (ex.: busca ao vivo dentro de uma
+# requisição HTTP) passar a chamar um provider, ele roda no processo de vida longa
+# da API e pode incrementar Counters de verdade diretamente — mas isso não existe
+# ainda, então não construímos esse caminho especulativamente.
+provider_last_run_requests = Gauge(
+    "provider_last_run_requests",
+    "Requisições ao provedor na última execução do worker",
+    ["provider", "worker_name"],
+    registry=registry,
+)
+provider_last_run_requests_failed = Gauge(
+    "provider_last_run_requests_failed",
+    "Requisições ao provedor que falharam na última execução do worker",
+    ["provider", "worker_name"],
+    registry=registry,
+)
+provider_last_run_cache_hits = Gauge(
+    "provider_last_run_cache_hits",
+    "Acertos de cache na última execução do worker",
+    ["provider", "worker_name"],
+    registry=registry,
+)
+provider_last_run_cache_misses = Gauge(
+    "provider_last_run_cache_misses",
+    "Erros de cache (miss) na última execução do worker",
+    ["provider", "worker_name"],
+    registry=registry,
+)
+provider_last_run_fallback_used = Gauge(
+    "provider_last_run_fallback_used",
+    "Quantas vezes o fallback (cache/provedor secundário/mock) foi acionado na última execução",
+    ["provider", "worker_name"],
+    registry=registry,
+)
+provider_circuit_breaker_state = Gauge(
+    "provider_circuit_breaker_state",
+    "Estado do circuit breaker ao final da última execução (0=closed, 1=half_open, 2=open)",
+    ["provider", "worker_name"],
+    registry=registry,
+)
+
+_CIRCUIT_STATE_TO_NUMBER = {"closed": 0, "half_open": 1, "open": 2}
+
 
 def refresh_worker_gauges(worker_runs: list) -> None:
     for run in worker_runs:
@@ -65,6 +113,19 @@ def refresh_worker_gauges(worker_runs: list) -> None:
         )
         worker_last_run_success.labels(worker_name=run.worker_name).set(1 if run.success else 0)
         worker_last_run_routes_failed.labels(worker_name=run.worker_name).set(run.routes_failed)
+
+        if not run.provider_name:
+            continue
+        labels = {"provider": run.provider_name, "worker_name": run.worker_name}
+        provider_last_run_requests.labels(**labels).set(run.provider_requests)
+        provider_last_run_requests_failed.labels(**labels).set(run.provider_requests_failed)
+        provider_last_run_cache_hits.labels(**labels).set(run.provider_cache_hits)
+        provider_last_run_cache_misses.labels(**labels).set(run.provider_cache_misses)
+        provider_last_run_fallback_used.labels(**labels).set(run.provider_fallback_used)
+        if run.provider_circuit_state is not None:
+            provider_circuit_breaker_state.labels(**labels).set(
+                _CIRCUIT_STATE_TO_NUMBER.get(run.provider_circuit_state, 0)
+            )
 
 
 def render_metrics() -> bytes:

@@ -49,6 +49,36 @@ def test_get_price_history_filters_by_route_and_cabin_class():
     assert history[0].destination_iata == "MAD"
 
 
+def test_poll_route_price_honors_provider_reported_source_when_present():
+    # Simula um `FallbackFlightProvider` que degradou pra mock nesta chamada
+    # específica: o snapshot deve ficar rotulado com o provedor que REALMENTE
+    # respondeu, não com o `source_provider` estático passado pelo chamador (ver
+    # modules/providers/infrastructure/resilience.py e o comentário em
+    # PollRoutePrice.execute).
+    class ProviderThatFellBackToMock(MockFlightProvider):
+        last_call_source_provider = "mock"
+
+    repo = InMemoryPriceSnapshotRepository()
+    poll = PollRoutePrice(ProviderThatFellBackToMock(), repo)
+
+    snapshots = poll.execute(
+        RouteQuery("FLN", "MAD", "2026-11-10", "2026-11-24", "economy"), source_provider="amadeus"
+    )
+
+    assert snapshots[0].source_provider == "mock"
+
+
+def test_poll_route_price_uses_static_source_when_provider_does_not_report_one():
+    repo = InMemoryPriceSnapshotRepository()
+    poll = PollRoutePrice(MockFlightProvider(), repo)
+
+    snapshots = poll.execute(
+        RouteQuery("FLN", "MAD", "2026-11-10", "2026-11-24", "economy"), source_provider="mock"
+    )
+
+    assert snapshots[0].source_provider == "mock"
+
+
 def test_mock_provider_is_stable_within_the_same_day():
     provider = MockFlightProvider()
     query = dict(

@@ -45,6 +45,12 @@ class PollRoutePrice:
             cabin_class=query.cabin_class,
             passengers=query.passengers,
         )
+        # Provedores que podem degradar por chamada (ex.: `FallbackFlightProvider`)
+        # expõem `last_call_source_provider` — quando presente, ele é a verdade sobre
+        # QUEM respondeu esta busca específica, mais confiável que o `source_provider`
+        # estático configurado (ver resilience.py: sem isso, um snapshot vindo do
+        # fallback ficaria rotulado com o nome do provedor primário que falhou).
+        effective_source = getattr(self._provider, "last_call_source_provider", source_provider)
 
         saved: list[PriceSnapshot] = []
         for offer in offers:
@@ -57,7 +63,7 @@ class PollRoutePrice:
                 currency=offer.currency,
                 cabin_class=offer.cabin_class,
                 airline_iata=offer.airline_iata,
-                source_provider=source_provider,
+                source_provider=effective_source,
             )
             self._snapshots.add(snapshot)
             saved.append(snapshot)

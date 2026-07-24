@@ -18,6 +18,13 @@ def _to_domain(row: WorkerRunModel) -> WorkerRun:
         routes_ok=row.routes_ok,
         routes_failed=row.routes_failed,
         error_message=row.error_message,
+        provider_name=row.provider_name,
+        provider_requests=row.provider_requests,
+        provider_requests_failed=row.provider_requests_failed,
+        provider_cache_hits=row.provider_cache_hits,
+        provider_cache_misses=row.provider_cache_misses,
+        provider_fallback_used=row.provider_fallback_used,
+        provider_circuit_state=row.provider_circuit_state,
         recorded_at=row.recorded_at,
     )
 
@@ -37,6 +44,13 @@ class SqlAlchemyWorkerRunRepository(WorkerRunRepository):
                 routes_ok=run.routes_ok,
                 routes_failed=run.routes_failed,
                 error_message=run.error_message,
+                provider_name=run.provider_name,
+                provider_requests=run.provider_requests,
+                provider_requests_failed=run.provider_requests_failed,
+                provider_cache_hits=run.provider_cache_hits,
+                provider_cache_misses=run.provider_cache_misses,
+                provider_fallback_used=run.provider_fallback_used,
+                provider_circuit_state=run.provider_circuit_state,
                 recorded_at=run.recorded_at,
             )
         )

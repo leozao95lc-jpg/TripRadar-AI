@@ -30,7 +30,7 @@ from modules.price_monitoring.application.use_cases import PollRoutePrice, Route
 from modules.price_monitoring.infrastructure.repository import (  # noqa: E402
     SqlAlchemyPriceSnapshotRepository,
 )
-from modules.providers.infrastructure.mock_provider import MockFlightProvider  # noqa: E402
+from modules.providers.infrastructure.provider_factory import build_flight_provider  # noqa: E402
 from shared.config import settings  # noqa: E402
 from shared.database import session_scope  # noqa: E402
 from shared.events import event_bus  # noqa: E402
@@ -49,14 +49,6 @@ SEED_ROUTES: list[RouteQuery] = [
     RouteQuery("GRU", "JFK", "2026-09-20", "2026-10-04", "economy"),
     RouteQuery("CNF", "LIS", "2026-11-01", "2026-11-15", "economy"),
 ]
-
-
-def build_provider():
-    if settings.flight_provider == "amadeus":
-        from modules.providers.infrastructure.amadeus_provider import AmadeusFlightProvider
-
-        return AmadeusFlightProvider()
-    return MockFlightProvider()
 
 
 def _load_routes(db) -> list[RouteQuery]:
@@ -97,7 +89,7 @@ def _poll_single_route(provider, route: RouteQuery) -> None:
 
 def run() -> None:
     register_event_handlers()
-    provider = build_provider()
+    provider, telemetry = build_flight_provider()
     started_at = datetime.now(UTC)
 
     with session_scope() as db:
@@ -127,6 +119,7 @@ def run() -> None:
     # falhar não deve reverter nenhum snapshot já commitado, e um worker sem nenhuma
     # rota pra pollar ainda deve deixar claro "eu rodei e não tinha nada pra fazer",
     # não silêncio (que não se distingue de "o cron parou de disparar").
+    provider_telemetry = telemetry.snapshot() if telemetry else {}
     with session_scope() as db:
         RecordWorkerRun(SqlAlchemyWorkerRunRepository(db)).execute(
             worker_name=WORKER_NAME,
@@ -136,6 +129,7 @@ def run() -> None:
             routes_ok=routes_ok,
             routes_failed=routes_failed,
             error_message=None if routes_failed == 0 else f"{routes_failed} rota(s) falharam no polling",
+            **provider_telemetry,
         )
 
 
