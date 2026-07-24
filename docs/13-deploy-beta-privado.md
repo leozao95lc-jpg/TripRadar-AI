@@ -5,10 +5,11 @@
 > prioridades), antes de qualquer expansão de funcionalidade — item 5,
 > "medir antes de expandir", depende deste deploy existir.
 
-**✅ Aprovado: Render + Vercel.** A configuração de deploy (§8) já está pronta
-no repositório — `render.yaml`, Dockerfile atualizado, `.env.example`
-completo. O que falta são só ações que só você pode fazer (criar as contas,
-gerar secrets reais, decidir a lista de convidados) — ver §9.
+**✅ Aprovado: Render + Vercel, com senha compartilhada como allowlist.** A
+configuração de deploy (§8) já está pronta no repositório — `render.yaml`,
+Dockerfile atualizado, `.env.example` completo, e o gate de código de acesso
+implementado e testado. O que falta são só ações que só você pode fazer
+(criar as contas, gerar secrets reais, escolher a senha em si) — ver §9.
 
 ## 1. Por que isto diverge do que `03-arquitetura.md` já diz
 
@@ -121,11 +122,18 @@ mesmo lugar que o backend — são preocupações independentes, e a
       menos uma execução real verificada via `/admin` (heartbeat visível) —
       depende do deploy acontecer de verdade.
 - [ ] Domínio próprio apontado (mesmo que um subdomínio), HTTPS ativo.
-- [ ] **Lista de convidados / allowlist — ainda sem decisão.** Hoje o
-      registro (`POST /api/v1/auth/register`) é aberto para qualquer um; um
-      "beta privado com poucos usuários" normalmente implica algum tipo de
-      controle de quem entra. Isso não foi implementado ainda porque é uma
-      decisão de produto, não técnica — ver §9, pergunta 3.
+- [x] **Allowlist — decidido: senha compartilhada.** `BETA_ACCESS_CODE`
+      (config) gate no registro — quando definido, `POST
+      /api/v1/auth/register` exige o código no corpo; vazio (default de
+      dev/teste) mantém o registro aberto, então nada mudou fora deste
+      cenário. Campo "Código de acesso (beta)" já no formulário de
+      registro, com mensagem de erro amigável quando o código está errado.
+      Testado (backend + Playwright contra servidor real): sem
+      `BETA_ACCESS_CODE`, registro continua aberto; com ele, código errado
+      ou em branco é rejeitado (403) e o correto passa. Falta só você
+      preencher o valor real do código em `BETA_ACCESS_CODE` no `render.yaml`
+      antes do deploy — o código em si (a senha que você vai compartilhar
+      com os convidados) é uma escolha sua, não teria como eu decidir.
 - [ ] Confirmação de que o `CORS_ALLOW_ORIGINS` de produção aponta pro
       domínio real do frontend (Vercel), não `localhost` — campo já existe
       no `render.yaml` como `sync: false`, só falta o valor real.
@@ -169,11 +177,10 @@ deploy 100% liso.
 2. **Gerar/fornecer os secrets reais** — a lista exata está no `render.yaml`
    (todo campo `sync: false`); o Render pede cada um no momento de aprovar o
    Blueprint.
-3. **Decidir o mecanismo de allowlist** (DoD §6) — três opções, do mais simples
-   ao mais robusto: (a) nenhum controle técnico, só não divulgar a URL
-   amplamente; (b) uma senha/código de acesso compartilhado exigido no
-   registro; (c) convites individuais (token único por pessoa). Nenhuma foi
-   implementada — confirmar qual antes de eu construir alguma.
+3. **Escolher o código de acesso em si** — o mecanismo (senha compartilhada)
+   já está pronto e testado (§6); falta só decidir qual será a senha e
+   preenchê-la em `BETA_ACCESS_CODE` no Render, e compartilhá-la com quem
+   for convidado.
 4. **No Vercel**, configurar o projeto com *Root Directory* = `apps/web`
    (é ajuste do painel do Vercel, não algo que um arquivo no repo resolva
    sozinho, por ser um monorepo).

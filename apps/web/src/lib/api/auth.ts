@@ -1,7 +1,12 @@
 import { apiRequest } from "@/lib/api/client";
 import type { AuthTokens, UserProfile } from "@/lib/api/types";
 
-export async function register(input: { email: string; password: string; full_name: string }) {
+export async function register(input: {
+  email: string;
+  password: string;
+  full_name: string;
+  access_code?: string;
+}) {
   return apiRequest<UserProfile>("/api/v1/auth/register", { method: "POST", body: input, auth: false });
 }
 

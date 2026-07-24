@@ -1,3 +1,5 @@
+import secrets
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -16,12 +18,25 @@ from modules.identity.interface.schemas import (
     TokenResponse,
     UserProfileResponse,
 )
+from shared.config import settings
 from shared.database import get_db
 from shared.events import event_bus
 from shared.rate_limit import rate_limit
 
 router = APIRouter(prefix="/api/v1/auth", tags=["identity"])
 me_router = APIRouter(prefix="/api/v1/me", tags=["identity"])
+
+
+def _check_beta_access_code(access_code: str | None) -> None:
+    """Beta fechado com senha compartilhada (docs/13-deploy-beta-privado.md §9).
+    `settings.beta_access_code` vazio/None (default de dev/teste) mantém o
+    registro aberto — este gate só liga quando explicitamente configurado."""
+    if not settings.beta_access_code:
+        return
+    if not access_code or not secrets.compare_digest(access_code, settings.beta_access_code):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Invalid or missing beta access code"
+        )
 
 
 @router.post(
@@ -31,6 +46,7 @@ me_router = APIRouter(prefix="/api/v1/me", tags=["identity"])
     dependencies=[Depends(rate_limit(5, 3600))],
 )
 def register(payload: RegisterRequest, db: Session = Depends(get_db)) -> UserProfileResponse:
+    _check_beta_access_code(payload.access_code)
     use_case = RegisterUser(SqlAlchemyUserRepository(db))
     try:
         user = use_case.execute(payload.email, payload.password, payload.full_name)

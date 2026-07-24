@@ -81,6 +81,11 @@ services:
       # aqui. Preencher só se/quando adicionar Redis (ver docs/13 §5).
       - key: REDIS_URL
         value: ""
+      # Senha compartilhada do beta fechado — quem for convidado recebe este
+      # valor pra conseguir se registrar. Só o web service precisa (é o
+      # registro via HTTP, não o worker).
+      - key: BETA_ACCESS_CODE
+        sync: false
 
   - type: cron
     name: tripradar-price-polling-worker

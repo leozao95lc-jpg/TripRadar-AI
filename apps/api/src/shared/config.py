@@ -57,6 +57,11 @@ class Settings(BaseSettings):
 
     cors_allow_origins: list[str] = ["http://localhost:3000"]
 
+    # Beta fechado (docs/13-deploy-beta-privado.md §9): quando definido, o
+    # registro exige esse código no corpo da requisição. `None`/vazio (default
+    # de dev/teste) mantém o registro aberto — nunca ativa sem querer.
+    beta_access_code: str | None = None
+
 
 @lru_cache
 def get_settings() -> Settings:

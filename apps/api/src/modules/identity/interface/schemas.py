@@ -7,6 +7,10 @@ class RegisterRequest(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
     full_name: str = Field(min_length=1, max_length=255)
+    # Só exigido quando `settings.beta_access_code` está configurado (beta
+    # fechado com senha compartilhada) — ver docs/13-deploy-beta-privado.md.
+    # Em dev/teste (sem a variável definida), este campo é ignorado.
+    access_code: str | None = None
 
 
 class LoginRequest(BaseModel):

@@ -12,7 +12,7 @@ interface AuthContextValue {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, fullName: string) => Promise<void>;
+  register: (email: string, password: string, fullName: string, accessCode?: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -52,10 +52,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(profile);
   }, []);
 
-  const register = useCallback(async (email: string, password: string, fullName: string) => {
-    await authApi.register({ email, password, full_name: fullName });
-    await login(email, password);
-  }, [login]);
+  const register = useCallback(
+    async (email: string, password: string, fullName: string, accessCode?: string) => {
+      await authApi.register({ email, password, full_name: fullName, access_code: accessCode });
+      await login(email, password);
+    },
+    [login]
+  );
 
   const value = useMemo<AuthContextValue>(
     () => ({ user, isLoading, isAuthenticated: user !== null, login, register, logout }),

@@ -32,6 +32,7 @@ function RegisterForm() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [accessCode, setAccessCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
@@ -49,7 +50,7 @@ function RegisterForm() {
 
     setIsSubmitting(true);
     try {
-      await register(email, password, fullName);
+      await register(email, password, fullName, accessCode || undefined);
       const origin = searchParams.get("origin");
       const destination = searchParams.get("destination");
       router.replace(
@@ -125,6 +126,20 @@ function RegisterForm() {
                 Mínimo de {MIN_PASSWORD_LENGTH} caracteres.
               </p>
             )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="access_code">Código de acesso (beta)</Label>
+            <Input
+              id="access_code"
+              autoComplete="off"
+              value={accessCode}
+              onChange={(e) => setAccessCode(e.target.value)}
+              aria-describedby="access-code-hint"
+            />
+            <p id="access-code-hint" className="text-sm text-muted-foreground">
+              O TripRadar está em beta fechado — peça o código a quem te convidou.
+            </p>
           </div>
 
           <Button type="submit" className="w-full" isLoading={isSubmitting}>
