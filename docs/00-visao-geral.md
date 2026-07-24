@@ -10,6 +10,15 @@ O diferencial não é a busca (isso todo metabuscador faz), é a **camada de
 inteligência sobre o tempo**: histórico, sazonalidade e explicação em linguagem
 natural do porquê comprar agora ou esperar.
 
+> **Atualização (decisão registrada em `12-fase7-decisoes-pendentes.md` §8):** a
+> ambição de longo prazo do produto deixou de ser só "monitor de preço de
+> passagem" e passa a ser um **assistente de custo total da viagem** — passagem
+> continua sendo o núcleo e a porta de entrada, mas hotel, seguro, milhas e
+> câmbio deixam de ser cross-sells desconexos e passam a ser lidos como facetas
+> da mesma pergunta ("quanto esta viagem custa, e onde dá pra economizar"). Isso
+> não muda o MVP nem antecipa nenhuma implementação nova — é a lente para
+> decisões de produto futuras, detalhada no documento referenciado.
+
 ## 1.2 Público-alvo e personas
 
 | Persona | Necessidade principal | Como o produto atende |

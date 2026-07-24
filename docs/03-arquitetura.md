@@ -27,6 +27,15 @@ reescrita.
 > módulos `notifications` e `recommendations` ganham capacidades novas já no MVP —
 > detalhadas em 4.1.1 e 4.1.2 — e o `price_monitoring` passa a expor uma superfície
 > pública de leitura para o feed de ofertas/SEO.
+>
+> **Atualização (Fase 6/7, `11-provider-integration-strategy.md` e
+> `12-fase7-decisoes-pendentes.md` §7):** dentro de `providers`, busca de voo
+> (`FlightSearchProvider`, implementado pela Fase 6) e emissão/compra (uma porta
+> futura e separada, se o Modelo B de compra por parceiro for revisitado) são
+> dois contratos que nunca devem se misturar numa mesma interface — mesmo
+> princípio de fronteira de módulo desta seção, aplicado dentro do módulo
+> `providers` entre duas responsabilidades que parecem próximas mas têm perfil
+> de risco/dado sensível bem diferente.
 
 ### 4.1.1 `notifications` — WhatsApp desde o MVP
 

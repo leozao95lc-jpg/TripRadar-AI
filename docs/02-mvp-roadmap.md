@@ -99,7 +99,9 @@ usuário dentro do orçamento projetado, engajamento mensurável no feed de ofer
 - Extração seletiva de microsserviços a partir dos módulos do monólito que tiverem
   perfil de escala diferente (ver `03-arquitetura.md`, seção de evolução).
 - Expansão de produto: hotéis, aluguel de carro, seguro viagem, eSIM, sala VIP,
-  programa de afiliados.
+  programa de afiliados. Modelo de hotel e seguro já decidido em
+  `12-fase7-decisoes-pendentes.md` (cross-sell de afiliado, não busca própria)
+  — falta só a escolha de parceiro comercial.
 - Copiloto de viagem conversacional (IA livre) via WhatsApp, como capacidade Premium.
 - Produto de dados B2B (tendências agregadas e anonimizadas de tarifa para
   companhias/agências), sujeito a revisão de compliance/LGPD.
@@ -114,3 +116,11 @@ usuário dentro do orçamento projetado, engajamento mensurável no feed de ofer
 do alerta − preço no momento da compra ou clique de compra), agregada por usuário.
 É a métrica que prova a proposta de valor central e deve ser exibida de volta ao
 usuário no dashboard ("você economizou R$X este ano").
+
+> **Atualização (`12-fase7-decisoes-pendentes.md` §8):** com o reposicionamento
+> para assistente de custo total da viagem, esta métrica permanece a North Star
+> por enquanto (passagem continua o núcleo), mas deve ser revisitada quando
+> hotel/seguro tiverem volume relevante — nesse momento, "economia validada"
+> pode fazer mais sentido agregada por viagem (passagem + hotel + seguro) do que
+> só por passagem. Não é uma mudança a fazer agora; é um lembrete para quando a
+> Fase 7 tática avançar o suficiente para o dado existir.

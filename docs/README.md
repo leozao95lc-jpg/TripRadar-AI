@@ -18,7 +18,7 @@ riscos e o desenho técnico; só então construir.
 10. [Revisão técnica do backend (Fases 1–4)](09-revisao-tecnica-backend.md)
 11. [Verificação — achados de Alta prioridade resolvidos](10-verificacao-correcoes-alta-prioridade.md)
 12. [Provider Integration Strategy — antes da integração com a Amadeus](11-provider-integration-strategy.md)
-13. [Fase 7 — Decisões pendentes (compra por parceiro, hotéis, seguro, milhas, câmbio)](12-fase7-decisoes-pendentes.md)
+13. [Fase 7 — Decisões (compra por parceiro, hotéis, seguro, milhas, câmbio)](12-fase7-decisoes-pendentes.md)
 
 ## Como ler isso
 
@@ -44,8 +44,12 @@ resolvidas.
   muda é o canal (WhatsApp) e o contexto (milhas, câmbio) que já nascem pensados
   para o viajante latino-americano, sem inflar custo (ver
   [`08-revisao-estrategica-latam.md`](08-revisao-estrategica-latam.md)).
-- **Ambição de longo prazo:** ser a plataforma de referência de descoberta,
-  monitoramento e compra inteligente de viagens da América Latina — competindo não
-  em cobertura de busca (onde Google Flights/Kayak/Skyscanner já vencem), mas em
-  inteligência de compra localizada, confiança e canal nativo (WhatsApp), pontos
-  estruturalmente fracos dos concorrentes globais e da Decolar.
+- **Ambição de longo prazo:** evoluir de monitor de preço de passagem para um
+  **assistente de custo total da viagem** da América Latina (decisão registrada
+  em [`12-fase7-decisoes-pendentes.md`](12-fase7-decisoes-pendentes.md) §8) —
+  passagem continua o núcleo e a porta de entrada, mas hotel, seguro, milhas e
+  câmbio passam a ser lidos como facetas da mesma pergunta, não cross-sells
+  desconexos. Competindo não em cobertura de busca (onde Google Flights/Kayak/
+  Skyscanner já vencem), mas em inteligência de compra localizada, confiança e
+  canal nativo (WhatsApp), pontos estruturalmente fracos dos concorrentes
+  globais e da Decolar.

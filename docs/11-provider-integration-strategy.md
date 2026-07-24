@@ -7,6 +7,15 @@
 > contrato) tenham um caminho de degradação previsível em vez de virarem incidente.
 > Nenhum código de integração foi escrito ainda; isto é só a estratégia.
 
+> **Atualização (Fase 6 implementada, decisão registrada em
+> `12-fase7-decisoes-pendentes.md` §7):** `FlightSearchProvider` continua sendo
+> **exclusivamente** uma porta de busca/preço — nenhum adapter de emissão/compra
+> (Duffel ou outro, caso o Modelo B de compra seja revisitado no futuro) deve
+> implementá-la ou estendê-la. Emissão de bilhete é uma porta nova e separada
+> (`FlightBookingProvider` ou um bounded context próprio), nunca um método a
+> mais aqui — decisão de arquitetura oficial, não mais só uma inclinação. Ver o
+> documento referenciado para o racional completo.
+
 ## 0. O que já existe hoje (ponto de partida real, não hipotético)
 
 A base para isto já está no código, não é uma proposta do zero:

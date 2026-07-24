@@ -12,6 +12,35 @@
 > `02-mvp-roadmap.md` §3.6 — não repete a análise de risco regulatório geral, só
 > aprofunda as decisões específicas de cada vertical da Fase 7.
 
+## Registro de decisões oficiais
+
+As decisões abaixo foram confirmadas e passam a valer como diretriz para todo
+trabalho futuro de Fase 7 — não são mais recomendações deste documento, são
+decisão tomada. Os itens que **não** aparecem aqui (ex.: qual parceiro de
+passagem/hotel/seguro específico) continuam em aberto; ver cada seção para o
+que ainda falta decidir.
+
+1. ✅ **Compra por redirecionamento para parceiro no lançamento** — Modelo A
+   (§0), não Modelo B. Confirma a recomendação; resolve a Decisão 0.1.
+2. ✅ **Hotéis e seguro seguem o mesmo padrão** — cross-sell de afiliado
+   (redirecionamento), não busca própria dentro do produto. Resolve a pergunta
+   de produto no início de §1 e §2.
+3. ✅ **Milhas permanecem na versão lite até existir demanda comprovada** —
+   nenhuma frente de parceria com programas de milhas (Smiles, LATAM Pass,
+   TudoAzul) antes de haver sinal de uso da tabela de referência atual.
+   Resolve a Decisão 3.1.
+4. ✅ **Câmbio oferece histórico e contexto, sem previsões** — Opção A (§4)
+   confirmada para implementação; Opção C descartada definitivamente, não só
+   desaconselhada. Resolve a Decisão 4.1.
+5. ✅ **Search Provider e Booking Provider são conceitos definitivamente
+   separados na arquitetura** — formaliza a ressalva técnica que estava no
+   final de §0 como decisão de arquitetura, não mais só uma observação.
+   Detalhado em §7 (novo).
+6. ✅ **Prioridade estratégica: evoluir para um assistente de custo total da
+   viagem, não só um monitor de passagens** — reposiciona como os itens desta
+   Fase 7 devem ser lidos e sequenciados daqui em diante. Detalhado em §8
+   (novo), com implicações em `00-visao-geral.md` e `02-mvp-roadmap.md`.
+
 ## 0. A decisão-mãe: o que "comprar por parceiro" significa de fato
 
 Todo o resto deste documento depende desta decisão primeiro. `01-analise-e-riscos.md`
@@ -29,30 +58,24 @@ porque eles têm implicações de produto, responsabilidade e engenharia bem dif
 | Receita | Comissão de afiliado (tipicamente 1–3%, definida pelo parceiro) | Margem maior possível, mas negociada por volume — no início, provavelmente pior que afiliado até haver escala |
 | Esforço de engenharia | Baixo (é um link com tracking) | Alto (fluxo de pagamento, PCI-scope via gateway, tratamento de falha de emissão, estado de pedido) |
 
-**⚠️ Decisão pendente 0.1:** Modelo A ou B para o lançamento da compra de passagem?
-A recomendação deste documento é **A**, pela mesma razão que `01-analise-e-riscos.md`
-já deu para CADASTUR: validar demanda e reduzir risco regulatório/operacional antes
-de assumir a complexidade (e a exposição) do Modelo B. Modelo B só compensa quando
-já existe volume que justifique negociar melhor comissão E capacidade operacional de
-suporte pós-venda — nenhum dos dois existe ainda.
+**✅ Decisão oficial 0.1:** Modelo A (redirecionamento simples) para o lançamento
+da compra de passagem. Mesma razão que `01-analise-e-riscos.md` já deu para
+CADASTUR: validar demanda e reduzir risco regulatório/operacional antes de
+assumir a complexidade (e a exposição) do Modelo B. Revisitar o Modelo B só
+quando já existir volume que justifique negociar melhor comissão E capacidade
+operacional de suporte pós-venda — nenhum dos dois existe ainda.
 
-**⚠️ Decisão pendente 0.2:** Se Modelo A, qual parceiro/agência? Isso não é uma
-escolha técnica (qualquer um vira "um link com UTM"), é uma escolha comercial:
-cobertura de rotas (nacional vs. internacional), reputação (evitar repetir o
-problema de confiança já flagrado sobre a Decolar em `08-revisao-estrategica-latam.md`),
-e se o parceiro aceita ser citado como "onde comprar" sem prejudicar o
-posicionamento de "TripRadar é quem tem a inteligência, não quem vende" que é o
-diferencial central do produto.
+**⚠️ Decisão ainda pendente 0.2:** qual parceiro/agência para o Modelo A? Isso
+não é uma escolha técnica (qualquer um vira "um link com UTM"), é uma escolha
+comercial: cobertura de rotas (nacional vs. internacional), reputação (evitar
+repetir o problema de confiança já flagrado sobre a Decolar em
+`08-revisao-estrategica-latam.md`), e se o parceiro aceita ser citado como "onde
+comprar" sem prejudicar o posicionamento de "TripRadar é quem tem a
+inteligência, não quem vende" que é o diferencial central do produto. Continua
+em aberto — ver pergunta 1 em §10.
 
-**Se Modelo B for escolhido no futuro:** `02-mvp-roadmap.md` já aponta Duffel como
-"mais rápido de integrar tecnicamente" — vale uma ressalva técnica que não estava
-explícita antes: **Duffel é uma API de busca+emissão, não a mesma coisa que a
-integração Amadeus da Fase 6** (que é só busca/preço, via Flight Offers Search).
-A `FlightSearchProvider` de `modules/providers` não cobre emissão — um adapter de
-emissão seria uma porta nova (`FlightBookingProvider` ou similar), não uma extensão
-da existente. E cobertura de tarifa doméstica brasileira em GDS internacionais como
-Duffel historicamente é mais fraca que a de um consolidador local — outro motivo pra
-essa escolha ser validada com dado de cobertura real antes de integrar, não suposta.
+**Se o Modelo B for revisitado no futuro:** vale a ressalva técnica que agora é
+decisão de arquitetura oficial, não só observação — ver §7.
 
 ---
 
@@ -66,19 +89,19 @@ o que já existe pra voo)?
 
 A segunda opção é um produto novo inteiro (motor de busca+preço+UI própria), não uma
 feature — e não há nenhum dado ainda de que o usuário do TripRadar (que veio pelo
-monitoramento de passagem) quer isso do mesmo lugar. `02-mvp-roadmap.md` já coloca
-hotéis na Fase 4/Escala, não na Fase 7 imediata — este documento concorda e reforça:
-**começar como cross-sell simples de afiliado é a única opção que não exige
-decisão de provedor de busca de hotel nenhuma para começar a gerar receita
-marginal.**
+monitoramento de passagem) quer isso do mesmo lugar.
 
-**⚠️ Decisão pendente 1.1:** Qual programa de afiliados de hotel (Booking.com
-Partner Program, Expedia Rapid API/Affiliate, HotelBeds)? Cada um tem cobertura,
-comissão e complexidade de integração diferentes — mas para o modelo de
-cross-sell simples (link com tracking, não busca própria), a escolha é
-predominantemente comercial (comissão, confiabilidade de pagamento, marca) mais
-do que técnica. Não há necessidade de decidir isso antes de outras prioridades —
-é a peça de menor risco/urgência deste documento inteiro.
+**✅ Decisão oficial:** hotel entra como cross-sell simples de afiliado (mesmo
+Modelo A de §0), não como busca própria. Consistente com `02-mvp-roadmap.md`,
+que já colocava hotéis na Fase 4/Escala, não na Fase 7 imediata.
+
+**⚠️ Decisão ainda pendente 1.1:** qual programa de afiliados de hotel
+(Booking.com Partner Program, Expedia Rapid API/Affiliate, HotelBeds)? Cada um
+tem cobertura, comissão e complexidade de integração diferentes — mas para o
+modelo de cross-sell simples (link com tracking, não busca própria), a escolha
+é predominantemente comercial (comissão, confiabilidade de pagamento, marca)
+mais do que técnica. Não há necessidade de decidir isso antes de outras
+prioridades — é a peça de menor risco/urgência deste documento inteiro.
 
 ---
 
@@ -88,10 +111,12 @@ Mesma estrutura regulatória do problema de passagem, só que para seguro: no
 Brasil, intermediar venda de seguro exige ser corretor de seguros registrado na
 SUSEP, ou operar através de um parceiro já licenciado. `01-analise-e-riscos.md`
 não cobriu isso explicitamente (só falou de CADASTUR para passagem) — vale
-registrar aqui como o mesmo tipo de risco, com a mesma recomendação: **parceiro
-via afiliado (Modelo A), nunca corretagem própria no início.**
+registrar aqui como o mesmo tipo de risco.
 
-**⚠️ Decisão pendente 2.1:** Qual parceiro — uma insurtech com programa de
+**✅ Decisão oficial:** parceiro via afiliado (mesmo Modelo A de §0), nunca
+corretagem própria no início.
+
+**⚠️ Decisão ainda pendente 2.1:** qual parceiro — uma insurtech com programa de
 afiliados já pronto (ex.: perfis como 90 Seguro Viagem, Seguros Promo) ou uma
 seguradora tradicional com parceria direta? Insurtechs tendem a ter onboarding de
 afiliado mais rápido; seguradora tradicional pode ter melhor cobertura/preço mas
@@ -121,17 +146,18 @@ arquitetura:
   programa). Nenhuma decisão de arquitetura antecipa isso; só uma conversa
   comercial com os programas (ou aceitar que não vai haver dado em tempo real) resolve.
 
-**⚠️ Decisão pendente 3.1:** Vale abrir uma frente de parceria com programas de
-milhas brasileiros agora, ou manter a tabela "lite" (curadoria manual periódica)
-até haver sinal de demanda validada — por exemplo, % de usuários que efetivamente
-interagem com o painel de milhas hoje? Recomendação: **esperar o sinal de
-demanda.** Negociar acesso a dado de programa de milhas é um processo lento e de
-relacionamento; gastar esse capital de relacionamento antes de saber se o usuário
-sequer usa a feature "lite" é risco de esforço desperdiçado — o tipo de decisão
-que este engajamento tem evitado sistematicamente (ver "não-escopo" em
-`11-provider-integration-strategy.md` §8, mesmo princípio aplicado aqui).
+**✅ Decisão oficial 3.1:** manter a tabela "lite" (curadoria manual periódica) e
+**não** abrir nenhuma frente de parceria com programas de milhas brasileiros até
+haver sinal de demanda validada — por exemplo, % de usuários que efetivamente
+interagem com o painel de milhas hoje. Negociar acesso a dado de programa de
+milhas é um processo lento e de relacionamento; gastar esse capital antes de
+saber se o usuário sequer usa a feature "lite" seria esforço desperdiçado — o
+tipo de decisão que este engajamento tem evitado sistematicamente (ver
+"não-escopo" em `11-provider-integration-strategy.md` §8, mesmo princípio
+aplicado aqui). Nenhuma ação necessária até o sinal de demanda aparecer.
 
-**⚠️ Decisão pendente 3.2 (separada da anterior):** a monetização via afiliado de
+**⚠️ Decisão ainda em aberto 3.2 (separada da anterior, não bloqueada por ela):**
+a monetização via afiliado de
 cartão/clube de milhas já foi sinalizada em `08-revisao-estrategica-latam.md`
 como oportunidade ("audiência já qualificada pelo consultor de milhas") — isso é
 uma parceria de marketing de produto financeiro (ex.: cartões com pontuação de
@@ -157,45 +183,134 @@ anteriores:
 | **B. Provedor de câmbio mais granular** — trocar a fonte gratuita atual por um serviço pago com mais frequência de atualização/histórico mais longo | Custo recorrente novo, decisão de fornecedor | Baixo-médio — decisão de compra simples, não regulatória |
 | **C. Recomendação combinando previsão de câmbio + preço** ("espere N dias, câmbio deve melhorar X%") | Muda a natureza da recomendação de descritiva para preditiva sobre câmbio | **Alto** — câmbio é notoriamente difícil de prever; uma previsão errada mina exatamente a confiança que `01-analise-e-riscos.md` §2.3 já identificou como o risco central do produto ("falsos positivos da IA... sempre expor o racional, nunca uma promessa categórica") |
 
-**⚠️ Decisão pendente 4.1:** este documento recomenda explicitamente **A agora,
-B quando houver orçamento de dado disponível, e C não** (ou, no máximo, C
-reformulado como "aqui está a tendência histórica" em vez de "aqui está a
-previsão") — não porque falte parceiro ou licença, mas porque C é o único item
-deste documento inteiro que é uma decisão de **risco de produto**, não de
-negócio/jurídica. Não é algo que precise de resposta externa para prosseguir — é
-algo que este documento já está recomendando não fazer, e registra aqui para
-não ser reintroduzido sem essa ressalva.
+**✅ Decisão oficial 4.1:** Opção A (histórico e contexto) confirmada para
+implementação assim que fizer sentido no roadmap de frontend — nenhum bloqueio
+de negócio. Opção C (previsão) **descartada definitivamente**, não apenas
+desaconselhada: é a única decisão deste documento inteiro que era de risco de
+produto, não de parceria/licença, e o risco (câmbio é notoriamente difícil de
+prever; uma previsão errada mina exatamente a confiança que
+`01-analise-e-riscos.md` §2.3 identifica como central) foi julgado alto demais
+para o ganho. Opção B (provedor de câmbio pago) fica em espera até haver
+orçamento de dado disponível — não decidida nem descartada, só não prioritária
+agora.
 
 ---
 
-## 5. Tabela-resumo de sequenciamento
+## 7. Search Provider e Booking Provider são conceitos definitivamente separados
 
-| Item | Tipo de bloqueio | Precisa de decisão externa (sua) antes de começar? | Prioridade sugerida |
+Isso estava registrado como "ressalva técnica" no final de §0; agora é decisão
+de arquitetura oficial, então merece seção própria.
+
+`modules/providers` (Fase 6) define `FlightSearchProvider` — uma porta que só
+faz uma coisa: dado uma rota/data, devolve ofertas com preço (`FlightOffer`).
+O `AmadeusFlightProvider` implementa exatamente isso, e só isso. **Nenhum
+adapter de emissão/compra (Duffel ou qualquer outro, no Modelo B, se e quando
+for revisitado) deve implementar ou estender `FlightSearchProvider`** — emitir
+um bilhete é uma capacidade categoricamente diferente (envolve pagamento,
+dados de passageiro, estado de pedido, cancelamento/remarcação), não um método
+a mais na mesma interface.
+
+**O que isso significa na prática, quando a Fase 7 chegar no Modelo B (se
+chegar):**
+- Uma porta nova, própria — algo como `FlightBookingProvider` em
+  `modules/providers/application/ports.py` (ou um módulo novo, `booking`, se o
+  escopo justificar um bounded context próprio com seu próprio ciclo de vida
+  de pedido) — não um método adicional em `FlightSearchProvider`.
+- `FlightSearchProvider` continua podendo evoluir (novo provedor de busca,
+  cache, circuit breaker — tudo que já existe na Fase 6) **sem nenhum risco de
+  vazar preocupação de pagamento/emissão** para dentro dela.
+- Um mesmo provedor comercial (ex.: se um dia a Amadeus ou a Duffel forem
+  usadas tanto pra busca quanto pra emissão) pode ter DUAS classes adapter
+  diferentes, uma por porta — não uma classe que implementa as duas
+  interfaces, para não criar acoplamento entre um caso de uso que hoje é
+  público/sem autenticação de usuário (busca) e outro que é sensível e
+  transacional (compra).
+
+Esta decisão não exige nenhuma ação agora — não há `FlightBookingProvider`
+para construir enquanto a Decisão 0.1 mantiver o Modelo A. Ela existe para que,
+quando/se o Modelo B for revisitado, ninguém (nem uma sessão futura deste
+mesmo assistente) tente atalhar estendendo `FlightSearchProvider` por
+conveniência de curto prazo.
+
+---
+
+## 8. Reposicionamento: assistente de custo total da viagem
+
+Esta é a decisão de maior alcance deste documento — não é sobre um item
+específico da Fase 7, é sobre **como ler todos eles daqui em diante**.
+
+**✅ Decisão oficial:** o TripRadar deixa de ser enquadrado, na ambição de longo
+prazo, como "monitor de preço de passagem que também empurra hotel/seguro como
+cross-sell avulso" e passa a ser enquadrado como **um assistente de custo total
+da viagem** — a pergunta que o produto responde deixa de ser só "quando devo
+comprar esta passagem" e passa a incluir "quanto esta viagem inteira vai custar,
+e onde dá pra economizar em cada parte dela".
+
+**O que muda de fato, e o que não muda:**
+- **Não muda o MVP nem o que já está construído.** O core continua sendo
+  monitoramento de preço de passagem — isso não é substituído, é o ponto de
+  entrada de um produto maior.
+- **Não antecipa nenhuma implementação nova.** Hotel, seguro, milhas e câmbio
+  continuam exatamente com o escopo e a sequência decididos acima (cross-sell
+  de afiliado, lite, histórico sem previsão) — o reposicionamento é de
+  narrativa/arquitetura de informação, não uma ordem para construir mais agora.
+- **Muda a lente para decisões de produto futuras**, em particular:
+  - Dá uma razão de ser coerente para por que hotel/seguro/milhas/câmbio
+    pertencem ao mesmo produto, em vez de parecerem bolt-ons desconexos
+    grudados num monitor de passagem — eles são facetas do "quanto a viagem
+    custa", não features soltas.
+  - Sugere (sem decidir agora — fica para quando a Fase 7 tática avançar) que
+    o modelo de dados eventualmente precisa de um conceito de "viagem"
+    (agregando passagem + hotel + seguro + milhas + câmbio de uma mesma
+    jornada) em vez de cada vertical viver isolada. Isso é uma implicação a
+    ser detalhada em `04-modelo-dados.md` quando (e só quando) a implementação
+    de fato começar — registrar aqui não é autorização para modelar agora.
+  - Deve influenciar o texto de produto (`00-visao-geral.md` §1.1, proposta de
+    valor) e a métrica norte (`02-mvp-roadmap.md` §3.7) — ver ambos, já
+    atualizados com uma nota apontando pra esta decisão.
+
+**Por que registrar isso agora, sem implementar nada:** decisões de
+posicionamento de produto têm efeito imediato em como as decisões táticas
+seguintes (qual parceiro, qual dado, qual UI) são avaliadas, mesmo antes de
+qualquer código — errar essa lente cedo custa retrabalho de arquitetura de
+informação mais tarde, o mesmo racional de "resolver antes de construir" que
+guia este documento inteiro.
+
+---
+
+## 9. Tabela-resumo de sequenciamento
+
+| Item | Status | Tipo de bloqueio restante | Prioridade sugerida |
 |---|---|---|---|
-| 0. Modelo de compra (A/B) | Negócio + jurídico | **Sim** — é a decisão mais crítica, define o padrão que 1 e 2 reaproveitam | 1º |
-| 0. Escolha do parceiro de passagem | Negócio | **Sim** | Junto com a de cima |
-| 1. Hotéis (cross-sell afiliado) | Negócio (qual programa) | Sim, mas de baixo risco/reversível | 3º — depois de validar o modelo 0 |
-| 2. Seguro (cross-sell afiliado) | Negócio + jurídico (SUSEP) | Sim | 4º — menor attach-rate esperado que hotel |
-| 3.1 Parceria de dado de milhas | Negócio, e de baixa urgência | Não — recomendação é esperar sinal de demanda | Adiado deliberadamente |
-| 3.2 Afiliado financeiro (cartão/milhas) | Negócio, baixa complexidade regulatória | Sim, mas pode andar em paralelo a qualquer outro item | Pode começar a qualquer momento, independente |
-| 4. Câmbio avançado (A) | Nenhum — é só produto/frontend | Não | Pode implementar já, sem esperar nada |
-| 4. Câmbio avançado (B/C) | B: compra de dado / C: não recomendado | B sim (orçamento); C não deveria prosseguir | B fica pra quando houver orçamento; C fica registrado como não-recomendado |
+| 0. Modelo de compra (A/B) | ✅ Decidido — Modelo A | — | Resolvido |
+| 0. Escolha do parceiro de passagem | ⚠️ Em aberto | Negócio | 1º — próximo bloqueio real |
+| 1. Hotéis — padrão (cross-sell vs. busca própria) | ✅ Decidido — cross-sell | — | Resolvido |
+| 1. Hotéis — escolha do parceiro | ⚠️ Em aberto | Negócio (baixo risco) | 3º |
+| 2. Seguro — padrão (cross-sell vs. corretagem própria) | ✅ Decidido — cross-sell | — | Resolvido |
+| 2. Seguro — escolha do parceiro | ⚠️ Em aberto | Negócio + jurídico (SUSEP) | 4º |
+| 3.1 Parceria de dado de milhas | ✅ Decidido — adiado até sinal de demanda | — | Nenhuma ação agora |
+| 3.2 Afiliado financeiro (cartão/milhas) | ⚠️ Em aberto, opcional | Negócio, baixa complexidade | Pode começar a qualquer momento, independente |
+| 4. Câmbio avançado (A — histórico) | ✅ Decidido — implementar | — | Pode implementar já |
+| 4. Câmbio avançado (B — provedor pago) | Em espera (não decidido nem descartado) | Orçamento | Quando houver orçamento |
+| 4. Câmbio avançado (C — previsão) | ✅ Decidido — descartado | — | Não fazer |
+| 7. Separação Search/Booking Provider | ✅ Decidido — arquitetura registrada | — | Sem ação até o Modelo B ser revisitado |
+| 8. Reposicionamento "custo total da viagem" | ✅ Decidido — lente adotada | — | Sem ação de implementação imediata |
 
-## 6. O que eu preciso de você para destravar isto
+## 10. O que ainda falta para destravar o resto
 
-Perguntas diretas, na ordem em que bloqueiam o resto:
+As seis decisões de §"Registro de decisões oficiais" estão tomadas. O que
+resta é só escolha de parceiro comercial — nenhuma delas tem opção técnica
+pendente:
 
-1. **Modelo de compra**: redirecionamento simples (afiliado) ou checkout embutido?
-   (Recomendação: afiliado, para o lançamento.)
-2. **Parceiro de passagem**: já existe alguma conversa comercial em andamento com
-   alguma agência/consolidador, ou parto do zero para levantar opções?
-3. **Hotel e seguro**: confirma que ambos entram só como cross-sell de afiliado
-   por enquanto (sem busca própria), como já estava implícito no roadmap?
-4. **Milhas**: concorda em adiar a busca de parceria de dado de programa até haver
-   sinal de uso da versão "lite" atual? Se sim, nenhuma ação é necessária agora.
-5. **Câmbio avançado**: posso implementar a Opção A (visualização histórica) como
-   próximo passo já, sem esperar decisão nenhuma sua — confirma?
+1. **Parceiro de passagem** (§0.2): já existe alguma conversa comercial em
+   andamento com alguma agência/consolidador, ou parto do zero para levantar
+   opções?
+2. **Parceiro de hotel** (§1.1): alguma preferência entre Booking.com Partner
+   Program, Expedia Rapid API/Affiliate ou HotelBeds — ou parto do zero?
+3. **Parceiro de seguro** (§2.1): insurtech com onboarding de afiliado rápido
+   ou seguradora tradicional com parceria direta?
 
-Itens 3.2 (afiliado financeiro) e 4-A (câmbio histórico) não têm nenhum bloqueio
-de negócio real — posso começar por eles enquanto as decisões acima amadurecem,
-se fizer sentido para você.
+Nenhuma delas bloqueia o item 4-A (câmbio histórico) nem o item 3.2 (afiliado
+financeiro de milhas), que já podem avançar a qualquer momento, de forma
+independente — nem a §7/§8 (arquitetura e reposicionamento), que já estão
+registradas e não pedem nenhuma ação imediata.
