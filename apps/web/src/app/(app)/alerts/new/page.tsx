@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,10 +26,13 @@ function todayIso(): string {
 
 export default function NewAlertPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const createAlert = useCreateAlert();
 
-  const [originIata, setOriginIata] = useState("");
-  const [destinationIata, setDestinationIata] = useState("");
+  // Pré-preenchido quando o usuário chega de uma página pública de rota
+  // (/voos/[origin]/[destination]) — ver app/voos/[origin]/[destination]/page.tsx.
+  const [originIata, setOriginIata] = useState((searchParams.get("origin") ?? "").toUpperCase());
+  const [destinationIata, setDestinationIata] = useState((searchParams.get("destination") ?? "").toUpperCase());
   const [tripType, setTripType] = useState<TripType>("round_trip");
   const [departureDate, setDepartureDate] = useState("");
   const [returnDate, setReturnDate] = useState("");

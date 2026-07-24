@@ -1,21 +1,40 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 import { useAuth } from "@/lib/auth/auth-context";
 import { Spinner } from "@/components/ui/spinner";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center">
+          <Spinner label="Verificando sessão" />
+        </div>
+      }
+    >
+      <AuthLayoutContent>{children}</AuthLayoutContent>
+    </Suspense>
+  );
+}
+
+function AuthLayoutContent({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.replace("/dashboard");
+      const origin = searchParams.get("origin");
+      const destination = searchParams.get("destination");
+      router.replace(
+        origin && destination ? `/alerts/new?origin=${origin}&destination=${destination}` : "/dashboard"
+      );
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, router, searchParams]);
 
   if (isLoading || isAuthenticated) {
     return (

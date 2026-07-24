@@ -1,14 +1,15 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { Suspense, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 import { PasswordInput } from "@/components/auth/password-input";
 import { useAuth } from "@/lib/auth/auth-context";
 import { friendlyAuthError } from "@/lib/api/error-messages";
@@ -16,8 +17,17 @@ import { friendlyAuthError } from "@/lib/api/error-messages";
 const MIN_PASSWORD_LENGTH = 8;
 
 export default function RegisterPage() {
+  return (
+    <Suspense fallback={<Spinner label="Carregando" />}>
+      <RegisterForm />
+    </Suspense>
+  );
+}
+
+function RegisterForm() {
   const { register } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -40,7 +50,11 @@ export default function RegisterPage() {
     setIsSubmitting(true);
     try {
       await register(email, password, fullName);
-      router.replace("/dashboard");
+      const origin = searchParams.get("origin");
+      const destination = searchParams.get("destination");
+      router.replace(
+        origin && destination ? `/alerts/new?origin=${origin}&destination=${destination}` : "/dashboard"
+      );
     } catch (error) {
       setFormError(friendlyAuthError(error, "register"));
       nameRef.current?.focus();
