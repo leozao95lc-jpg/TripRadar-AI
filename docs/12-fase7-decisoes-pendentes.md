@@ -299,18 +299,81 @@ guia este documento inteiro.
 ## 10. O que ainda falta para destravar o resto
 
 As seis decisões de §"Registro de decisões oficiais" estão tomadas. O que
-resta é só escolha de parceiro comercial — nenhuma delas tem opção técnica
-pendente:
-
-1. **Parceiro de passagem** (§0.2): já existe alguma conversa comercial em
-   andamento com alguma agência/consolidador, ou parto do zero para levantar
-   opções?
-2. **Parceiro de hotel** (§1.1): alguma preferência entre Booking.com Partner
-   Program, Expedia Rapid API/Affiliate ou HotelBeds — ou parto do zero?
-3. **Parceiro de seguro** (§2.1): insurtech com onboarding de afiliado rápido
-   ou seguradora tradicional com parceria direta?
+resta é só escolha de parceiro comercial. §11 traz um levantamento inicial de
+candidatos (pesquisa web, não conversa comercial real) para embasar essa
+escolha — a decisão final continua sendo sua.
 
 Nenhuma delas bloqueia o item 4-A (câmbio histórico) nem o item 3.2 (afiliado
 financeiro de milhas), que já podem avançar a qualquer momento, de forma
 independente — nem a §7/§8 (arquitetura e reposicionamento), que já estão
 registradas e não pedem nenhuma ação imediata.
+
+---
+
+## 11. Levantamento de candidatos a parceiro (pesquisa inicial)
+
+> Pesquisa feita em julho de 2026 via busca web — não é uma conversa
+> comercial real, é um ponto de partida para comparar opções antes de
+> abordar qualquer um deles. Percentuais de comissão variam por acordo
+> individual e mudam com frequência; confirmar direto com cada programa
+> antes de decidir. Fontes ao final de cada bloco.
+
+### 11.1 Passagem — a escolha mais importante
+
+O TripRadar monitora preço **entre companhias** (a Amadeus busca múltiplas
+cias por rota) — isso muda o que "bom parceiro" significa aqui: um afiliado
+de uma companhia só (GOL, LATAM, Air France) é estruturalmente ruim pra esse
+caso de uso, porque se a oferta mais barata encontrada for de outra
+companhia, o redirecionamento não leva a ela. **Vale eliminar programas de
+afiliado por companhia aérea individual da lista de candidatos por esse
+motivo, não só por comissão.**
+
+| Candidato | Comissão | Cobertura | Observação |
+|---|---|---|---|
+| **TravelPayouts** (rede Aviasales/Jetradar) | ~1,1–1,5% em voos, ~4–5% em hotel, também cobre seguro/carro | Agrega ~100 marcas de viagem, busca/deep-link **multi-companhia** por rota+data | **Candidato mais forte**: um único cadastro cobre passagem, hotel *e* seguro — resolve as três decisões pendentes com uma relação comercial só. Pagamento mensal, mínimo de saque $50 |
+| **Kiwi.com (Tequila API)** | Historicamente ~3%, hoje negociado por parceria | Multi-companhia, deep-link por itinerário | ⚠️ Parcerias novas de API hoje são **só por convite** — não é mais cadastro aberto; precisa abordagem direta, não é um "criar conta e pronto" |
+| **Decolar (via Awin)** | 2,5% CPA | Multi-companhia (é uma OTA) | ⚠️ Cadastro exige ser **pessoa jurídica que atua exclusivamente com venda/promoção de viagens, habilitada por autoridade de turismo competente** — isso reintroduz exatamente o tipo de exigência regulatória que a Decisão 0.1 (Modelo A) foi escolhida pra evitar. Some ao problema de marca já flagrado em `08-revisao-estrategica-latam.md`. **Não recomendado** |
+| **Hurb (Clube Hurb)** | Não divulgado publicamente | Multi-companhia (é uma OTA) | Programa ativo (15 mil+ afiliados), mas sem informação técnica de deep-link/API encontrada na pesquisa — precisaria contato direto pra avaliar viabilidade técnica |
+| GOL / LATAM / Air France (afiliado direto) | 1–2,5% conforme cia | Só aquela companhia | **Descartado** pelo motivo estrutural acima |
+
+**Recomendação:** avaliar TravelPayouts primeiro — não só pela comissão, mas
+por resolver as três verticais (passagem, hotel, seguro) com uma única
+integração/relação comercial, o que é uma vantagem prática real dado que
+"escolher parceiro" é hoje o principal item que resta nesta lista. Kiwi.com
+fica como alternativa de qualidade potencialmente maior, se e quando a
+abordagem por convite for viável.
+
+Fontes: [Travelpayouts review](https://affiliation-direct.net/en/travelpayouts-platform/), [Kiwi.com affiliate program API – Travelpayouts Help Center](https://support.travelpayouts.com/hc/en-us/articles/360019237899-Kiwi-com-affiliate-program-API), [Better for Business – Kiwi.com](https://media.kiwi.com/articles-and-interviews/better-for-business-kiwi-com-takes-a-new-approach-to-partnerships/), [Programa de Afiliados Decolar na Awin](https://bomdemarca.com.br/blog/programa-de-afiliados-decolar), [Clube Hurb](https://www.mercadoeeventos.com.br/noticias/agencias-e-operadoras/clube-hurb-lanca-programa-para-indicar-amigos-e-ganhar-comissao/), [Programa de Afiliados Azul, Latam e Gol](https://voopassagensaereas.com.br/programa-de-afiliados-azul-latam-gol-e-avianca), [Air France afiliação](https://wwws.airfrance.com.br/information/prepare/services/affiliation).
+
+### 11.2 Hotel
+
+| Candidato | Comissão | Observação |
+|---|---|---|
+| **TravelPayouts** (mesma rede) | ~4–5% revenue share | Mesma vantagem de integração única já citada acima |
+| **Booking.com Affiliate Partner Program** | ~4–4,8% | Cadastro direto simples (formulário + revisão de 1–5 dias úteis), marca forte e reconhecida pelo viajante brasileiro, dashboard próprio de deep links |
+
+**Recomendação:** se TravelPayouts for escolhido para passagem, começar
+usando a mesma rede pra hotel evita abrir uma segunda relação comercial
+antes de haver volume que justifique. Booking.com direto é a opção natural
+se/quando o cross-sell de hotel mostrar tração suficiente pra valer uma
+integração dedicada.
+
+Fontes: [Booking.com Affiliate Program 2026 — getlasso](https://getlasso.co/affiliate/booking/), [Booking.com Affiliate Partners](https://partnerships.booking.com/).
+
+### 11.3 Seguro viagem
+
+| Candidato | Comissão | Observação |
+|---|---|---|
+| **TravelPayouts** (mesma rede) | Não detalhado na pesquisa | Mesma vantagem de integração única |
+| **Real Seguro Viagem** | Não divulgado | Programa de indicação direto, sem desconto no repasse |
+| **Assistente de Viagem** | Até 25%, progressivo | Comissão mais alta entre os candidatos levantados |
+| **Allianz Travel BR** | Não divulgado | Marca grande/estabelecida (75+ anos), modelo B2B2C — provavelmente onboarding mais lento pra um afiliado pequeno |
+
+**Recomendação:** dado que seguro já é o item de menor prioridade em §2
+(attach-rate esperado menor), começar pela mesma rede TravelPayouts (se
+escolhida acima) em vez de abrir uma terceira relação comercial agora;
+revisitar com um parceiro dedicado (Assistente de Viagem pela comissão, ou
+Real Seguro Viagem) só quando houver sinal real de demanda — mesmo racional
+já aplicado à decisão de milhas em §3.1.
+
+Fontes: [Real Seguro Viagem — Programa de Indicadores](https://app.seguroviagem.srv.br/indica/), [Assistente de Viagem — Afiliados](https://assistentedeviagem.com.br/seguro-viagem/afiliados), [Allianz Travel BR na Awin](https://ui.awin.com/merchant-profile/24143).
