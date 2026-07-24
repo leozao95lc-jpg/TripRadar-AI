@@ -18,6 +18,7 @@ riscos e o desenho técnico; só então construir.
 10. [Revisão técnica do backend (Fases 1–4)](09-revisao-tecnica-backend.md)
 11. [Verificação — achados de Alta prioridade resolvidos](10-verificacao-correcoes-alta-prioridade.md)
 12. [Provider Integration Strategy — antes da integração com a Amadeus](11-provider-integration-strategy.md)
+13. [Fase 7 — Decisões pendentes (compra por parceiro, hotéis, seguro, milhas, câmbio)](12-fase7-decisoes-pendentes.md)
 
 ## Como ler isso
 
