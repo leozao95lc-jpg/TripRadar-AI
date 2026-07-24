@@ -16,6 +16,8 @@ class NotificationPreferenceModel(Base):
     channel: Mapped[str] = mapped_column(String(20), nullable=False)
     destination: Mapped[str] = mapped_column(String(255), nullable=False)
     enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    verification_code_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    verification_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class NotificationModel(Base):

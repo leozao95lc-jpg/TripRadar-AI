@@ -20,6 +20,7 @@ from modules.identity.domain.entities import User
 from modules.identity.infrastructure.repository import SqlAlchemyUserRepository
 from modules.identity.interface.dependencies import get_current_user
 from shared.database import get_db
+from shared.rate_limit import rate_limit
 
 router = APIRouter(prefix="/api/v1/alerts", tags=["alerts"])
 
@@ -44,7 +45,12 @@ def _to_response(alert: SearchAlert) -> AlertResponse:
     )
 
 
-@router.post("", response_model=AlertResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=AlertResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(rate_limit(20, 3600))],
+)
 def create_alert(
     payload: CreateAlertRequest,
     current_user: User = Depends(get_current_user),

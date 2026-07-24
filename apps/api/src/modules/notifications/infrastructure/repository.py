@@ -13,6 +13,18 @@ from modules.notifications.domain.entities import (
 from modules.notifications.infrastructure.models import NotificationModel, NotificationPreferenceModel
 
 
+def _preference_to_domain(row: NotificationPreferenceModel) -> NotificationPreference:
+    return NotificationPreference(
+        id=UUID(str(row.id)),
+        user_id=UUID(str(row.user_id)),
+        channel=NotificationChannel(row.channel),
+        destination=row.destination,
+        enabled=row.enabled,
+        verification_code_hash=row.verification_code_hash,
+        verification_expires_at=row.verification_expires_at,
+    )
+
+
 class SqlAlchemyNotificationPreferenceRepository(NotificationPreferenceRepository):
     def __init__(self, session: Session) -> None:
         self._session = session
@@ -28,16 +40,28 @@ class SqlAlchemyNotificationPreferenceRepository(NotificationPreferenceRepositor
             .scalars()
             .all()
         )
-        return [
-            NotificationPreference(
-                id=UUID(str(r.id)),
-                user_id=UUID(str(r.user_id)),
-                channel=NotificationChannel(r.channel),
-                destination=r.destination,
-                enabled=r.enabled,
+        return [_preference_to_domain(r) for r in rows]
+
+    def list_for_user(self, user_id: UUID) -> list[NotificationPreference]:
+        rows = (
+            self._session.execute(
+                select(NotificationPreferenceModel).where(NotificationPreferenceModel.user_id == str(user_id))
             )
-            for r in rows
-        ]
+            .scalars()
+            .all()
+        )
+        return [_preference_to_domain(r) for r in rows]
+
+    def get_for_user_and_channel(
+        self, user_id: UUID, channel: NotificationChannel
+    ) -> NotificationPreference | None:
+        row = self._session.execute(
+            select(NotificationPreferenceModel).where(
+                NotificationPreferenceModel.user_id == str(user_id),
+                NotificationPreferenceModel.channel == channel.value,
+            )
+        ).scalar_one_or_none()
+        return _preference_to_domain(row) if row is not None else None
 
     def upsert(self, preference: NotificationPreference) -> None:
         existing = self._session.execute(
@@ -50,6 +74,8 @@ class SqlAlchemyNotificationPreferenceRepository(NotificationPreferenceRepositor
         if existing is not None:
             existing.destination = preference.destination
             existing.enabled = preference.enabled
+            existing.verification_code_hash = preference.verification_code_hash
+            existing.verification_expires_at = preference.verification_expires_at
         else:
             self._session.add(
                 NotificationPreferenceModel(
@@ -58,6 +84,8 @@ class SqlAlchemyNotificationPreferenceRepository(NotificationPreferenceRepositor
                     channel=preference.channel.value,
                     destination=preference.destination,
                     enabled=preference.enabled,
+                    verification_code_hash=preference.verification_code_hash,
+                    verification_expires_at=preference.verification_expires_at,
                 )
             )
         self._session.flush()
@@ -105,6 +133,14 @@ class InMemoryNotificationPreferenceRepository(NotificationPreferenceRepository)
 
     def list_enabled_for_user(self, user_id: UUID) -> list[NotificationPreference]:
         return [p for (uid, _), p in self._by_key.items() if uid == user_id and p.enabled]
+
+    def list_for_user(self, user_id: UUID) -> list[NotificationPreference]:
+        return [p for (uid, _), p in self._by_key.items() if uid == user_id]
+
+    def get_for_user_and_channel(
+        self, user_id: UUID, channel: NotificationChannel
+    ) -> NotificationPreference | None:
+        return self._by_key.get((user_id, channel))
 
     def upsert(self, preference: NotificationPreference) -> None:
         self._by_key[(preference.user_id, preference.channel)] = preference

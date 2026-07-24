@@ -1,7 +1,7 @@
 from datetime import date
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from modules.alerts.application.ports import AlertRepository, AlertTriggerRepository
@@ -99,7 +99,7 @@ class SqlAlchemyAlertRepository(AlertRepository):
             self._session.flush()
 
     def list_active_matching_route(
-        self, origin_iata: str, destination_iata: str, cabin_class: str
+        self, origin_iata: str, destination_iata: str, cabin_class: str, departure_date: str
     ) -> list[SearchAlert]:
         rows = (
             self._session.execute(
@@ -108,6 +108,10 @@ class SqlAlchemyAlertRepository(AlertRepository):
                     SearchAlertModel.destination_iata == destination_iata,
                     SearchAlertModel.cabin_class == cabin_class,
                     SearchAlertModel.status == AlertStatus.ACTIVE.value,
+                    or_(
+                        SearchAlertModel.flexible_dates.is_(True),
+                        SearchAlertModel.departure_date == date.fromisoformat(departure_date),
+                    ),
                 )
             )
             .scalars()
@@ -189,7 +193,7 @@ class InMemoryAlertRepository(AlertRepository):
         self._alerts.pop(alert_id, None)
 
     def list_active_matching_route(
-        self, origin_iata: str, destination_iata: str, cabin_class: str
+        self, origin_iata: str, destination_iata: str, cabin_class: str, departure_date: str
     ) -> list[SearchAlert]:
         return [
             a
@@ -198,6 +202,7 @@ class InMemoryAlertRepository(AlertRepository):
             and a.destination_iata == destination_iata
             and a.cabin_class.value == cabin_class
             and a.status == AlertStatus.ACTIVE
+            and (a.flexible_dates or a.departure_date == departure_date)
         ]
 
     def list_distinct_active_routes(self) -> list[SearchAlert]:

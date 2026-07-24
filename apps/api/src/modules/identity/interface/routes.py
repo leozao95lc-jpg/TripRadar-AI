@@ -18,12 +18,18 @@ from modules.identity.interface.schemas import (
 )
 from shared.database import get_db
 from shared.events import event_bus
+from shared.rate_limit import rate_limit
 
 router = APIRouter(prefix="/api/v1/auth", tags=["identity"])
 me_router = APIRouter(prefix="/api/v1/me", tags=["identity"])
 
 
-@router.post("/register", response_model=UserProfileResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register",
+    response_model=UserProfileResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(rate_limit(5, 3600))],
+)
 def register(payload: RegisterRequest, db: Session = Depends(get_db)) -> UserProfileResponse:
     use_case = RegisterUser(SqlAlchemyUserRepository(db))
     try:
@@ -37,7 +43,7 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)) -> UserPro
     )
 
 
-@router.post("/login", response_model=TokenResponse)
+@router.post("/login", response_model=TokenResponse, dependencies=[Depends(rate_limit(10, 300))])
 def login(payload: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse:
     use_case = AuthenticateUser(SqlAlchemyUserRepository(db))
     try:

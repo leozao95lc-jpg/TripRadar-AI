@@ -22,8 +22,14 @@ class AlertRepository(ABC):
 
     @abstractmethod
     def list_active_matching_route(
-        self, origin_iata: str, destination_iata: str, cabin_class: str
-    ) -> list[SearchAlert]: ...
+        self, origin_iata: str, destination_iata: str, cabin_class: str, departure_date: str
+    ) -> list[SearchAlert]:
+        """Alertas ativos para a rota+classe que também casam com `departure_date` —
+        exceto os com `flexible_dates=True`, que casam com qualquer data (ver
+        docs/09-revisao-tecnica-backend.md, achado #1: antes desta correção, um
+        snapshot de uma data disparava alertas cadastrados para outra data da mesma
+        rota)."""
+        ...
 
     @abstractmethod
     def list_distinct_active_routes(self) -> list[SearchAlert]:

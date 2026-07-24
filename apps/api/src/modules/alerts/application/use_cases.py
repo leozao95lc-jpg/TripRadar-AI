@@ -108,12 +108,15 @@ class EvaluateAlertsForRoute:
         origin_iata: str,
         destination_iata: str,
         cabin_class: str,
+        departure_date: str,
         price_cents: int,
         currency: str,
         price_snapshot_id: UUID,
     ) -> list[AlertTrigger]:
         self.pending_events = []
-        matching = self._alerts.list_active_matching_route(origin_iata, destination_iata, cabin_class)
+        matching = self._alerts.list_active_matching_route(
+            origin_iata, destination_iata, cabin_class, departure_date
+        )
         fired: list[AlertTrigger] = []
         for alert in matching:
             if price_cents > alert.max_price_cents:

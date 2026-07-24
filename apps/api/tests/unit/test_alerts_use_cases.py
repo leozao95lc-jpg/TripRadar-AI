@@ -89,6 +89,7 @@ def test_evaluate_alerts_for_route_fires_when_price_is_at_or_below_target():
         origin_iata="FLN",
         destination_iata="MAD",
         cabin_class="economy",
+        departure_date="2026-11-10",
         price_cents=299_000,
         currency="BRL",
         price_snapshot_id=uuid4(),
@@ -107,9 +108,53 @@ def test_evaluate_alerts_for_route_does_not_fire_above_target():
         origin_iata="FLN",
         destination_iata="MAD",
         cabin_class="economy",
+        departure_date="2026-11-10",
         price_cents=299_000,
         currency="BRL",
         price_snapshot_id=uuid4(),
     )
 
     assert fired == []
+
+
+def test_evaluate_alerts_for_route_ignores_snapshot_for_a_different_departure_date():
+    # Regressão do achado #1 de docs/09-revisao-tecnica-backend.md: um snapshot de
+    # uma data não pode disparar o alerta de outro usuário para uma data diferente
+    # na mesma rota.
+    alerts_repo = InMemoryAlertRepository()
+    triggers_repo = InMemoryAlertTriggerRepository()
+    CreateAlert(alerts_repo, FakePlanPort(None)).execute(
+        _alert_input(departure_date="2026-11-10", max_price_cents=300_000)
+    )
+
+    fired = EvaluateAlertsForRoute(alerts_repo, triggers_repo).execute(
+        origin_iata="FLN",
+        destination_iata="MAD",
+        cabin_class="economy",
+        departure_date="2026-12-25",  # data diferente da do alerta
+        price_cents=100_000,  # bem abaixo do alvo — dispararia se a data não fosse checada
+        currency="BRL",
+        price_snapshot_id=uuid4(),
+    )
+
+    assert fired == []
+
+
+def test_evaluate_alerts_for_route_matches_any_date_when_flexible():
+    alerts_repo = InMemoryAlertRepository()
+    triggers_repo = InMemoryAlertTriggerRepository()
+    CreateAlert(alerts_repo, FakePlanPort(None)).execute(
+        _alert_input(departure_date="2026-11-10", max_price_cents=300_000, flexible_dates=True)
+    )
+
+    fired = EvaluateAlertsForRoute(alerts_repo, triggers_repo).execute(
+        origin_iata="FLN",
+        destination_iata="MAD",
+        cabin_class="economy",
+        departure_date="2026-12-25",
+        price_cents=100_000,
+        currency="BRL",
+        price_snapshot_id=uuid4(),
+    )
+
+    assert len(fired) == 1

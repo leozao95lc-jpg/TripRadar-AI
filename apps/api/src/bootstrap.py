@@ -63,6 +63,7 @@ def _on_price_snapshot_collected(event: DomainEvent, session) -> list[DomainEven
         origin_iata=payload["origin_iata"],
         destination_iata=payload["destination_iata"],
         cabin_class=payload["cabin_class"],
+        departure_date=payload["departure_date"],
         price_cents=payload["price_cents"],
         currency=payload["currency"],
         price_snapshot_id=UUID(payload["price_snapshot_id"]),

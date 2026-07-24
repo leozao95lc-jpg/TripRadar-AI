@@ -8,6 +8,7 @@ import bootstrap
 from main import app
 from shared.database import Base, get_db
 from shared.events import event_bus
+from shared.rate_limit import rate_limiter
 
 
 @pytest.fixture(autouse=True)
@@ -21,6 +22,17 @@ def _isolated_event_bus():
     yield
     event_bus._handlers.clear()
     bootstrap._registered = False
+
+
+@pytest.fixture(autouse=True)
+def _isolated_rate_limiter():
+    # `rate_limiter` também é um singleton de processo — sem resetar entre testes,
+    # os muitos testes que chamam /auth/register ou POST /alerts repetidamente
+    # acabariam esbarrando no limite uns dos outros (o TestClient sempre usa o
+    # mesmo IP simulado).
+    rate_limiter.reset()
+    yield
+    rate_limiter.reset()
 
 
 @pytest.fixture()

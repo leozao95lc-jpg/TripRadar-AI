@@ -70,23 +70,52 @@ def _load_routes(db) -> list[RouteQuery]:
     ]
 
 
+def _poll_single_route(provider, route: RouteQuery) -> None:
+    """Uma transação por rota (não uma para o lote inteiro): se a avaliação de
+    alerta ou o despacho de notificação de UMA rota falhar, só o snapshot dessa
+    rota é revertido — as demais, já commitadas, ficam de pé. Antes desta correção
+    (docs/09-revisao-tecnica-backend.md, achado #3), o lote inteiro era uma única
+    transação e uma falha em qualquer evento revertia todos os snapshots já
+    coletados na rodada, inclusive os de rotas sem nenhum problema."""
+    with session_scope() as db:
+        use_case = PollRoutePrice(provider, SqlAlchemyPriceSnapshotRepository(db))
+        snapshots = use_case.execute(route, source_provider=settings.flight_provider)
+        for snapshot in snapshots:
+            logger.info(
+                "price_snapshot_collected",
+                route=f"{route.origin_iata}-{route.destination_iata}",
+                price_cents=snapshot.price_cents,
+                currency=snapshot.currency,
+            )
+        event_bus.dispatch(use_case.pending_events, db)
+
+
 def run() -> None:
     register_event_handlers()
     provider = build_provider()
+
     with session_scope() as db:
         routes = _load_routes(db)
-        use_case = PollRoutePrice(provider, SqlAlchemyPriceSnapshotRepository(db))
-        for route in routes:
-            snapshots = use_case.execute(route, source_provider=settings.flight_provider)
-            for snapshot in snapshots:
-                logger.info(
-                    "price_snapshot_collected",
-                    route=f"{route.origin_iata}-{route.destination_iata}",
-                    price_cents=snapshot.price_cents,
-                    currency=snapshot.currency,
-                )
-            event_bus.dispatch(use_case.pending_events, db)
-        logger.info("price_polling_run_completed", routes_polled=len(routes))
+
+    routes_ok = 0
+    routes_failed = 0
+    for route in routes:
+        try:
+            _poll_single_route(provider, route)
+            routes_ok += 1
+        except Exception:
+            routes_failed += 1
+            logger.exception(
+                "price_polling_route_failed",
+                route=f"{route.origin_iata}-{route.destination_iata}",
+            )
+
+    logger.info(
+        "price_polling_run_completed",
+        routes_total=len(routes),
+        routes_ok=routes_ok,
+        routes_failed=routes_failed,
+    )
 
 
 if __name__ == "__main__":
