@@ -89,6 +89,29 @@ class SetNotificationPreference:
             self._preferences.upsert(preference)
             return preference
 
+        existing = self._preferences.get_for_user_and_channel(user_id, channel_enum)
+
+        # Desligar um canal já configurado nunca reenvia código nem mexe no estado de
+        # verificação — só marca enabled=False. Sem isso, o único jeito de "desativar"
+        # o WhatsApp seria passar de novo pelo fluxo de código, o que é confuso e, pior,
+        # reativaria um canal já verificado como se fosse novo a cada toggle.
+        if not enabled and existing is not None:
+            existing.enabled = False
+            self._preferences.upsert(existing)
+            return existing
+
+        # Religar um canal já verificado para o MESMO destino: não pede código de novo.
+        already_verified_same_destination = (
+            existing is not None
+            and existing.destination == destination
+            and existing.verification_code_hash is None
+        )
+        if enabled and already_verified_same_destination:
+            existing.enabled = True
+            self._preferences.upsert(existing)
+            return existing
+
+        # Canal novo, destino mudou, ou ainda não verificado: gera e envia um código.
         code = self._code_generator()
         preference = NotificationPreference(
             user_id=user_id,

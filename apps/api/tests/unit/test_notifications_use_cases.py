@@ -130,6 +130,64 @@ def test_confirm_notification_channel_rejects_when_no_pending_verification():
         ConfirmNotificationChannel(prefs).execute(user_id, "whatsapp", "123456")
 
 
+def test_disabling_a_verified_whatsapp_channel_does_not_request_a_new_code():
+    prefs = InMemoryNotificationPreferenceRepository()
+    whatsapp_sender = FakeSender(ok=True)
+    user_id = uuid4()
+    SetNotificationPreference(
+        prefs, senders={"whatsapp": whatsapp_sender}, code_generator=_fixed_code_generator
+    ).execute(user_id, "dono-da-conta@example.com", "whatsapp", "+5511999999999", True)
+    ConfirmNotificationChannel(prefs).execute(user_id, "whatsapp", FIXED_CODE)
+    assert len(whatsapp_sender.calls) == 1
+
+    preference = SetNotificationPreference(prefs, senders={"whatsapp": whatsapp_sender}).execute(
+        user_id, "dono-da-conta@example.com", "whatsapp", "+5511999999999", False
+    )
+
+    assert preference.enabled is False
+    assert preference.verification_code_hash is None  # continua verificado, só desligado
+    assert len(whatsapp_sender.calls) == 1  # nenhum código novo foi enviado
+
+
+def test_re_enabling_a_verified_whatsapp_channel_for_the_same_number_skips_verification():
+    prefs = InMemoryNotificationPreferenceRepository()
+    whatsapp_sender = FakeSender(ok=True)
+    user_id = uuid4()
+    SetNotificationPreference(
+        prefs, senders={"whatsapp": whatsapp_sender}, code_generator=_fixed_code_generator
+    ).execute(user_id, "dono-da-conta@example.com", "whatsapp", "+5511999999999", True)
+    ConfirmNotificationChannel(prefs).execute(user_id, "whatsapp", FIXED_CODE)
+    SetNotificationPreference(prefs, senders={"whatsapp": whatsapp_sender}).execute(
+        user_id, "dono-da-conta@example.com", "whatsapp", "+5511999999999", False
+    )
+
+    preference = SetNotificationPreference(prefs, senders={"whatsapp": whatsapp_sender}).execute(
+        user_id, "dono-da-conta@example.com", "whatsapp", "+5511999999999", True
+    )
+
+    assert preference.enabled is True
+    assert len(whatsapp_sender.calls) == 1  # nenhum código novo — não passou por verificação de novo
+
+
+def test_changing_the_whatsapp_number_requires_verification_again():
+    prefs = InMemoryNotificationPreferenceRepository()
+    whatsapp_sender = FakeSender(ok=True)
+    user_id = uuid4()
+    SetNotificationPreference(
+        prefs, senders={"whatsapp": whatsapp_sender}, code_generator=_fixed_code_generator
+    ).execute(user_id, "dono-da-conta@example.com", "whatsapp", "+5511999999999", True)
+    ConfirmNotificationChannel(prefs).execute(user_id, "whatsapp", FIXED_CODE)
+
+    preference = SetNotificationPreference(
+        prefs, senders={"whatsapp": whatsapp_sender}, code_generator=_fixed_code_generator
+    ).execute(user_id, "dono-da-conta@example.com", "whatsapp", "+5511888888888", True)
+
+    assert preference.enabled is False
+    assert preference.destination == "+5511888888888"
+    assert preference.verification_code_hash == _hash_code(FIXED_CODE)
+    assert len(whatsapp_sender.calls) == 2  # um código novo foi enviado pro número novo
+
+
 def test_dispatch_only_reaches_confirmed_channels():
     prefs = InMemoryNotificationPreferenceRepository()
     notifications = InMemoryNotificationRepository()
