@@ -3,8 +3,12 @@
 > Pesquisa feita em julho de 2026. Objetivo: recomendar onde colocar o
 > TripRadar no ar para uso real com poucos usuários (item 4 das próximas
 > prioridades), antes de qualquer expansão de funcionalidade — item 5,
-> "medir antes de expandir", depende deste deploy existir. Nada foi
-> provisionado ainda; isto é recomendação, não execução.
+> "medir antes de expandir", depende deste deploy existir.
+
+**✅ Aprovado: Render + Vercel.** A configuração de deploy (§8) já está pronta
+no repositório — `render.yaml`, Dockerfile atualizado, `.env.example`
+completo. O que falta são só ações que só você pode fazer (criar as contas,
+gerar secrets reais, decidir a lista de convidados) — ver §9.
 
 ## 1. Por que isto diverge do que `03-arquitetura.md` já diz
 
@@ -96,28 +100,87 @@ mesmo lugar que o backend — são preocupações independentes, e a
 
 ## 6. Definition of done deste deploy
 
-- [ ] Postgres real provisionado, migrações do Alembic rodadas contra ele
-      (nunca testado fora de SQLite até agora — validar isso é, sozinho,
-      um motivo pra fazer esse deploy cedo, não só "colocar no ar").
-- [ ] Variáveis de ambiente de produção configuradas (JWT secret novo, não o
-      default de dev; credenciais reais de SMTP/WhatsApp/Amadeus se
-      aplicável nesta fase).
-- [ ] `price_polling_worker.py` rodando no agendamento escolhido, com pelo
-      menos uma execução real verificada via `/admin` (heartbeat visível).
+- [x] **Postgres real validado** — nunca tinha rodado fora de SQLite até
+      agora. Testado de ponta a ponta contra Postgres 16 real localmente:
+      `alembic upgrade head`, registro de usuário, worker de polling,
+      dashboard administrativo, `/metrics` — todos funcionando. No processo,
+      encontrado e corrigido um gap real: três tabelas (Fase 5.5) nunca
+      tinham migração Alembic, só existiam via `create_all()` em teste — ver
+      `apps/api/migrations/versions/0006_obs_analytics_flags.py`. Sem essa
+      validação, o primeiro deploy real quebraria na primeira chamada ao
+      worker ou ao `/admin`.
+- [x] **Configuração de deploy pronta** — `render.yaml`, Dockerfile
+      atualizado (incluía `src/` mas não `workers/`), `.env.example`
+      completo (11 variáveis que existiam no código mas não estavam
+      documentadas foram adicionadas). Ver §8.
+- [ ] Variáveis de ambiente de produção com valores **reais** preenchidas —
+      o `render.yaml` já lista exatamente quais (`sync: false`), mas os
+      valores em si (JWT secret novo, credenciais de SMTP/WhatsApp/Amadeus)
+      só você pode gerar/fornecer.
+- [ ] `price_polling_worker.py` rodando no agendamento configurado, com pelo
+      menos uma execução real verificada via `/admin` (heartbeat visível) —
+      depende do deploy acontecer de verdade.
 - [ ] Domínio próprio apontado (mesmo que um subdomínio), HTTPS ativo.
-- [ ] Lista de convidados definida — "poucos usuários" precisa de um
-      mecanismo de convite/allowlist, que hoje não existe (registro é
-      aberto) — decisão de produto simples a tomar antes do deploy, não
-      depois.
+- [ ] **Lista de convidados / allowlist — ainda sem decisão.** Hoje o
+      registro (`POST /api/v1/auth/register`) é aberto para qualquer um; um
+      "beta privado com poucos usuários" normalmente implica algum tipo de
+      controle de quem entra. Isso não foi implementado ainda porque é uma
+      decisão de produto, não técnica — ver §9, pergunta 3.
 - [ ] Confirmação de que o `CORS_ALLOW_ORIGINS` de produção aponta pro
-      domínio real do frontend, não `localhost`.
+      domínio real do frontend (Vercel), não `localhost` — campo já existe
+      no `render.yaml` como `sync: false`, só falta o valor real.
 
-## 7. Próximo passo
+## 7. Limitação desta sessão: build do Docker não pôde ser validado
 
-Este documento é recomendação, não execução — nenhuma conta foi criada,
-nenhum recurso foi provisionado. Confirmar a escolha de plataforma (Render +
-Vercel, ou outra) antes de eu prosseguir com a configuração de deploy
-(Dockerfile/build config, variáveis de ambiente documentadas, checklist de
-migração) — provisionar credenciais de verdade e colocar algo no ar é uma
-ação que vale confirmar explicitamente antes de agir, mesmo sendo um beta
-pequeno.
+Tentei validar o `Dockerfile` com um build real (`docker build`) antes de
+recomendar o `render.yaml` — o daemon Docker está disponível neste ambiente,
+mas o pull da imagem base (`python:3.11-slim`) foi bloqueado pela política de
+rede da sessão (`403` da política de egress ao tentar alcançar o registry do
+Docker Hub, não um erro transitório — conferido em
+`http://127.0.0.1:42145/__agentproxy/status`). Não tentei contornar isso.
+
+Isso não bloqueia o deploy: o **build de verdade vai acontecer do lado da
+Render**, que não tem essa restrição. A mudança no Dockerfile foi mínima e de
+baixo risco (uma linha, `COPY workers ./workers`, para o cron job conseguir
+rodar `price_polling_worker.py` a partir da mesma imagem) — mas vale
+observar o primeiro build real no painel da Render (ou rodar `docker build`
+localmente na sua máquina, se preferir validar antes) antes de considerar o
+deploy 100% liso.
+
+## 8. Configuração já pronta no repositório
+
+- **`render.yaml`** (raiz do repo) — Blueprint completo: banco Postgres,
+  web service da API (com `preDeployCommand: alembic upgrade head` — migração
+  roda em todo deploy, automaticamente, nunca à mão), e o cron job do worker
+  (agendado de hora em hora por padrão, ajustável). Cada secret está marcado
+  `sync: false` com um comentário explicando o que preencher.
+- **`apps/api/Dockerfile`** — corrigido para incluir `workers/` (faltava;
+  sem isso o cron job não teria o script pra rodar).
+- **`apps/api/.env.example`** — completo: 11 variáveis que já existiam em
+  `shared/config.py` desde a Fase 6 (timeouts, retries, circuit breaker,
+  cache TTL da Amadeus) não estavam documentadas aqui; adicionadas com os
+  mesmos defaults do código.
+- **`apps/web/.env.example`** (novo — não existia) — as duas variáveis que o
+  frontend de fato usa (`NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SITE_URL`).
+
+## 9. O que só você pode fazer a partir daqui
+
+1. **Criar as contas** — Render e Vercel, conectadas ao repositório GitHub.
+2. **Gerar/fornecer os secrets reais** — a lista exata está no `render.yaml`
+   (todo campo `sync: false`); o Render pede cada um no momento de aprovar o
+   Blueprint.
+3. **Decidir o mecanismo de allowlist** (DoD §6) — três opções, do mais simples
+   ao mais robusto: (a) nenhum controle técnico, só não divulgar a URL
+   amplamente; (b) uma senha/código de acesso compartilhado exigido no
+   registro; (c) convites individuais (token único por pessoa). Nenhuma foi
+   implementada — confirmar qual antes de eu construir alguma.
+4. **No Vercel**, configurar o projeto com *Root Directory* = `apps/web`
+   (é ajuste do painel do Vercel, não algo que um arquivo no repo resolva
+   sozinho, por ser um monorepo).
+5. **Confirmar a região** `ohio` no `render.yaml` — ou trocar por outra, se o
+   dashboard da Render oferecer algo com latência melhor pro Brasil no
+   momento do deploy.
+
+Depois dessas cinco coisas, o deploy é literalmente aprovar o Blueprint no
+painel da Render e importar o projeto no Vercel — a configuração para isso
+já está no repositório.

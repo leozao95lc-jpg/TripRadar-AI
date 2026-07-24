@@ -1,0 +1,113 @@
+# Blueprint do Render para o beta privado do TripRadar AI — ver docs/13-deploy-beta-privado.md.
+# Sintaxe verificada contra a referência oficial em julho de 2026
+# (https://render.com/docs/blueprint-spec). Isto NÃO foi implantado de verdade —
+# é configuração pronta para revisão. No dashboard da Render: New -> Blueprint,
+# apontar para este repositório, revisar o preview e preencher os campos
+# marcados `sync: false` com os valores reais antes de aprovar.
+#
+# `region` está como `ohio` (US East) por ser, entre as regiões oferecidas pela
+# Render, a de menor latência típica a partir do Brasil — confirmar no
+# dashboard se uma opção melhor existir no momento do deploy.
+
+databases:
+  - name: tripradar-db
+    databaseName: tripradar
+    user: tripradar
+    plan: basic-256mb
+    region: ohio
+
+services:
+  - type: web
+    name: tripradar-api
+    runtime: docker
+    rootDir: apps/api
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: starter
+    region: ohio
+    healthCheckPath: /health/ready
+    # Roda `alembic upgrade head` a cada deploy, antes do novo código receber
+    # tráfego — nunca à mão, nunca esquecido (ver o gap real que isso já
+    # pegou: apps/api/migrations/versions/0006_obs_analytics_flags.py).
+    preDeployCommand: alembic upgrade head
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tripradar-db
+          property: connectionString
+      - key: ENVIRONMENT
+        value: production
+      - key: LOG_LEVEL
+        value: INFO
+      # Gerar valores novos e únicos — nunca reaproveitar o default de dev.
+      - key: JWT_SECRET_KEY
+        sync: false
+      - key: SESSION_SECRET_KEY
+        sync: false
+      # Domínio real do frontend (Vercel), formato de lista JSON — ex.:
+      # ["https://beta.tripradar.ai"]. Sem isso, o frontend não consegue
+      # chamar a API (CORS).
+      - key: CORS_ALLOW_ORIGINS
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM_EMAIL
+        sync: false
+      - key: SMTP_USE_TLS
+        sync: false
+      # Só preencher se o canal WhatsApp for testado neste beta.
+      - key: WHATSAPP_CLOUD_API_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      # "mock" até a Decisão de negócio sobre o contrato real da Amadeus
+      # (docs/11-provider-integration-strategy.md) estar fechada — trocar
+      # pra "amadeus" só depois de AMADEUS_API_KEY/SECRET estarem preenchidos
+      # E de AMADEUS_MAX_REQUESTS_PER_MINUTE refletir o limite contratado.
+      - key: FLIGHT_PROVIDER
+        value: mock
+      - key: AMADEUS_API_KEY
+        sync: false
+      - key: AMADEUS_API_SECRET
+        sync: false
+      # Vazio = cache cai pra memória (ver modules/providers/infrastructure/
+      # resilience.py) — suficiente com uma única instância, que é o caso
+      # aqui. Preencher só se/quando adicionar Redis (ver docs/13 §5).
+      - key: REDIS_URL
+        value: ""
+
+  - type: cron
+    name: tripradar-price-polling-worker
+    runtime: docker
+    rootDir: apps/api
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: python workers/price_polling_worker.py
+    # A cada hora — ponto de partida razoável pra um beta com poucos alertas
+    # ativos; revisar junto com AMADEUS_MAX_REQUESTS_PER_MINUTE se o volume
+    # de alertas crescer (ver docs/11-provider-integration-strategy.md §2).
+    schedule: "0 * * * *"
+    region: ohio
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tripradar-db
+          property: connectionString
+      - key: ENVIRONMENT
+        value: production
+      - key: LOG_LEVEL
+        value: INFO
+      - key: FLIGHT_PROVIDER
+        value: mock
+      - key: AMADEUS_API_KEY
+        sync: false
+      - key: AMADEUS_API_SECRET
+        sync: false
+      - key: REDIS_URL
+        value: ""
