@@ -10,6 +10,7 @@ from modules.alerts.infrastructure import models as alerts_models  # noqa: F401
 from modules.identity.infrastructure import models as identity_models  # noqa: F401
 from modules.notifications.infrastructure import models as notifications_models  # noqa: F401
 from modules.price_monitoring.infrastructure import models as price_monitoring_models  # noqa: F401
+from modules.recommendations.infrastructure import models as recommendations_models  # noqa: F401
 from shared.config import settings
 from shared.database import Base
 

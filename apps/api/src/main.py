@@ -11,6 +11,7 @@ from modules.identity.interface.routes import me_router as identity_me_router
 from modules.identity.interface.routes import router as identity_router
 from modules.notifications.interface.routes import router as notifications_router
 from modules.price_monitoring.interface.routes import router as price_monitoring_router
+from modules.recommendations.interface.routes import router as recommendations_router
 from shared.config import settings
 from shared.logging import configure_logging, get_logger
 from shared.middleware import RequestContextMiddleware
@@ -49,6 +50,7 @@ app.include_router(identity_oauth_router)
 app.include_router(price_monitoring_router)
 app.include_router(alerts_router)
 app.include_router(notifications_router)
+app.include_router(recommendations_router)
 
 
 @app.get("/health", tags=["ops"])
