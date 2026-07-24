@@ -26,3 +26,7 @@ out/
 
 # Logs
 *.log
+
+# Frontend
+apps/web/.next/
+apps/web/out/
