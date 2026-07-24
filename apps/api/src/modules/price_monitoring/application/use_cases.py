@@ -4,7 +4,7 @@ from datetime import date, timedelta
 from modules.price_monitoring.application.ports import PriceSnapshotRepository
 from modules.price_monitoring.domain.entities import PriceSnapshot
 from modules.providers.application.ports import FlightSearchProvider
-from shared.events import DomainEvent, event_bus
+from shared.events import DomainEvent
 
 PRICE_SNAPSHOT_COLLECTED = "price_snapshot_collected"
 
@@ -21,9 +21,10 @@ class RouteQuery:
 
 class PollRoutePrice:
     """Caso de uso central do motor de monitoramento: busca o preço atual de uma rota no
-    provedor configurado e persiste um snapshot. Publica `price_snapshot_collected` para
-    que outros módulos (recommendations, alerts) reajam sem acoplamento direto — é essa
-    publicação de evento, não uma chamada direta, que conecta o motor ao resto do sistema.
+    provedor configurado e persiste um snapshot. Acumula `price_snapshot_collected` em
+    `pending_events` para que outros módulos (recommendations, alerts) reajam sem
+    acoplamento direto — é o composition root que despacha esses eventos (com a mesma
+    sessão/transação), não o caso de uso.
 
     Roda tanto a partir da API (uso administrativo) quanto de um worker standalone
     (`workers/price_polling_worker.py`), sem nenhuma dependência de FastAPI ou HTTP.
@@ -32,8 +33,10 @@ class PollRoutePrice:
     def __init__(self, provider: FlightSearchProvider, snapshots: PriceSnapshotRepository) -> None:
         self._provider = provider
         self._snapshots = snapshots
+        self.pending_events: list[DomainEvent] = []
 
     def execute(self, query: RouteQuery, source_provider: str) -> list[PriceSnapshot]:
+        self.pending_events = []
         offers = self._provider.search(
             origin_iata=query.origin_iata,
             destination_iata=query.destination_iata,
@@ -58,10 +61,11 @@ class PollRoutePrice:
             )
             self._snapshots.add(snapshot)
             saved.append(snapshot)
-            event_bus.publish(
+            self.pending_events.append(
                 DomainEvent(
                     name=PRICE_SNAPSHOT_COLLECTED,
                     payload={
+                        "price_snapshot_id": str(snapshot.id),
                         "origin_iata": snapshot.origin_iata,
                         "destination_iata": snapshot.destination_iata,
                         "departure_date": snapshot.departure_date,

@@ -1,14 +1,16 @@
-from modules.price_monitoring.application.use_cases import GetPriceHistory, PollRoutePrice, RouteQuery
+from modules.price_monitoring.application.use_cases import (
+    PRICE_SNAPSHOT_COLLECTED,
+    GetPriceHistory,
+    PollRoutePrice,
+    RouteQuery,
+)
 from modules.price_monitoring.infrastructure.repository import InMemoryPriceSnapshotRepository
 from modules.providers.infrastructure.mock_provider import MockFlightProvider
-from shared.events import event_bus
 
 
-def test_poll_route_price_persists_snapshot_and_publishes_event():
+def test_poll_route_price_persists_snapshot_and_records_pending_event():
     repo = InMemoryPriceSnapshotRepository()
     poll = PollRoutePrice(MockFlightProvider(), repo)
-    received = []
-    event_bus.subscribe("price_snapshot_collected", lambda event: received.append(event))
 
     query = RouteQuery("FLN", "MAD", "2026-11-10", "2026-11-24", "economy")
     snapshots = poll.execute(query, source_provider="mock")
@@ -16,8 +18,20 @@ def test_poll_route_price_persists_snapshot_and_publishes_event():
     assert len(snapshots) == 1
     assert snapshots[0].price_cents > 0
     assert snapshots[0].currency == "BRL"
-    assert len(received) == 1
-    assert received[0].payload["origin_iata"] == "FLN"
+    assert len(poll.pending_events) == 1
+    assert poll.pending_events[0].name == PRICE_SNAPSHOT_COLLECTED
+    assert poll.pending_events[0].payload["origin_iata"] == "FLN"
+
+
+def test_poll_route_price_resets_pending_events_on_each_call():
+    repo = InMemoryPriceSnapshotRepository()
+    poll = PollRoutePrice(MockFlightProvider(), repo)
+
+    poll.execute(RouteQuery("FLN", "MAD", "2026-11-10", "2026-11-24", "economy"), source_provider="mock")
+    poll.execute(RouteQuery("GRU", "LIS", "2026-10-05", "2026-10-19", "economy"), source_provider="mock")
+
+    assert len(poll.pending_events) == 1
+    assert poll.pending_events[0].payload["origin_iata"] == "GRU"
 
 
 def test_get_price_history_filters_by_route_and_cabin_class():

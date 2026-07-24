@@ -3,12 +3,15 @@ from uuid import UUID
 
 from modules.identity.application.ports import UserRepository
 from modules.identity.domain.entities import User
+from shared.events import DomainEvent
 from shared.security import (
     create_access_token,
     create_refresh_token,
     hash_password,
     verify_password,
 )
+
+USER_REGISTERED = "user_registered"
 
 
 class EmailAlreadyRegisteredError(Exception):
@@ -31,17 +34,24 @@ class AuthTokens:
 
 
 class RegisterUser:
-    """Caso de uso: cria uma conta nova por e-mail/senha. Levanta erro de domínio se o e-mail já existe."""
+    """Caso de uso: cria uma conta nova por e-mail/senha. Levanta erro de domínio se o
+    e-mail já existe. Não publica eventos diretamente — acumula em `pending_events`;
+    quem chama (composition root) decide quando e com qual sessão despachá-los."""
 
     def __init__(self, users: UserRepository) -> None:
         self._users = users
+        self.pending_events: list[DomainEvent] = []
 
     def execute(self, email: str, password: str, full_name: str) -> User:
+        self.pending_events = []
         email = email.strip().lower()
         if self._users.get_by_email(email) is not None:
             raise EmailAlreadyRegisteredError(email)
         user = User(email=email, password_hash=hash_password(password), full_name=full_name)
         self._users.add(user)
+        self.pending_events.append(
+            DomainEvent(name=USER_REGISTERED, payload={"user_id": str(user.id), "email": user.email})
+        )
         return user
 
 

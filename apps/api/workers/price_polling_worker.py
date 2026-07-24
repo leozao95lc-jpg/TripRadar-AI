@@ -3,12 +3,12 @@
 Uso:
     PYTHONPATH=src python workers/price_polling_worker.py
 
-Hoje itera sobre uma lista fixa de rotas de referência (`SEED_ROUTES`). Quando o módulo
-`alerts` existir (Fase 3), este loop passa a consultar as rotas distintas dos alertas
-ativos no banco — sem qualquer mudança no motor de monitoramento em si
-(`PollRoutePrice`, em `modules/price_monitoring/application/use_cases.py`). É exatamente
-esse desacoplamento entre "o que monitorar" e "como monitorar" que evita um refactor
-quando o produto evolui.
+Poll-a as rotas distintas dos alertas ativos no banco (módulo `alerts`); se não houver
+nenhum alerta ainda (banco novo), cai de volta em `SEED_ROUTES` só para o motor ter
+o que monitorar. O motor de monitoramento em si (`PollRoutePrice`, em
+`modules/price_monitoring/application/use_cases.py`) não muda quando a origem das
+rotas muda — é exatamente esse desacoplamento entre "o que monitorar" e "como
+monitorar" que evita um refactor quando o produto evolui.
 
 Em produção, este script é o entry point de um job agendado (AWS EventBridge -> ECS
 Task / Lambda), não de um processo de longa duração.
@@ -21,19 +21,22 @@ _SRC_DIR = Path(__file__).resolve().parent.parent / "src"
 if str(_SRC_DIR) not in sys.path:
     sys.path.insert(0, str(_SRC_DIR))
 
+from bootstrap import register_event_handlers  # noqa: E402
+from modules.alerts.infrastructure.repository import SqlAlchemyAlertRepository  # noqa: E402
 from modules.price_monitoring.application.use_cases import PollRoutePrice, RouteQuery  # noqa: E402
 from modules.price_monitoring.infrastructure.repository import (  # noqa: E402
     SqlAlchemyPriceSnapshotRepository,
 )
 from modules.providers.infrastructure.mock_provider import MockFlightProvider  # noqa: E402
 from shared.config import settings  # noqa: E402
-from shared.database import SessionLocal  # noqa: E402
+from shared.database import session_scope  # noqa: E402
+from shared.events import event_bus  # noqa: E402
 from shared.logging import configure_logging, get_logger  # noqa: E402
 
 configure_logging(settings.environment, settings.log_level)
 logger = get_logger(__name__)
 
-# Rotas populares Brasil <-> exterior usadas como semente até o módulo `alerts` existir.
+# Rotas populares Brasil <-> exterior usadas como semente até existir algum alerta ativo.
 SEED_ROUTES: list[RouteQuery] = [
     RouteQuery("FLN", "MAD", "2026-11-10", "2026-11-24", "economy"),
     RouteQuery("GRU", "LIS", "2026-10-05", "2026-10-19", "economy"),
@@ -51,12 +54,29 @@ def build_provider():
     return MockFlightProvider()
 
 
+def _load_routes(db) -> list[RouteQuery]:
+    active_alerts = SqlAlchemyAlertRepository(db).list_distinct_active_routes()
+    if not active_alerts:
+        return SEED_ROUTES
+    return [
+        RouteQuery(
+            origin_iata=alert.origin_iata,
+            destination_iata=alert.destination_iata,
+            departure_date=alert.departure_date,
+            return_date=alert.return_date,
+            cabin_class=alert.cabin_class.value,
+        )
+        for alert in active_alerts
+    ]
+
+
 def run() -> None:
+    register_event_handlers()
     provider = build_provider()
-    db = SessionLocal()
-    try:
+    with session_scope() as db:
+        routes = _load_routes(db)
         use_case = PollRoutePrice(provider, SqlAlchemyPriceSnapshotRepository(db))
-        for route in SEED_ROUTES:
+        for route in routes:
             snapshots = use_case.execute(route, source_provider=settings.flight_provider)
             for snapshot in snapshots:
                 logger.info(
@@ -65,13 +85,8 @@ def run() -> None:
                     price_cents=snapshot.price_cents,
                     currency=snapshot.currency,
                 )
-        db.commit()
-        logger.info("price_polling_run_completed", routes_polled=len(SEED_ROUTES))
-    except Exception:
-        db.rollback()
-        raise
-    finally:
-        db.close()
+            event_bus.dispatch(use_case.pending_events, db)
+        logger.info("price_polling_run_completed", routes_polled=len(routes))
 
 
 if __name__ == "__main__":

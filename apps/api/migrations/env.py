@@ -6,7 +6,9 @@ from sqlalchemy import engine_from_config, pool
 # Importar os models de cada módulo registra as tabelas em Base.metadata.
 # Ao adicionar um novo módulo com tabelas próprias, basta importar seu `models`
 # aqui — nenhuma outra mudança de configuração é necessária.
+from modules.alerts.infrastructure import models as alerts_models  # noqa: F401
 from modules.identity.infrastructure import models as identity_models  # noqa: F401
+from modules.notifications.infrastructure import models as notifications_models  # noqa: F401
 from modules.price_monitoring.infrastructure import models as price_monitoring_models  # noqa: F401
 from shared.config import settings
 from shared.database import Base

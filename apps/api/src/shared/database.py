@@ -1,5 +1,6 @@
 import uuid
 from collections.abc import Generator
+from contextlib import contextmanager
 
 from sqlalchemy import create_engine
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
@@ -45,7 +46,15 @@ engine = create_engine(settings.database_url, pool_pre_ping=True, future=True)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
 
 
-def get_db() -> Generator[Session, None, None]:
+@contextmanager
+def session_scope() -> Generator[Session, None, None]:
+    """Uma única transação por unidade de trabalho (uma requisição HTTP via `get_db`,
+    ou o `run()` de um worker). O chamador passa essa mesma sessão explicitamente para
+    `event_bus.dispatch(eventos, session)` — a cadeia de eventos de domínio disparada
+    por essa unidade de trabalho participa da MESMA transação (tudo comita ou tudo
+    reverte junto), sem estado ambiente (contextvars/threadlocals) e sem o risco de
+    duas conexões concorrentes disputarem a mesma transação ainda aberta (ver
+    docs/03-arquitetura.md, seção 4.2)."""
     db = SessionLocal()
     try:
         yield db
@@ -55,3 +64,8 @@ def get_db() -> Generator[Session, None, None]:
         raise
     finally:
         db.close()
+
+
+def get_db() -> Generator[Session, None, None]:
+    with session_scope() as db:
+        yield db

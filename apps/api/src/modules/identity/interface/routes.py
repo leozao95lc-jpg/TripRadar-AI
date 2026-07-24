@@ -17,6 +17,7 @@ from modules.identity.interface.schemas import (
     UserProfileResponse,
 )
 from shared.database import get_db
+from shared.events import event_bus
 
 router = APIRouter(prefix="/api/v1/auth", tags=["identity"])
 me_router = APIRouter(prefix="/api/v1/me", tags=["identity"])
@@ -29,6 +30,7 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)) -> UserPro
         user = use_case.execute(payload.email, payload.password, payload.full_name)
     except EmailAlreadyRegisteredError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered") from exc
+    event_bus.dispatch(use_case.pending_events, db)
     return UserProfileResponse(
         id=user.id, email=user.email, full_name=user.full_name, locale=user.locale,
         role=user.role.value, plan=user.plan.value, mfa_enabled=user.mfa_enabled,

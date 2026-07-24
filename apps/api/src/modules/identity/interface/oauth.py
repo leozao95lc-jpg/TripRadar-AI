@@ -9,6 +9,7 @@ from modules.identity.infrastructure.repository import (
 )
 from shared.config import settings
 from shared.database import get_db
+from shared.events import DomainEvent, event_bus
 from shared.security import create_access_token, create_refresh_token
 
 router = APIRouter(prefix="/api/v1/auth/oauth", tags=["identity"])
@@ -57,6 +58,10 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
         if user is None:
             user = User(email=email, password_hash=None, full_name=userinfo.get("name", email))
             user_repo.add(user)
+            event_bus.dispatch(
+                [DomainEvent(name="user_registered", payload={"user_id": str(user.id), "email": user.email})],
+                db,
+            )
         oauth_repo.add(OAuthAccount(user_id=user.id, provider="google", provider_user_id=provider_user_id))
 
     return {

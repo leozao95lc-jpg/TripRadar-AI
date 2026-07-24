@@ -4,8 +4,23 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
+import bootstrap
 from main import app
 from shared.database import Base, get_db
+from shared.events import event_bus
+
+
+@pytest.fixture(autouse=True)
+def _isolated_event_bus():
+    # `event_bus` e `bootstrap._registered` são singletons de processo. Sem isso, o
+    # primeiro teste que sobe a API (lifespan -> register_event_handlers) deixaria
+    # handlers de produção registrados para sempre, e testes de unidade que publicam
+    # eventos diretamente (sem TestClient) tentariam abrir sessão no Postgres real.
+    event_bus._handlers.clear()
+    bootstrap._registered = False
+    yield
+    event_bus._handlers.clear()
+    bootstrap._registered = False
 
 
 @pytest.fixture()
