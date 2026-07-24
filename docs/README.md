@@ -16,6 +16,7 @@ riscos e o desenho técnico; só então construir.
 8. [Estrutura de pastas do projeto](07-estrutura-projeto.md)
 9. [Revisão estratégica — diferenciação para a América Latina](08-revisao-estrategica-latam.md)
 10. [Revisão técnica do backend (Fases 1–4)](09-revisao-tecnica-backend.md)
+11. [Verificação — achados de Alta prioridade resolvidos](10-verificacao-correcoes-alta-prioridade.md)
 
 ## Como ler isso
 

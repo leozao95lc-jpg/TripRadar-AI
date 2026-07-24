@@ -4,6 +4,13 @@
 > como está no branch, não como pretendia ficar. Cada achado foi verificado no código
 > (arquivo/função citados), não é uma impressão geral. Nenhum código foi alterado —
 > isto é só o relatório, conforme pedido.
+>
+> **Atualização:** os 5 achados marcados como prioridade (Alta #1, #2, #3, #6 e
+> Média #14) foram corrigidos — ver
+> [`10-verificacao-correcoes-alta-prioridade.md`](10-verificacao-correcoes-alta-prioridade.md)
+> para evidência de cada correção. Os demais achados abaixo (Alta #4, #5, #7 e todos
+> os de Média/Baixa) continuam em aberto; este documento não foi reescrito, é o
+> registro histórico do estado encontrado.
 
 ## Resumo executivo
 
