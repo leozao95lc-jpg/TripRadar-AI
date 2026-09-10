@@ -550,7 +550,7 @@ button{ font-family:inherit; }
           </div>
           <span class="task-status" id="status-banco">Pendente</span>
         </header>
-        <p class="task-note">Avaliar a possibilidade de abrir conta no <strong>Bradesco</strong> com o passaporte — ainda é uma hipótese, não algo garantido.</p>
+        <p class="task-note">Avaliar a possibilidade de abrir conta no <strong>Bradesco</strong> com o passaporte — ainda é uma hipótese, não algo garantido. A própria advogada recomenda conta espanhola para comprovar os meios econômicos do visto, já que o pedido será feito em território espanhol.</p>
         <div class="progress-track"><div class="progress-fill" id="progress-banco"></div></div>
         <ul class="check-list" id="list-banco"></ul>
         <div class="callout callout-warn">⚠️ Confirmar previamente com o banco quais documentos são aceitos para abertura de conta por estrangeiro.</div>
@@ -565,7 +565,7 @@ button{ font-family:inherit; }
           </div>
           <span class="task-status" id="status-docs">Pendente</span>
         </header>
-        <p class="task-note">Progresso combinado de todas as categorias de documentos do visto e da instalação.</p>
+        <p class="task-note">Progresso combinado da lista oficial da advogada (titular + acompanhante).</p>
         <div class="progress-track"><div class="progress-fill" id="progress-docs"></div></div>
         <a class="task-link" href="#documentos">Ver checklist completa de documentos ↓</a>
       </article>
@@ -579,7 +579,7 @@ button{ font-family:inherit; }
           </div>
           <span class="task-status" id="status-exame">Pendente</span>
         </header>
-        <p class="task-note">Data confirmada: <strong>01/10</strong> (<span id="wd-1001b"></span>), período da <strong>tarde</strong>. Objetivo: realizar o exame exigido para o visto de estudos e obter o certificado correto para o processo.</p>
+        <p class="task-note">Data confirmada: <strong>01/10</strong> (<span id="wd-1001b"></span>), período da <strong>tarde</strong>. É esse exame que gera o "certificado médico de não padecer doenças contagiosas" pedido na lista oficial de documentos (item 10 do titular).</p>
         <div class="progress-track"><div class="progress-fill" id="progress-exame"></div></div>
         <ul class="check-list" id="list-exame"></ul>
       </article>
@@ -610,7 +610,7 @@ button{ font-family:inherit; }
         <p class="task-note">Curso: <strong>Gestión Empresarial</strong>, início em <strong>07/12</strong>. Prazo informado para dar entrada: <strong>07/10</strong>. Meta real: protocolar bem antes disso — nunca depois — para não colocar o início do curso em risco.</p>
         <div class="progress-track"><div class="progress-fill" id="progress-visto"></div></div>
         <ul class="check-list" id="list-visto"></ul>
-        <div class="callout callout-info">Documentos e exigências ainda não confirmadas oficialmente não foram inventadas aqui — o que não está confirmado aparece marcado na seção de Documentos.</div>
+        <div class="callout callout-info">📋 Lista de documentos confirmada pela advogada Bruna Albuquerque (Abogacía Internacional) — ver checklist completa na seção Documentos.</div>
       </article>
 
       <article class="task-card" id="card-turismo" data-priority="pode-esperar">
@@ -649,29 +649,31 @@ button{ font-family:inherit; }
   <section id="documentos" class="section">
     <div class="section-head">
       <h2>📄 Documentação</h2>
-      <p class="section-sub">Checklist para revisar antes do protocolo do visto. Itens marcados com <span class="tag-confirm">CONFIRMAR</span> ainda não têm exigência confirmada — validar antes de assumir que são necessários.</p>
+      <p class="section-sub">Lista oficial enviada pela advogada <strong>Bruna Albuquerque</strong> (Abogacía Internacional) para o processo de estância por estudos. Itens com <span class="tag-confirm">SE EXIGIDO</span> dependem da exigência específica do curso/consulado — a própria advogada marcou como condicionais.</p>
     </div>
+
+    <div class="callout callout-warn" style="margin-bottom:20px;">⏳ <strong>Apostilamento vem antes da tradução juramentada</strong> — nessa ordem, sempre. Documentos apostilados no Brasil (antecedentes criminais, certidão de casamento) levam tempo; considerar resolver isso <strong>antes de viajar</strong>, se ainda der, porque a janela até 07/10 é curta para as duas etapas em sequência.</div>
+
     <div class="docs-grid">
       <div class="docs-group">
-        <h3>🪪 Identificação</h3>
-        <ul class="check-list" id="list-docs-ident"></ul>
+        <h3>🧑 Titular — Léo</h3>
+        <ul class="check-list" id="list-docs-titular"></ul>
       </div>
       <div class="docs-group">
-        <h3>🎓 Curso e financeiro</h3>
-        <ul class="check-list" id="list-docs-prof"></ul>
+        <h3>👩 Acompanhante — Celly</h3>
+        <ul class="check-list" id="list-docs-familiar"></ul>
       </div>
-      <div class="docs-group">
-        <h3>👥 Pessoal</h3>
-        <ul class="check-list" id="list-docs-pessoal"></ul>
-      </div>
-      <div class="docs-group">
-        <h3>🩺 Médica</h3>
-        <ul class="check-list" id="list-docs-medica"></ul>
-      </div>
-      <div class="docs-group">
-        <h3>🗂️ Do processo</h3>
-        <ul class="check-list" id="list-docs-processo"></ul>
-      </div>
+    </div>
+
+    <div class="callout callout-info" style="margin-top:20px;">
+      <strong>📌 Observações da advogada</strong>
+      <ul style="margin:8px 0 0; padding-left:1.1em;">
+        <li>Antecedentes criminais só são exigidos de maiores de idade.</li>
+        <li>Passaporte com validade mínima de 1 ano recomendada no momento da solicitação.</li>
+        <li>O apostilamento deve ser feito <strong>antes</strong> da tradução juramentada.</li>
+        <li>Se o pedido for feito em território espanhol, recomenda-se abrir <strong>conta bancária espanhola</strong> para comprovar os meios econômicos — é exatamente o que está na tarefa "Abrir conta bancária" acima.</li>
+        <li>Dependendo do curso, da situação pessoal ou de exigências da Administração, pode ser pedida documentação complementar durante a tramitação.</li>
+      </ul>
     </div>
   </section>
 
@@ -938,37 +940,28 @@ button{ font-family:inherit; }
       {k:'visto.formulario', t:'01–04/10 — preparar formulário e conferir taxas', c:true},
       {k:'visto.protocolo', t:'Preparar e protocolar o pedido, idealmente antes de 07/10'}
     ],
-    docsIdent: [
-      {k:'docs.ident.passaporte', t:'Passaporte'},
-      {k:'docs.ident.copias', t:'Cópias do passaporte'},
-      {k:'docs.ident.nie', t:'NIE, se já disponível'},
-      {k:'docs.ident.outros', t:'Outros documentos de identificação', c:true}
+    /* Lista oficial da advogada Bruna Albuquerque (Abogacía Internacional) —
+       "DOCUMENTOS PARA Estancia por estudos ESPANHA". Itens com c:true e
+       cLabel:'SE EXIGIDO' são condicionais no documento original dela,
+       não uma suposição nossa. */
+    docsTitular: [
+      {k:'docs.titular.passaporte', t:'Passaporte completo (com folhas em branco, capa e contracapa)'},
+      {k:'docs.titular.extrato', t:'Extrato bancário + certificado de titularidade, comprovando os requisitos econômicos (tradução juramentada se não for em espanhol)'},
+      {k:'docs.titular.seguro', t:'Seguro médico privado espanhol — sem carências, sem copagamentos, com repatriação e cobertura equivalente ao sistema público'},
+      {k:'docs.titular.antecedentes', t:'Antecedentes criminais (Brasil + países onde morou nos últimos 5 anos) — apostilados e traduzidos'},
+      {k:'docs.titular.matricula', t:'Matrícula ou documento equivalente de aceitação no curso'},
+      {k:'docs.titular.pagamento', t:'Justificante de pagamento da matrícula/curso completo'},
+      {k:'docs.titular.historico', t:'Histórico escolar/universitário completo, com firma reconhecida, apostilado e traduzido', c:true, cLabel:'SE EXIGIDO'},
+      {k:'docs.titular.homologacao', t:'Justificante de homologação/reconhecimento de diploma (ou diploma já homologado)', c:true, cLabel:'SE EXIGIDO'},
+      {k:'docs.titular.moradia', t:'Comprovação de moradia/endereço (contrato de arrendamento, reserva do Airbnb ou equivalente)'},
+      {k:'docs.titular.certmedico', t:'Certificado médico de não padecer doenças contagiosas (sai do exame de 01/10)'},
+      {k:'docs.titular.entrada', t:'Comprovação de entrada na Espanha (declaração na polícia / passagens aéreas)'}
     ],
-    docsProf: [
-      {k:'docs.prof.matricula', t:'Comprovante de matrícula / carta de aceite — Gestión Empresarial'},
-      {k:'docs.prof.iniciocurso', t:'Comprovante da data de início do curso (07/12)'},
-      {k:'docs.prof.renda', t:'Comprovantes de renda / meios de subsistência', c:true},
-      {k:'docs.prof.bancarios', t:'Comprovantes bancários', c:true},
-      {k:'docs.prof.outros', t:'Outros documentos exigidos pela instituição/consulado', c:true}
-    ],
-    docsPessoal: [
-      {k:'docs.pessoal.casamento', t:'Certidão de casamento'},
-      {k:'docs.pessoal.marcelly', t:'Documentos da Marcelly', c:true},
-      {k:'docs.pessoal.outros', t:'Outros documentos pessoais', c:true}
-    ],
-    docsMedica: [
-      {k:'docs.medica.exame', t:'Exame médico'},
-      {k:'docs.medica.certificado', t:'Certificado médico'},
-      {k:'docs.medica.outros', t:'Outros documentos solicitados', c:true}
-    ],
-    docsProcesso: [
-      {k:'docs.processo.formulario', t:'Formulário', c:true},
-      {k:'docs.processo.taxa', t:'Taxa', c:true},
-      {k:'docs.processo.fotos', t:'Fotografias, se necessárias', c:true},
-      {k:'docs.processo.copias', t:'Cópias'},
-      {k:'docs.processo.apostilamentos', t:'Apostilamentos', c:true},
-      {k:'docs.processo.traducoes', t:'Traduções juramentadas', c:true},
-      {k:'docs.processo.protocolo', t:'Comprovante de protocolo'}
+    docsFamiliar: [
+      {k:'docs.familiar.passaporte', t:'Passaporte completo (com folhas em branco, capa e contracapa)'},
+      {k:'docs.familiar.antecedentes', t:'Antecedentes criminais (Brasil + últimos 5 anos) — apostilados e traduzidos'},
+      {k:'docs.familiar.vinculo', t:'Certidão de casamento (vínculo familiar) — apostilada e traduzida'},
+      {k:'docs.familiar.seguro', t:'Seguro médico privado espanhol — mesmas condições do titular'}
     ],
     turismo: [
       {k:'turismo.pesquisar', t:'Pesquisar pontos turísticos de Valencia'},
@@ -995,10 +988,7 @@ button{ font-family:inherit; }
     ]
   };
 
-  var DOCS_ALL = [].concat(
-    CHECKLISTS.docsIdent, CHECKLISTS.docsProf, CHECKLISTS.docsPessoal,
-    CHECKLISTS.docsMedica, CHECKLISTS.docsProcesso
-  );
+  var DOCS_ALL = [].concat(CHECKLISTS.docsTitular, CHECKLISTS.docsFamiliar);
 
   var PROGRESS_TARGETS = [
     {bar:'progress-chip', status:'status-chip', items:CHECKLISTS.chip, card:'card-chip', resolvedKey:'chip.resolvido'},
@@ -1044,7 +1034,7 @@ button{ font-family:inherit; }
       if(item.c){
         var tag = document.createElement('span');
         tag.className = 'tag-confirm';
-        tag.textContent = 'CONFIRMAR';
+        tag.textContent = item.cLabel || 'CONFIRMAR';
         label.appendChild(tag);
       }
       li.appendChild(label);
@@ -1432,11 +1422,8 @@ button{ font-family:inherit; }
     renderChecklist('list-moradia', CHECKLISTS.moradiaMissao);
     renderChecklist('list-visto', CHECKLISTS.visto);
     renderChecklist('list-turismo', CHECKLISTS.turismo);
-    renderChecklist('list-docs-ident', CHECKLISTS.docsIdent);
-    renderChecklist('list-docs-prof', CHECKLISTS.docsProf);
-    renderChecklist('list-docs-pessoal', CHECKLISTS.docsPessoal);
-    renderChecklist('list-docs-medica', CHECKLISTS.docsMedica);
-    renderChecklist('list-docs-processo', CHECKLISTS.docsProcesso);
+    renderChecklist('list-docs-titular', CHECKLISTS.docsTitular);
+    renderChecklist('list-docs-familiar', CHECKLISTS.docsFamiliar);
     renderChecklist('list-semana', CHECKLISTS.semanaGeral);
 
     bindChipResolvido();
