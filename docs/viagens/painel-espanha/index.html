@@ -138,6 +138,47 @@ button{ font-family:inherit; }
 .stat-label{ font-size:.74rem; letter-spacing:.03em; text-transform:uppercase; color:var(--ink-faint); font-weight:700; margin-top:4px; }
 .stat-value{ font-family:'JetBrains Mono',monospace; font-size:1.15rem; font-weight:700; color:var(--ink); }
 .stat-note{ font-size:.78rem; color:var(--ink-soft); }
+.stat-input{
+  font-family:'JetBrains Mono',monospace; font-size:1.1rem; font-weight:700; color:var(--ink);
+  border:1px solid var(--line-strong); border-radius:var(--radius-sm); padding:5px 8px; background:var(--surface-2);
+  width:100%; text-align:left;
+}
+.stat-input:focus{ outline:2px solid var(--blue); outline-offset:1px; }
+.stat-sync-link{
+  border:none; background:transparent; padding:0; margin-top:5px; font-size:.72rem; color:var(--blue); font-weight:700;
+  cursor:pointer; text-align:left; font-family:inherit;
+}
+.stat-sync-link:hover{ text-decoration:underline; }
+
+/* =========================================================
+   HOJE — cockpit no topo
+   ========================================================= */
+.hoje-panel{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg); padding:20px 24px;
+  box-shadow:var(--shadow-sm); margin-top:24px; display:flex; flex-wrap:wrap; align-items:center; gap:18px 32px;
+}
+.hoje-date{ display:flex; flex-direction:column; gap:2px; }
+.hoje-label{ font-family:'JetBrains Mono',monospace; font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:var(--red); font-weight:700; }
+.hoje-value{ font-family:'Fraunces',serif; font-size:1.25rem; font-weight:600; }
+.hoje-countdowns{ display:flex; flex-wrap:wrap; gap:12px 26px; font-size:.9rem; color:var(--ink-soft); }
+.hoje-countdowns strong{ font-family:'JetBrains Mono',monospace; color:var(--ink); }
+
+.next-actions{ margin-top:16px; }
+.next-actions h3{ font-size:1rem; font-weight:600; margin-bottom:10px; }
+.next-actions ol{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; counter-reset:na; }
+.next-actions li{ counter-increment:na; display:flex; align-items:baseline; gap:10px; font-size:.92rem; }
+.next-actions li::before{ content:counter(na) '.'; font-family:'JetBrains Mono',monospace; color:var(--ink-faint); font-weight:700; min-width:1.2em; }
+.next-actions a{ color:var(--ink); text-decoration:none; font-weight:600; }
+.next-actions a:hover{ color:var(--red); text-decoration:underline; }
+
+/* =========================================================
+   DIVISOR DE FASE (Antes de ir / Na Espanha)
+   ========================================================= */
+.phase-divider{ text-align:center; margin:36px 0; }
+.phase-divider span{
+  display:inline-flex; align-items:center; gap:8px; background:var(--ink); color:#fff;
+  padding:9px 22px; border-radius:999px; font-family:'Fraunces',serif; font-weight:600; font-size:.95rem;
+}
 
 /* =========================================================
    SECTIONS (shared)
@@ -302,7 +343,16 @@ button{ font-family:inherit; }
 }
 .expense-table td{ padding:10px 14px; font-size:.88rem; border-bottom:1px solid var(--line); color:var(--ink-soft); }
 .expense-table td.num{ font-weight:700; color:var(--ink); }
+.expense-table td.pos{ color:var(--green); }
+.expense-table td.neg{ color:var(--red); }
 .expense-table tr:last-child td{ border-bottom:none; }
+.expense-table tfoot td{ border-top:2px solid var(--line-strong); border-bottom:none; padding-top:12px; }
+.expense-table td.editable-cell{ padding:6px 10px; }
+.expense-table .budget-planejado-input{
+  width:100px; text-align:right; font-family:'JetBrains Mono',monospace; font-size:.86rem; font-weight:700;
+  padding:6px 8px; border-radius:6px; border:1px solid var(--line-strong); background:var(--blue-soft); color:var(--ink);
+}
+.expense-table .budget-planejado-input:focus{ outline:none; border-color:var(--blue); }
 .cat-chip{ background:var(--blue-soft); color:var(--blue); border-radius:999px; padding:2px 9px; font-size:.76rem; font-weight:700; }
 #expense-empty{ padding:18px; margin:0; }
 .expense-summary{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-top:14px; }
@@ -357,6 +407,7 @@ button{ font-family:inherit; }
     </div>
   </div>
   <nav class="pill-nav" aria-label="Navegação do painel">
+    <a href="#antes-de-ir">Antes de ir</a>
     <a href="#cronograma">Cronograma</a>
     <a href="#tarefas">Tarefas</a>
     <a href="#compras">Compras</a>
@@ -382,6 +433,23 @@ button{ font-family:inherit; }
     <p class="eyebrow">Léo &amp; Celly · Setembro–Outubro 2026</p>
     <h1>Nova vida na Espanha</h1>
     <p class="hero-sub">Painel de acompanhamento da chegada: cronograma, tarefas, documentos, moradia e o prazo do visto — tudo em um só lugar, editável e salvo automaticamente neste navegador.</p>
+
+    <div class="hoje-panel">
+      <div class="hoje-date">
+        <span class="hoje-label">📍 Hoje</span>
+        <span class="hoje-value" id="hoje-data">--</span>
+      </div>
+      <div class="hoje-countdowns">
+        <span>✈️ <strong class="js-countdown-saida">--</strong> dias para sair do Brasil</span>
+        <span>🏠 <strong class="js-countdown-days">--</strong> dias para terminar o Airbnb</span>
+        <span>🎓 <strong class="js-countdown-curso">--</strong> dias para começar o curso</span>
+      </div>
+    </div>
+
+    <div class="next-actions">
+      <h3>Próximas ações</h3>
+      <ol id="next-actions-list"></ol>
+    </div>
 
     <div class="dashboard-grid">
       <div class="stat-card">
@@ -435,6 +503,47 @@ button{ font-family:inherit; }
       </div>
     </div>
   </section>
+
+  <!-- =======================================================
+       ANTES DE IR — janela até 26/09, antes da saída de casa
+       ======================================================= -->
+  <section id="antes-de-ir" class="section">
+    <div class="section-head">
+      <h2>🇧🇷 Antes de ir <span style="font-weight:400;font-size:.7em;color:var(--ink-faint);">— até 26/09</span></h2>
+      <p class="section-sub">Faltam <strong class="js-countdown-saida">--</strong> dias para sair de casa. A prioridade real desse período é a <a href="#documentos">documentação do visto</a> (<strong id="antes-docs-status">--</strong> concluído) — o resto abaixo é o que falta organizar até lá.</p>
+    </div>
+
+    <div class="task-grid">
+      <article class="task-card" id="card-viagem" data-priority="urgente">
+        <header class="task-head">
+          <span class="task-icon">✈️</span>
+          <div class="task-titles">
+            <h3>Preparar a viagem</h3>
+            <span class="priority-badge badge-urgente">🔴 Urgente</span>
+          </div>
+          <span class="task-status" id="status-viagem">Pendente</span>
+        </header>
+        <div class="progress-track"><div class="progress-fill" id="progress-viagem"></div></div>
+        <ul class="check-list check-list--grid" id="list-viagem"></ul>
+      </article>
+
+      <article class="task-card" id="card-espanha-prep" data-priority="importante">
+        <header class="task-head">
+          <span class="task-icon">🏠</span>
+          <div class="task-titles">
+            <h3>Preparar a chegada na Espanha</h3>
+            <span class="priority-badge badge-importante">🟠 Importante</span>
+          </div>
+          <span class="task-status" id="status-espanha-prep">Pendente</span>
+        </header>
+        <p class="task-note">Confirmações que dá pra fechar ainda no Brasil, antes de precisar decidir tudo em cima da hora em Madrid.</p>
+        <div class="progress-track"><div class="progress-fill" id="progress-espanha-prep"></div></div>
+        <ul class="check-list" id="list-espanha-prep"></ul>
+      </article>
+    </div>
+  </section>
+
+  <div class="phase-divider"><span>🇪🇸 Na Espanha — a partir de 27/09</span></div>
 
   <!-- =======================================================
        CRONOGRAMA PRINCIPAL
@@ -734,12 +843,51 @@ button{ font-family:inherit; }
        ======================================================= -->
   <section id="orcamento" class="section">
     <div class="section-head">
-      <h2>💶 Orçamento dos primeiros dias</h2>
-      <p class="section-sub">Registro rápido dos gastos do dia a dia. Valores em euros por padrão — ajuste manualmente se algum lançamento for em reais.</p>
+      <h2>💶 Orçamento da chegada</h2>
+      <p class="section-sub">Planejado vs. realizado por categoria — não é só um diário de gastos, é o controle do orçamento de curto prazo.</p>
     </div>
 
     <div class="callout callout-info" style="margin-bottom:18px;">
-      📊 Isso aqui é só o registro do dia a dia. Para o modelo financeiro completo — 16 meses (set/26–dez/27), meios econômicos do visto e o cartão de crédito do Brasil, tudo editável — veja o <a href="financeiro/index.html" style="font-weight:700;">Painel Financeiro ↗</a>.
+      📊 Isso aqui é o orçamento de curto prazo (chegada + primeiros dias). Para o modelo de 16 meses (visto, moradia, cartão Brasil), veja o <a href="financeiro/index.html" style="font-weight:700;">Painel Financeiro ↗</a>.
+    </div>
+
+    <div class="dashboard-grid" style="margin-bottom:20px;">
+      <div class="stat-card">
+        <span class="stat-icon">💰</span>
+        <span class="stat-label">Orçamento disponível</span>
+        <input type="text" inputmode="decimal" id="orc-disponivel-input" class="stat-input">
+        <button type="button" id="orc-sync-btn" class="stat-sync-link">🔄 sincronizar do Painel Financeiro</button>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">🧾</span>
+        <span class="stat-label">Gasto realizado</span>
+        <span class="stat-value" id="orc-realizado">€ 0,00</span>
+      </div>
+      <div class="stat-card" id="orc-saldo-card">
+        <span class="stat-icon">⚖️</span>
+        <span class="stat-label">Saldo</span>
+        <span class="stat-value" id="orc-saldo">€ 0,00</span>
+      </div>
+    </div>
+
+    <div class="table-scroll" style="margin-bottom:28px;">
+      <table class="expense-table" id="budget-table">
+        <thead><tr><th>Categoria</th><th>Planejado</th><th>Realizado</th><th>Saldo</th></tr></thead>
+        <tbody id="budget-cat-tbody"></tbody>
+        <tfoot>
+          <tr>
+            <td><strong>Total</strong></td>
+            <td class="num" id="budget-total-planejado">€ 0,00</td>
+            <td class="num" id="budget-total-realizado">€ 0,00</td>
+            <td class="num" id="budget-total-saldo">€ 0,00</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="subsection-head">
+      <h3>Registro de gastos</h3>
+      <p class="section-sub">O detalhe por trás dos números acima — cada lançamento soma na categoria certa.</p>
     </div>
 
     <form id="expense-form" class="inline-form">
@@ -773,11 +921,6 @@ button{ font-family:inherit; }
       </table>
       <p class="empty-state" id="expense-empty">Nenhum gasto registrado ainda.</p>
     </div>
-
-    <div class="expense-summary">
-      <div class="expense-total">Total gasto: <strong id="expense-total">€ 0,00</strong></div>
-      <div class="expense-by-category" id="expense-by-category"></div>
-    </div>
   </section>
 
   <!-- =======================================================
@@ -809,7 +952,7 @@ button{ font-family:inherit; }
   var STORAGE_KEY = 'espanhaPlannerState_v1';
 
   function defaultState(){
-    return { checks:{}, properties:[], expenses:[], places:{} };
+    return { checks:{}, properties:[], expenses:[], places:{}, orcamento:{ disponivel:null, planejado:{} } };
   }
 
   function loadState(){
@@ -818,11 +961,16 @@ button{ font-family:inherit; }
       if(!raw) return defaultState();
       var parsed = JSON.parse(raw);
       var base = defaultState();
+      var orc = (parsed.orcamento && typeof parsed.orcamento === 'object') ? parsed.orcamento : base.orcamento;
       return {
         checks: parsed.checks || base.checks,
         properties: Array.isArray(parsed.properties) ? parsed.properties : base.properties,
         expenses: Array.isArray(parsed.expenses) ? parsed.expenses : base.expenses,
-        places: parsed.places || base.places
+        places: parsed.places || base.places,
+        orcamento: {
+          disponivel: (typeof orc.disponivel === 'number' && !isNaN(orc.disponivel)) ? orc.disponivel : null,
+          planejado: (orc.planejado && typeof orc.planejado === 'object') ? orc.planejado : {}
+        }
       };
     }catch(e){
       console.warn('Não foi possível ler os dados salvos, iniciando do zero.', e);
@@ -869,6 +1017,22 @@ button{ font-family:inherit; }
     if(!el) return;
     var date = new Date(y, m - 1, d);
     el.textContent = date.toLocaleDateString('pt-BR', { weekday:'long' });
+  }
+
+  function fmtNumBR(v, decimals){ return Number(v).toLocaleString('pt-BR', { minimumFractionDigits:decimals, maximumFractionDigits:decimals }); }
+
+  function parseNumBR(str){
+    if(str == null) return NaN;
+    str = String(str).trim();
+    if(str === '') return NaN;
+    str = str.replace(/[^\d,.\-]/g, '');
+    if(str.indexOf(',') > -1){ str = str.replace(/\./g, '').replace(',', '.'); }
+    var v = parseFloat(str);
+    return isNaN(v) ? NaN : v;
+  }
+
+  function truncate(str, max){
+    return str.length > max ? str.slice(0, max - 1).replace(/\s+$/, '') + '…' : str;
   }
 
   /* =========================================================
@@ -972,6 +1136,23 @@ button{ font-family:inherit; }
       {k:'turismo.passeio', t:'Definir um passeio para o primeiro fim de semana livre'},
       {k:'turismo.sempressa', t:'Aproveitar sem pressa — isso pode esperar'}
     ],
+    viagemPrep: [
+      {k:'viagem.checkin', t:'Fazer check-in dos voos'},
+      {k:'viagem.malas', t:'Organizar as malas'},
+      {k:'viagem.impressos', t:'Imprimir documentos essenciais'},
+      {k:'viagem.digitais', t:'Guardar cópias digitais dos documentos'},
+      {k:'viagem.cartoes', t:'Separar cartões (débito/crédito internacional)'},
+      {k:'viagem.dinheiro', t:'Levar dinheiro em espécie (euros)'},
+      {k:'viagem.wise', t:'Conferir conta/cartão Wise'},
+      {k:'viagem.seguro', t:'Confirmar seguro viagem/saúde'},
+      {k:'viagem.reservas', t:'Conferir reservas (Airbnb, trem, voos)'}
+    ],
+    espanhaPrep: [
+      {k:'espanha.airbnb', t:'Confirmar a reserva do Airbnb'},
+      {k:'espanha.endereco', t:'Anotar o endereço exato do Airbnb'},
+      {k:'espanha.trem', t:'Definir/comprar a passagem do trem Madrid → Valencia'},
+      {k:'espanha.transporteAlfafar', t:'Decidir o transporte da estação até Alfafar'}
+    ],
     semanaGeral: [
       {k:'semana.chegar', t:'Chegar em Valencia'},
       {k:'semana.checkin', t:'Fazer check-in'},
@@ -1001,8 +1182,56 @@ button{ font-family:inherit; }
     {bar:'progress-exame', status:'status-exame', items:CHECKLISTS.exame, card:'card-exame'},
     {bar:'progress-moradia', status:'status-moradia', items:CHECKLISTS.moradiaMissao, card:'card-moradia'},
     {bar:'progress-visto', status:'status-visto', items:CHECKLISTS.visto, card:'card-visto'},
-    {bar:'progress-turismo', status:'status-turismo', items:CHECKLISTS.turismo, card:'card-turismo'}
+    {bar:'progress-turismo', status:'status-turismo', items:CHECKLISTS.turismo, card:'card-turismo'},
+    {bar:'progress-viagem', status:'status-viagem', items:CHECKLISTS.viagemPrep, card:'card-viagem'},
+    {bar:'progress-espanha-prep', status:'status-espanha-prep', items:CHECKLISTS.espanhaPrep, card:'card-espanha-prep'}
   ];
+
+  var BUDGET_CATEGORIES = ['Transporte','Alimentação','Mercado','Chip','Documentação','Exame médico','Moradia','Outros'];
+
+  /* =========================================================
+     PRÓXIMAS AÇÕES — o próximo item não marcado de cada frente,
+     em ordem de prioridade. Nada digitado à mão aqui: é sempre
+     derivado do estado real das checklists, então nunca fica
+     desatualizado em relação ao resto do painel.
+     ========================================================= */
+  var NEXT_ACTIONS_SOURCES = [
+    { items:CHECKLISTS.viagemPrep, priority:'urgente', anchor:'#antes-de-ir' },
+    { items:DOCS_ALL, priority:'urgente', anchor:'#documentos' },
+    { items:CHECKLISTS.exame, priority:'urgente', anchor:'#card-exame' },
+    { items:CHECKLISTS.espanhaPrep, priority:'urgente', anchor:'#antes-de-ir' },
+    { items:CHECKLISTS.moradiaMissao, priority:'urgente', anchor:'#moradia' },
+    { items:CHECKLISTS.visto, priority:'urgente', anchor:'#card-visto' },
+    { items:CHECKLISTS.chip, priority:'importante', anchor:'#card-chip', resolvedKey:'chip.resolvido' },
+    { items:CHECKLISTS.banco, priority:'importante', anchor:'#card-banco' },
+    { items:CHECKLISTS.turismo, priority:'pode-esperar', anchor:'#card-turismo' }
+  ];
+
+  function computeNextActions(limit){
+    var priorityWeight = { urgente:0, importante:1, 'pode-esperar':2 };
+    var candidates = [];
+    NEXT_ACTIONS_SOURCES.forEach(function(src){
+      if(src.resolvedKey && state.checks[src.resolvedKey]) return;
+      var next = src.items.find(function(i){ return !state.checks[i.k]; });
+      if(next) candidates.push({ text:next.t, priority:src.priority, anchor:src.anchor });
+    });
+    candidates.sort(function(a, b){ return priorityWeight[a.priority] - priorityWeight[b.priority]; });
+    return candidates.slice(0, limit || 5);
+  }
+
+  function renderNextActions(){
+    var list = document.getElementById('next-actions-list');
+    if(!list) return;
+    var actions = computeNextActions(6);
+    if(actions.length === 0){
+      list.innerHTML = '<li class="empty-state">Tudo em dia — nada pendente nas prioridades no momento.</li>';
+      return;
+    }
+    var dot = { urgente:'🔴', importante:'🟠', 'pode-esperar':'🟢' };
+    list.innerHTML = actions.map(function(a){
+      return '<li><a href="' + a.anchor + '">' + dot[a.priority] + ' ' + escapeHtml(truncate(a.text, 74)) + '</a></li>';
+    }).join('');
+  }
 
   /* =========================================================
      CHECKLISTS — renderização genérica
@@ -1076,6 +1305,7 @@ button{ font-family:inherit; }
     if(semanaCount) semanaCount.textContent = semana.done + ' de ' + semana.total + ' concluídos';
 
     applyFilter(currentFilter);
+    renderNextActions();
   }
 
   /* =========================================================
@@ -1110,6 +1340,33 @@ button{ font-family:inherit; }
     var semana = progressOf(CHECKLISTS.semanaGeral);
     var dashSemana = document.getElementById('dash-progresso-semana');
     if(dashSemana) dashSemana.textContent = semana.pct + '%';
+
+    var docsProg = progressOf(DOCS_ALL);
+    var antesDocsStatus = document.getElementById('antes-docs-status');
+    if(antesDocsStatus) antesDocsStatus.textContent = docsProg.done + '/' + docsProg.total;
+  }
+
+  /* =========================================================
+     HOJE — data de hoje por extenso, calculada ao vivo
+     ========================================================= */
+  function updateHojeDate(){
+    var el = document.getElementById('hoje-data');
+    if(!el) return;
+    var now = new Date();
+    var text = now.toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    el.textContent = text.charAt(0).toUpperCase() + text.slice(1);
+  }
+
+  /* =========================================================
+     CONTAGEM REGRESSIVA — até 27/09/2026, saída de casa
+     ========================================================= */
+  function updateSaidaCountdown(){
+    var target = new Date(2026, 8, 27); // mês em JS é 0-indexado: 8 = setembro
+    var now = new Date();
+    var todayMid = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    var diffDays = Math.round((target - todayMid) / 86400000);
+    var text = diffDays > 0 ? String(diffDays) : (diffDays === 0 ? 'Hoje' : 'Já saiu');
+    document.querySelectorAll('.js-countdown-saida').forEach(function(el){ el.textContent = text; });
   }
 
   /* =========================================================
@@ -1155,7 +1412,7 @@ button{ font-family:inherit; }
   }
 
   function applyFilter(filter){
-    var cards = document.querySelectorAll('.task-card');
+    var cards = document.querySelectorAll('#tarefas .task-card');
     cards.forEach(function(card){
       var priority = card.dataset.priority;
       var progress = Number(card.dataset.progress || 0);
@@ -1166,7 +1423,7 @@ button{ font-family:inherit; }
       else if(filter === 'concluido') show = progress === 100;
       card.hidden = !show;
     });
-    var visibleCount = document.querySelectorAll('.task-card:not([hidden])').length;
+    var visibleCount = document.querySelectorAll('#tarefas .task-card:not([hidden])').length;
     var emptyMsg = document.getElementById('filter-empty');
     if(emptyMsg) emptyMsg.hidden = visibleCount > 0;
   }
@@ -1274,7 +1531,7 @@ button{ font-family:inherit; }
   }
 
   /* =========================================================
-     ORÇAMENTO
+     ORÇAMENTO — registro de gastos (detalhe)
      ========================================================= */
   function renderExpenses(){
     var tbody = document.getElementById('expense-tbody');
@@ -1307,22 +1564,113 @@ button{ font-family:inherit; }
       });
     }
 
-    var total = state.expenses.reduce(function(sum, e){ return sum + Number(e.valor || 0); }, 0);
-    var totalEl = document.getElementById('expense-total');
-    if(totalEl) totalEl.textContent = '€ ' + total.toFixed(2).replace('.', ',');
+    renderOrcamentoResumo();
+  }
+
+  /* =========================================================
+     ORÇAMENTO — resumo planejado x realizado (o controle de verdade)
+     ========================================================= */
+  function syncOrcamentoFromFinanceiro(){
+    try{
+      var raw = localStorage.getItem('espanhaFinanceiroState_v2');
+      if(!raw) return null;
+      var parsed = JSON.parse(raw);
+      if(!parsed.params || !parsed.params.cambio) return null;
+      var v = parsed.params.capitalReais / parsed.params.cambio;
+      return isFinite(v) ? v : null;
+    }catch(e){ return null; }
+  }
+
+  function ensureOrcamentoDisponivel(){
+    if(state.orcamento.disponivel == null){
+      var synced = syncOrcamentoFromFinanceiro();
+      state.orcamento.disponivel = synced != null ? synced : 13068.36;
+      saveState();
+    }
+  }
+
+  function renderOrcamentoResumo(){
+    var totalRealizado = state.expenses.reduce(function(s, e){ return s + Number(e.valor || 0); }, 0);
+    var disponivel = state.orcamento.disponivel || 0;
+    var saldo = disponivel - totalRealizado;
+
+    var dispInput = document.getElementById('orc-disponivel-input');
+    if(dispInput && document.activeElement !== dispInput) dispInput.value = fmtNumBR(disponivel, 2);
+
+    var realizadoEl = document.getElementById('orc-realizado');
+    if(realizadoEl) realizadoEl.textContent = '€ ' + fmtNumBR(totalRealizado, 2);
+
+    var saldoEl = document.getElementById('orc-saldo');
+    var saldoCard = document.getElementById('orc-saldo-card');
+    if(saldoEl) saldoEl.textContent = '€ ' + fmtNumBR(saldo, 2);
+    if(saldoCard) saldoCard.className = 'stat-card' + (saldo < 0 ? ' stat-card--accent' : '');
 
     var byCat = {};
-    state.expenses.forEach(function(e){
-      byCat[e.categoria] = (byCat[e.categoria] || 0) + Number(e.valor || 0);
-    });
-    var catWrap = document.getElementById('expense-by-category');
-    if(catWrap){
-      catWrap.innerHTML = '';
-      Object.keys(byCat).sort(function(a, b){ return byCat[b] - byCat[a]; }).forEach(function(cat){
-        var chip = document.createElement('span');
-        chip.className = 'cat-total-chip';
-        chip.textContent = cat + ': € ' + byCat[cat].toFixed(2).replace('.', ',');
-        catWrap.appendChild(chip);
+    state.expenses.forEach(function(e){ byCat[e.categoria] = (byCat[e.categoria] || 0) + Number(e.valor || 0); });
+
+    var tbody = document.getElementById('budget-cat-tbody');
+    if(tbody){
+      var totalPlanejado = 0;
+      tbody.innerHTML = BUDGET_CATEGORIES.map(function(cat){
+        var planejado = state.orcamento.planejado[cat] || 0;
+        var realizado = byCat[cat] || 0;
+        totalPlanejado += planejado;
+        var catSaldo = planejado - realizado;
+        var inputId = 'budget-planejado-' + slug(cat);
+        var isFocused = document.activeElement && document.activeElement.id === inputId;
+        return '<tr>' +
+          '<td>' + escapeHtml(cat) + '</td>' +
+          '<td class="editable-cell"><input type="text" inputmode="decimal" class="budget-planejado-input" id="' + inputId + '" data-cat="' + escapeHtml(cat) + '"' + (isFocused ? '' : ' value="' + fmtNumBR(planejado, 2) + '"') + '></td>' +
+          '<td class="num">€ ' + fmtNumBR(realizado, 2) + '</td>' +
+          '<td class="num ' + (catSaldo >= 0 ? 'pos' : 'neg') + '">€ ' + fmtNumBR(catSaldo, 2) + '</td>' +
+          '</tr>';
+      }).join('');
+
+      var totalPlanejadoEl = document.getElementById('budget-total-planejado');
+      if(totalPlanejadoEl) totalPlanejadoEl.textContent = '€ ' + fmtNumBR(totalPlanejado, 2);
+      var totalRealizadoEl = document.getElementById('budget-total-realizado');
+      if(totalRealizadoEl) totalRealizadoEl.textContent = '€ ' + fmtNumBR(totalRealizado, 2);
+      var totalSaldoEl = document.getElementById('budget-total-saldo');
+      if(totalSaldoEl) totalSaldoEl.textContent = '€ ' + fmtNumBR(totalPlanejado - totalRealizado, 2);
+    }
+  }
+
+  function initBudgetFields(){
+    var dispInput = document.getElementById('orc-disponivel-input');
+    if(dispInput){
+      dispInput.addEventListener('input', function(){
+        var v = parseNumBR(dispInput.value);
+        state.orcamento.disponivel = isNaN(v) ? 0 : v;
+        saveState();
+        renderOrcamentoResumo();
+      });
+      dispInput.addEventListener('blur', function(){ dispInput.value = fmtNumBR(state.orcamento.disponivel || 0, 2); });
+    }
+
+    var syncBtn = document.getElementById('orc-sync-btn');
+    if(syncBtn){
+      syncBtn.addEventListener('click', function(){
+        var v = syncOrcamentoFromFinanceiro();
+        if(v == null){
+          alert('Não encontrei dados do Painel Financeiro neste navegador. Abra o Painel Financeiro primeiro (no mesmo navegador) para sincronizar, ou informe o valor manualmente aqui.');
+          return;
+        }
+        state.orcamento.disponivel = v;
+        saveState();
+        renderOrcamentoResumo();
+      });
+    }
+
+    var tbody = document.getElementById('budget-cat-tbody');
+    if(tbody){
+      tbody.addEventListener('change', function(e){
+        var t = e.target;
+        if(!t.classList.contains('budget-planejado-input')) return;
+        var cat = t.dataset.cat;
+        var v = parseNumBR(t.value);
+        state.orcamento.planejado[cat] = isNaN(v) ? 0 : v;
+        saveState();
+        renderOrcamentoResumo();
       });
     }
   }
@@ -1428,19 +1776,25 @@ button{ font-family:inherit; }
     renderChecklist('list-turismo', CHECKLISTS.turismo);
     renderChecklist('list-docs-titular', CHECKLISTS.docsTitular);
     renderChecklist('list-docs-familiar', CHECKLISTS.docsFamiliar);
+    renderChecklist('list-viagem', CHECKLISTS.viagemPrep);
+    renderChecklist('list-espanha-prep', CHECKLISTS.espanhaPrep);
     renderChecklist('list-semana', CHECKLISTS.semanaGeral);
 
     bindChipResolvido();
     renderProperties();
     initPropertyForm();
+    ensureOrcamentoDisponivel();
     renderExpenses();
     initExpenseForm();
+    initBudgetFields();
     bindPlaces();
     initFilters();
     initFooterActions();
 
     renderProgressBars();
     renderDashboard();
+    updateHojeDate();
+    updateSaidaCountdown();
     updateCountdown();
     updateCourseCountdown();
   });
