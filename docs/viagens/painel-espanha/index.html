@@ -13,6 +13,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Karla:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <style>
 /* =========================================================
    TOKENS — paleta clara, inspirada na Espanha (vermelho/
@@ -80,6 +83,9 @@ button{ font-family:inherit; }
 }
 .brand{ display:flex; align-items:center; gap:8px; font-family:'Fraunces',serif; font-weight:600; font-size:1.15rem; }
 .autosave-note{ font-size:.72rem; color:var(--ink-faint); margin-left:6px; font-family:'JetBrains Mono',monospace; }
+.sync-status{ font-size:.72rem; color:var(--ink-faint); margin-left:6px; font-family:'JetBrains Mono',monospace; }
+.sync-status.is-synced{ color:var(--green); }
+.sync-status.is-offline{ color:var(--gold); }
 .topbar-actions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 .countdown-pill{
   font-family:'JetBrains Mono',monospace; font-size:.8rem; font-weight:700;
@@ -432,7 +438,7 @@ button{ font-family:inherit; }
      ========================================================= -->
 <header class="topbar">
   <div class="topbar-inner">
-    <div class="brand">🇪🇸 <span>Painel Espanha</span><span class="autosave-note">💾 salvo automaticamente</span></div>
+    <div class="brand">🇪🇸 <span>Painel Espanha</span><span class="autosave-note">💾 salvo automaticamente</span><span class="sync-status" id="sync-status">🔄 conectando…</span></div>
     <div class="topbar-actions">
       <span class="countdown-pill">🏠 <span class="js-countdown-days">--</span> dias até o fim do Airbnb</span>
       <button id="print-btn" class="btn btn-ghost" type="button">📋 Imprimir / Salvar em PDF</button>
@@ -1016,23 +1022,29 @@ button{ font-family:inherit; }
     return { checks:{}, properties:[], expenses:[], places:{}, orcamento:{ disponivel:null, planejado:{} } };
   }
 
+  /* Valida/preenche um objeto de estado cru (do localStorage OU da
+     nuvem) — mesma função serve pras duas origens. */
+  function normalizeState(parsed){
+    var base = defaultState();
+    if(!parsed || typeof parsed !== 'object') return base;
+    var orc = (parsed.orcamento && typeof parsed.orcamento === 'object') ? parsed.orcamento : base.orcamento;
+    return {
+      checks: (parsed.checks && typeof parsed.checks === 'object') ? parsed.checks : base.checks,
+      properties: Array.isArray(parsed.properties) ? parsed.properties : base.properties,
+      expenses: Array.isArray(parsed.expenses) ? parsed.expenses : base.expenses,
+      places: normalizePlaces(parsed.places || base.places),
+      orcamento: {
+        disponivel: (typeof orc.disponivel === 'number' && !isNaN(orc.disponivel)) ? orc.disponivel : null,
+        planejado: (orc.planejado && typeof orc.planejado === 'object') ? orc.planejado : {}
+      }
+    };
+  }
+
   function loadState(){
     try{
       var raw = localStorage.getItem(STORAGE_KEY);
       if(!raw) return defaultState();
-      var parsed = JSON.parse(raw);
-      var base = defaultState();
-      var orc = (parsed.orcamento && typeof parsed.orcamento === 'object') ? parsed.orcamento : base.orcamento;
-      return {
-        checks: parsed.checks || base.checks,
-        properties: Array.isArray(parsed.properties) ? parsed.properties : base.properties,
-        expenses: Array.isArray(parsed.expenses) ? parsed.expenses : base.expenses,
-        places: normalizePlaces(parsed.places || base.places),
-        orcamento: {
-          disponivel: (typeof orc.disponivel === 'number' && !isNaN(orc.disponivel)) ? orc.disponivel : null,
-          planejado: (orc.planejado && typeof orc.planejado === 'object') ? orc.planejado : {}
-        }
-      };
+      return normalizeState(JSON.parse(raw));
     }catch(e){
       console.warn('Não foi possível ler os dados salvos, iniciando do zero.', e);
       return defaultState();
@@ -1045,6 +1057,88 @@ button{ font-family:inherit; }
   function saveState(){
     try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
     catch(e){ console.warn('Não foi possível salvar os dados neste navegador.', e); }
+    pushStateToCloud();
+  }
+
+  /* =========================================================
+     SINCRONIZAÇÃO EM NUVEM (Firebase/Firestore) — o mesmo estado
+     em qualquer aparelho. O localStorage continua como cache
+     rápido e modo offline; a nuvem é quem concilia os aparelhos.
+     ========================================================= */
+  var FIREBASE_CONFIG = {
+    apiKey: "AIzaSyBoPJSy1I4U2YCmZAjul3ad398P0CBKOQo",
+    authDomain: "painel-espanha.firebaseapp.com",
+    projectId: "painel-espanha",
+    storageBucket: "painel-espanha.firebasestorage.app",
+    messagingSenderId: "808227600471",
+    appId: "1:808227600471:web:bc3ddc71b519d49b9ecb12"
+  };
+
+  var cloudReady = false;
+  var cloudDocRef = null;
+  var cloudPushTimer = null;
+  var suppressCloudPush = false; // true enquanto aplicamos um estado vindo da própria nuvem
+
+  function setSyncStatus(status){
+    var el = document.getElementById('sync-status');
+    if(!el) return;
+    el.className = 'sync-status' + (status === 'synced' ? ' is-synced' : status === 'offline' ? ' is-offline' : '');
+    el.textContent = status === 'synced' ? '☁️ sincronizado' : status === 'offline' ? '📴 sem nuvem (salvo só aqui)' : '🔄 conectando…';
+  }
+
+  function pushStateToCloud(){
+    if(!cloudReady || !cloudDocRef || suppressCloudPush) return;
+    clearTimeout(cloudPushTimer);
+    cloudPushTimer = setTimeout(function(){
+      cloudDocRef.set(state).catch(function(err){
+        console.warn('Não foi possível salvar na nuvem.', err);
+        setSyncStatus('offline');
+      });
+    }, 600);
+  }
+
+  function applyCloudState(data){
+    suppressCloudPush = true;
+    state = normalizeState(data);
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+    renderEverything();
+    suppressCloudPush = false;
+  }
+
+  function initCloudSync(){
+    if(typeof firebase === 'undefined'){ setSyncStatus('offline'); return; }
+    try{ firebase.initializeApp(FIREBASE_CONFIG); }
+    catch(e){ setSyncStatus('offline'); return; }
+
+    firebase.auth().onAuthStateChanged(function(user){
+      if(!user) return;
+      cloudDocRef = firebase.firestore().collection('app').doc('planner');
+      cloudDocRef.get().then(function(snap){
+        if(snap.exists){
+          applyCloudState(snap.data());
+        } else {
+          cloudDocRef.set(state).catch(function(){});
+        }
+        cloudReady = true;
+        setSyncStatus('synced');
+        cloudDocRef.onSnapshot(function(snap){
+          if(snap.metadata.hasPendingWrites) return;
+          if(snap.exists) applyCloudState(snap.data());
+          setSyncStatus('synced');
+        }, function(err){
+          console.warn('Erro de sincronização.', err);
+          setSyncStatus('offline');
+        });
+      }).catch(function(err){
+        console.warn('Erro ao ler dados da nuvem.', err);
+        setSyncStatus('offline');
+      });
+    });
+
+    firebase.auth().signInAnonymously().catch(function(err){
+      console.warn('Não foi possível entrar na nuvem — dados continuam salvos só neste navegador.', err);
+      setSyncStatus('offline');
+    });
   }
 
   /* =========================================================
@@ -1911,6 +2005,18 @@ button{ font-family:inherit; }
     });
   }
 
+  /* Só atualiza o valor exibido nos campos de local — sem religar
+     listeners. Usado quando o estado muda por sincronização remota,
+     nunca pula por cima de um campo que você está digitando agora. */
+  function refreshPlaceFieldValues(){
+    PLACE_FIELDS.concat(FREE_TEXT_PLACE_FIELDS).forEach(function(key){
+      var el = document.getElementById('place-' + key);
+      if(!el || document.activeElement === el) return;
+      var place = state.places[key] || {};
+      el.value = place.value || '';
+    });
+  }
+
   /* =========================================================
      MAPA — Leaflet + OpenStreetMap, marcadores com emoji
      ========================================================= */
@@ -2023,18 +2129,10 @@ button{ font-family:inherit; }
     }
   }
 
-  /* =========================================================
-     INICIALIZAÇÃO
-     ========================================================= */
-  document.addEventListener('DOMContentLoaded', function(){
-    setWeekday('wd-0927', 2026, 9, 27);
-    setWeekday('wd-0928', 2026, 9, 28);
-    setWeekday('wd-0929', 2026, 9, 29);
-    setWeekday('wd-0930', 2026, 9, 30);
-    setWeekday('wd-1001', 2026, 10, 1);
-    setWeekday('wd-1001b', 2026, 10, 1);
-    setWeekday('wd-1007', 2026, 10, 7);
-
+  /* Repinta tudo que depende do estado — chamada tanto no carregamento
+     inicial quanto sempre que um outro aparelho muda algo na nuvem.
+     Nunca religa listeners (isso é feito uma única vez nas funções bind/init). */
+  function renderEverything(){
     renderChecklist('list-mercado', CHECKLISTS.mercado);
     renderChecklist('list-chip', CHECKLISTS.chip);
     renderChecklist('list-banco', CHECKLISTS.banco);
@@ -2048,25 +2146,49 @@ button{ font-family:inherit; }
     renderChecklist('list-espanha-prep', CHECKLISTS.espanhaPrep);
     renderChecklist('list-semana', CHECKLISTS.semanaGeral);
 
-    bindChipResolvido();
+    var chipResolvidoEl = document.getElementById('chip-resolvido');
+    if(chipResolvidoEl) chipResolvidoEl.checked = !!state.checks['chip.resolvido'];
+
     renderProperties();
+    renderExpenses();
+    refreshPlaceFieldValues();
+    renderMapMarkers();
+
+    renderProgressBars();
+    renderDashboard();
+  }
+
+  /* =========================================================
+     INICIALIZAÇÃO
+     ========================================================= */
+  document.addEventListener('DOMContentLoaded', function(){
+    setWeekday('wd-0927', 2026, 9, 27);
+    setWeekday('wd-0928', 2026, 9, 28);
+    setWeekday('wd-0929', 2026, 9, 29);
+    setWeekday('wd-0930', 2026, 9, 30);
+    setWeekday('wd-1001', 2026, 10, 1);
+    setWeekday('wd-1001b', 2026, 10, 1);
+    setWeekday('wd-1007', 2026, 10, 7);
+
+    bindChipResolvido();
     initPropertyForm();
     ensureOrcamentoDisponivel();
-    renderExpenses();
     initExpenseForm();
     initBudgetFields();
     bindPlaces();
     initMap();
-    geocodeBacklog();
     initFilters();
     initFooterActions();
 
-    renderProgressBars();
-    renderDashboard();
+    renderEverything();
+
+    geocodeBacklog();
     updateHojeDate();
     updateSaidaCountdown();
     updateCountdown();
     updateCourseCountdown();
+
+    initCloudSync();
   });
 
 })();

@@ -11,6 +11,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Karla:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <style>
 /* Mesma paleta do painel de chegada, para consistência visual entre as duas páginas. */
 :root{
@@ -41,6 +44,9 @@ h1,h2,h3,h4{ font-family:'Fraunces', Georgia, serif; text-wrap:balance; margin:0
 .back-link{ display:inline-flex; align-items:center; gap:6px; text-decoration:none; color:var(--ink-soft); font-size:.85rem; font-weight:700; }
 .back-link:hover{ color:var(--red); }
 .brand{ display:flex; align-items:center; gap:8px; font-family:'Fraunces',serif; font-weight:600; font-size:1.1rem; }
+.sync-status{ font-size:.72rem; font-weight:400; color:var(--ink-faint); font-family:'JetBrains Mono',monospace; }
+.sync-status.is-synced{ color:var(--green); }
+.sync-status.is-offline{ color:var(--gold); }
 .topbar-actions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 
 /* Buttons */
@@ -171,7 +177,7 @@ footer.site-footer p{ color:var(--ink-faint); font-size:.8rem; margin-bottom:14p
 <header class="topbar">
   <div class="topbar-inner">
     <a class="back-link" href="../index.html">← Painel Espanha</a>
-    <div class="brand">💶 Financeiro — Léo &amp; Celly</div>
+    <div class="brand">💶 Financeiro — Léo &amp; Celly <span class="sync-status" id="sync-status">🔄 conectando…</span></div>
     <div class="topbar-actions">
       <button id="restore-btn" class="btn btn-ghost" type="button">🔄 Restaurar padrões</button>
       <button id="print-btn" class="btn btn-ghost" type="button">📋 Imprimir</button>
@@ -392,30 +398,120 @@ footer.site-footer p{ color:var(--ink-faint); font-size:.8rem; margin-bottom:14p
 
   function defaultState(){ return { params: defaultParams(), overrides: { fluxo:{}, cartao:{} } }; }
 
+  /* Valida/preenche um objeto de estado cru (do localStorage OU da
+     nuvem) — mesma função serve pras duas origens. */
+  function normalizeFinState(parsed){
+    var base = defaultState();
+    if(!parsed || typeof parsed !== 'object') return base;
+    if(parsed.params){
+      FIELD_IDS.forEach(function(k){ if(typeof parsed.params[k] === 'number' && !isNaN(parsed.params[k])) base.params[k] = parsed.params[k]; });
+    }
+    if(parsed.overrides){
+      if(parsed.overrides.fluxo && typeof parsed.overrides.fluxo === 'object') base.overrides.fluxo = parsed.overrides.fluxo;
+      if(parsed.overrides.cartao && typeof parsed.overrides.cartao === 'object') base.overrides.cartao = parsed.overrides.cartao;
+    }
+    return base;
+  }
+
   function loadState(){
     try{
       var raw = localStorage.getItem(STORAGE_KEY);
       if(!raw) return defaultState();
-      var parsed = JSON.parse(raw);
-      var base = defaultState();
-      if(parsed.params){
-        FIELD_IDS.forEach(function(k){ if(typeof parsed.params[k] === 'number' && !isNaN(parsed.params[k])) base.params[k] = parsed.params[k]; });
-      }
-      if(parsed.overrides){
-        if(parsed.overrides.fluxo && typeof parsed.overrides.fluxo === 'object') base.overrides.fluxo = parsed.overrides.fluxo;
-        if(parsed.overrides.cartao && typeof parsed.overrides.cartao === 'object') base.overrides.cartao = parsed.overrides.cartao;
-      }
-      return base;
+      return normalizeFinState(JSON.parse(raw));
     }catch(e){ return defaultState(); }
   }
 
   function saveState(){
     try{ localStorage.setItem(STORAGE_KEY, JSON.stringify({ params:params, overrides:overrides })); }catch(e){}
+    pushStateToCloud();
   }
 
   var state0 = loadState();
   var params = state0.params;
   var overrides = state0.overrides;
+
+  /* =========================================================
+     SINCRONIZAÇÃO EM NUVEM (Firebase/Firestore) — mesmo documento
+     que o Painel Espanha usa como app, doc separado ("financeiro").
+     ========================================================= */
+  var FIREBASE_CONFIG = {
+    apiKey: "AIzaSyBoPJSy1I4U2YCmZAjul3ad398P0CBKOQo",
+    authDomain: "painel-espanha.firebaseapp.com",
+    projectId: "painel-espanha",
+    storageBucket: "painel-espanha.firebasestorage.app",
+    messagingSenderId: "808227600471",
+    appId: "1:808227600471:web:bc3ddc71b519d49b9ecb12"
+  };
+
+  var cloudReady = false;
+  var cloudDocRef = null;
+  var cloudPushTimer = null;
+  var suppressCloudPush = false;
+
+  function setSyncStatus(status){
+    var el = document.getElementById('sync-status');
+    if(!el) return;
+    el.className = 'sync-status' + (status === 'synced' ? ' is-synced' : status === 'offline' ? ' is-offline' : '');
+    el.textContent = status === 'synced' ? '☁️ sincronizado' : status === 'offline' ? '📴 sem nuvem (salvo só aqui)' : '🔄 conectando…';
+  }
+
+  function pushStateToCloud(){
+    if(!cloudReady || !cloudDocRef || suppressCloudPush) return;
+    clearTimeout(cloudPushTimer);
+    cloudPushTimer = setTimeout(function(){
+      cloudDocRef.set({ params:params, overrides:overrides }).catch(function(err){
+        console.warn('Não foi possível salvar na nuvem.', err);
+        setSyncStatus('offline');
+      });
+    }, 600);
+  }
+
+  function applyCloudState(data){
+    suppressCloudPush = true;
+    var normalized = normalizeFinState(data);
+    params = normalized.params;
+    overrides = normalized.overrides;
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify({ params:params, overrides:overrides })); }catch(e){}
+    refreshFieldValues();
+    renderAll();
+    suppressCloudPush = false;
+  }
+
+  function initCloudSync(){
+    if(typeof firebase === 'undefined'){ setSyncStatus('offline'); return; }
+    try{ firebase.initializeApp(FIREBASE_CONFIG); }
+    catch(e){ setSyncStatus('offline'); return; }
+
+    firebase.auth().onAuthStateChanged(function(user){
+      if(!user) return;
+      cloudDocRef = firebase.firestore().collection('app').doc('financeiro');
+      cloudDocRef.get().then(function(snap){
+        if(snap.exists){
+          applyCloudState(snap.data());
+        } else {
+          cloudDocRef.set({ params:params, overrides:overrides }).catch(function(){});
+        }
+        cloudReady = true;
+        setSyncStatus('synced');
+        cloudDocRef.onSnapshot(function(snap){
+          if(snap.metadata.hasPendingWrites) return;
+          if(snap.exists) applyCloudState(snap.data());
+          setSyncStatus('synced');
+        }, function(err){
+          console.warn('Erro de sincronização.', err);
+          setSyncStatus('offline');
+        });
+      }).catch(function(err){
+        console.warn('Erro ao ler dados da nuvem.', err);
+        setSyncStatus('offline');
+      });
+    });
+
+    firebase.auth().signInAnonymously().catch(function(err){
+      console.warn('Não foi possível entrar na nuvem — dados continuam salvos só neste navegador.', err);
+      setSyncStatus('offline');
+    });
+  }
 
   /* =========================================================
      FORMATAÇÃO E LEITURA DE NÚMEROS — padrão brasileiro
@@ -537,6 +633,18 @@ footer.site-footer p{ color:var(--ink-faint); font-size:.8rem; margin-bottom:14p
       });
       el.addEventListener('blur', function(){ el.value = fmtNum(params[key], dec); });
       el.addEventListener('focus', function(){ el.select(); });
+    });
+  }
+
+  /* Só atualiza o valor exibido — sem religar listeners. Usado ao
+     restaurar padrões e quando o estado muda por sincronização remota,
+     nunca pula por cima de um campo que você está digitando agora. */
+  function refreshFieldValues(){
+    FIELD_IDS.forEach(function(key){
+      var el = document.getElementById('p-' + key);
+      if(!el || document.activeElement === el) return;
+      var dec = FIELD_DECIMALS[key] != null ? FIELD_DECIMALS[key] : 2;
+      el.value = fmtNum(params[key], dec);
     });
   }
 
@@ -825,7 +933,7 @@ footer.site-footer p{ color:var(--ink-faint); font-size:.8rem; margin-bottom:14p
         params = defaultParams();
         overrides = { fluxo:{}, cartao:{} };
         saveState();
-        bindFields();
+        refreshFieldValues();
         renderAll();
       }
     });
@@ -837,6 +945,7 @@ footer.site-footer p{ color:var(--ink-faint); font-size:.8rem; margin-bottom:14p
     initButtons();
     initTableEditing();
     renderAll();
+    initCloudSync();
   });
 })();
 </script>
