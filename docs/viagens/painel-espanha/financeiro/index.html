@@ -83,6 +83,11 @@ h1,h2,h3,h4{ font-family:'Fraunces', Georgia, serif; text-wrap:balance; margin:0
 .field-row input:focus{ outline:2px solid var(--blue); outline-offset:1px; }
 .field-unfilled{ background:var(--gold-soft) !important; border-color:var(--gold) !important; }
 .field-note{ font-size:.72rem; color:var(--ink-faint); }
+.calc-readout{
+  margin-top:10px; padding:10px 12px; background:var(--blue-soft); border-radius:var(--radius-sm);
+  font-family:'JetBrains Mono',monospace; font-size:.92rem; font-weight:700; color:#1c4258; text-align:right;
+}
+.calc-readout .r-label{ display:block; font-family:'Karla',sans-serif; font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.03em; color:#3d6478; margin-bottom:2px; text-align:left; }
 .fill-badge{
   font-family:'JetBrains Mono',monospace; font-size:.64rem; font-weight:700; background:var(--gold-soft); color:#6b4c12;
   border-radius:5px; padding:1px 6px; margin-left:6px; white-space:nowrap;
@@ -117,6 +122,21 @@ table.data-table tr:last-child td{ border-bottom:none; }
 table.data-table td.neg{ color:var(--red); }
 table.data-table td.pos{ color:var(--green); }
 table.data-table tr.row-event td{ background:var(--gold-soft); }
+table.data-table td.editable-cell{ padding:4px 6px; }
+table.data-table .cell-input{
+  width:92px; text-align:right; font-family:'JetBrains Mono',monospace; font-size:.82rem;
+  padding:5px 6px; border-radius:6px; border:1px solid transparent; background:transparent; color:var(--ink-soft);
+}
+table.data-table .cell-input:hover{ border-color:var(--line-strong); }
+table.data-table .cell-input:focus{ outline:none; border-color:var(--blue); background:var(--surface); color:var(--ink); }
+table.data-table .cell-input.is-override{ background:var(--blue-soft); border-color:var(--blue); color:var(--ink); font-weight:700; }
+table.data-table td.reset-cell{ text-align:center; padding:4px; }
+.row-reset-btn{ border:none; background:transparent; cursor:pointer; font-size:.9rem; color:var(--ink-faint); padding:4px 6px; border-radius:6px; line-height:1; }
+.row-reset-btn:hover{ color:var(--red); background:var(--red-soft); }
+.row-reset-btn:disabled{ opacity:.25; cursor:default; }
+.row-reset-btn:disabled:hover{ background:transparent; color:var(--ink-faint); }
+.table-note{ font-size:.78rem; color:var(--ink-faint); margin-top:10px; }
+.table-note .is-override-sample{ display:inline-block; width:26px; height:14px; background:var(--blue-soft); border:1px solid var(--blue); border-radius:4px; vertical-align:middle; margin:0 4px; }
 
 /* Diagnostics row */
 .diag-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:12px; margin-top:16px; }
@@ -187,55 +207,56 @@ footer.site-footer p{ color:var(--ink-faint); font-size:.8rem; margin-bottom:14p
       <div class="param-card">
         <h3>Câmbio &amp; capital</h3>
         <p class="param-hint">Base para converter o capital em reais para euros disponíveis.</p>
-        <div class="field-row"><label for="p-cambio">Câmbio EUR/BRL (R$ por €)</label><input type="number" id="p-cambio" step="0.01"></div>
-        <div class="field-row"><label for="p-capitalReais">Capital inicial (R$)</label><input type="number" id="p-capitalReais" step="100"></div>
+        <div class="field-row"><label for="p-cambio">Câmbio EUR/BRL (R$ por €)</label><input type="text" inputmode="decimal" id="p-cambio" step="0.01"></div>
+        <div class="field-row"><label for="p-capitalReais">Capital inicial (R$)</label><input type="text" inputmode="decimal" id="p-capitalReais" step="100"></div>
+        <div class="calc-readout"><span class="r-label">Dá em euros</span><span id="readout-capital-euros">€ 0,00</span></div>
       </div>
 
       <div class="param-card">
         <h3>Meios econômicos exigidos</h3>
         <p class="param-hint">Mínimo legal para a Extranjería (base IPREM).</p>
-        <div class="field-row"><label for="p-reqLeo">Léo — titular (€)</label><input type="number" id="p-reqLeo" step="10"></div>
-        <div class="field-row"><label for="p-reqMarcelly">Celly — acompanhante (€)</label><input type="number" id="p-reqMarcelly" step="10"></div>
+        <div class="field-row"><label for="p-reqLeo">Léo — titular (€)</label><input type="text" inputmode="decimal" id="p-reqLeo" step="10"></div>
+        <div class="field-row"><label for="p-reqMarcelly">Celly — acompanhante (€)</label><input type="text" inputmode="decimal" id="p-reqMarcelly" step="10"></div>
       </div>
 
       <div class="param-card">
         <h3>Custos mensais recorrentes (€)</h3>
         <p class="param-hint">Aplicados todo mês a partir de out/26 — set/26 conta só o seguro.</p>
-        <div class="field-row"><label for="p-aluguel">Aluguel (quarto/estúdio)</label><input type="number" id="p-aluguel" step="10"></div>
-        <div class="field-row"><label for="p-alimentacao">Alimentação (casal)</label><input type="number" id="p-alimentacao" step="10"></div>
-        <div class="field-row"><label for="p-transporte">Transporte</label><input type="number" id="p-transporte" step="5"></div>
-        <div class="field-row"><label for="p-outros">Outros (lazer, telefone, imprevistos)</label><input type="number" id="p-outros" step="10"></div>
-        <div class="field-row"><label for="p-seguroPessoa">Seguro saúde por pessoa</label><input type="number" id="p-seguroPessoa" step="0.01"></div>
-        <div class="field-row"><label for="p-numPessoas">Nº de pessoas</label><input type="number" id="p-numPessoas" step="1" min="1"></div>
+        <div class="field-row"><label for="p-aluguel">Aluguel (quarto/estúdio)</label><input type="text" inputmode="decimal" id="p-aluguel" step="10"></div>
+        <div class="field-row"><label for="p-alimentacao">Alimentação (casal)</label><input type="text" inputmode="decimal" id="p-alimentacao" step="10"></div>
+        <div class="field-row"><label for="p-transporte">Transporte</label><input type="text" inputmode="decimal" id="p-transporte" step="5"></div>
+        <div class="field-row"><label for="p-outros">Outros (lazer, telefone, imprevistos)</label><input type="text" inputmode="decimal" id="p-outros" step="10"></div>
+        <div class="field-row"><label for="p-seguroPessoa">Seguro saúde por pessoa</label><input type="text" inputmode="decimal" id="p-seguroPessoa" step="0.01"></div>
+        <div class="field-row"><label for="p-numPessoas">Nº de pessoas</label><input type="text" inputmode="decimal" id="p-numPessoas" step="1" min="1"></div>
       </div>
 
       <div class="param-card">
         <h3>Custos únicos de instalação (€)</h3>
         <p class="param-hint">Aplicados de uma vez, no mês escolhido abaixo.</p>
-        <div class="field-row"><label for="p-fianca">Fiança/depósito do quarto</label><input type="number" id="p-fianca" step="10"></div>
-        <div class="field-row"><label for="p-trem">Trem Madrid–Valência (2 pax)</label><input type="number" id="p-trem" step="5"></div>
-        <div class="field-row"><label for="p-taxis">Táxis chegada</label><input type="number" id="p-taxis" step="5"></div>
-        <div class="field-row"><label for="p-chip">Chip/eSIM (2 pax)</label><input type="number" id="p-chip" step="5"></div>
-        <div class="field-row"><label for="p-comprasIniciais">Compras iniciais da casa</label><input type="number" id="p-comprasIniciais" step="10"></div>
-        <div class="field-row"><label for="p-taxaModelo">Taxa modelo 790-052 (2 pax)</label><input type="number" id="p-taxaModelo" step="5"></div>
-        <div class="field-row"><label for="p-honorariosAdvogada">Honorários advogada (Bruna) <span class="fill-badge" id="badge-honorarios" hidden>PREENCHER</span></label><input type="number" id="p-honorariosAdvogada" step="10"></div>
-        <div class="field-row"><label for="p-custosDocumentaisBrasil">Custos documentais Brasil <span class="fill-badge" id="badge-docsbr" hidden>PREENCHER</span></label><input type="number" id="p-custosDocumentaisBrasil" step="10"></div>
-        <div class="field-row"><label for="p-mesCustosSetup">Mês do pagamento (0=set/26)</label><input type="number" id="p-mesCustosSetup" step="1" min="0" max="15"></div>
+        <div class="field-row"><label for="p-fianca">Fiança/depósito do quarto</label><input type="text" inputmode="decimal" id="p-fianca" step="10"></div>
+        <div class="field-row"><label for="p-trem">Trem Madrid–Valência (2 pax)</label><input type="text" inputmode="decimal" id="p-trem" step="5"></div>
+        <div class="field-row"><label for="p-taxis">Táxis chegada</label><input type="text" inputmode="decimal" id="p-taxis" step="5"></div>
+        <div class="field-row"><label for="p-chip">Chip/eSIM (2 pax)</label><input type="text" inputmode="decimal" id="p-chip" step="5"></div>
+        <div class="field-row"><label for="p-comprasIniciais">Compras iniciais da casa</label><input type="text" inputmode="decimal" id="p-comprasIniciais" step="10"></div>
+        <div class="field-row"><label for="p-taxaModelo">Taxa modelo 790-052 (2 pax)</label><input type="text" inputmode="decimal" id="p-taxaModelo" step="5"></div>
+        <div class="field-row"><label for="p-honorariosAdvogada">Honorários advogada (Bruna) <span class="fill-badge" id="badge-honorarios" hidden>PREENCHER</span></label><input type="text" inputmode="decimal" id="p-honorariosAdvogada" step="10"></div>
+        <div class="field-row"><label for="p-custosDocumentaisBrasil">Custos documentais Brasil <span class="fill-badge" id="badge-docsbr" hidden>PREENCHER</span></label><input type="text" inputmode="decimal" id="p-custosDocumentaisBrasil" step="10"></div>
+        <div class="field-row"><label for="p-mesCustosSetup">Mês do pagamento (0=set/26)</label><input type="text" inputmode="decimal" id="p-mesCustosSetup" step="1" min="0" max="15"></div>
       </div>
 
       <div class="param-card">
         <h3>Curso — Gestión Empresarial</h3>
         <p class="param-hint">Início confirmado em 07/12/2026.</p>
-        <div class="field-row"><label for="p-matricula">Matrícula/curso <span class="fill-badge" id="badge-matricula" hidden>PREENCHER</span></label><input type="number" id="p-matricula" step="10"></div>
-        <div class="field-row"><label for="p-mesMatricula">Mês do pagamento (0=set/26)</label><input type="number" id="p-mesMatricula" step="1" min="0" max="15"></div>
+        <div class="field-row"><label for="p-matricula">Matrícula/curso <span class="fill-badge" id="badge-matricula" hidden>PREENCHER</span></label><input type="text" inputmode="decimal" id="p-matricula" step="10"></div>
+        <div class="field-row"><label for="p-mesMatricula">Mês do pagamento (0=set/26)</label><input type="text" inputmode="decimal" id="p-mesMatricula" step="1" min="0" max="15"></div>
       </div>
 
       <div class="param-card">
         <h3>Renda (cenário)</h3>
         <p class="param-hint">Marcelly não pode trabalhar durante a estância — fixo em €0 por padrão.</p>
-        <div class="field-row"><label for="p-rendaLeo">Renda líquida mensal do Léo (€)</label><input type="number" id="p-rendaLeo" step="50"></div>
-        <div class="field-row"><label for="p-rendaComecaMes">Começa no mês nº (0=set/26)</label><input type="number" id="p-rendaComecaMes" step="1" min="0" max="15"></div>
-        <div class="field-row"><label for="p-rendaMarcelly">Renda mensal da Celly (€)</label><input type="number" id="p-rendaMarcelly" step="50"></div>
+        <div class="field-row"><label for="p-rendaLeo">Renda líquida mensal do Léo (€)</label><input type="text" inputmode="decimal" id="p-rendaLeo" step="50"></div>
+        <div class="field-row"><label for="p-rendaComecaMes">Começa no mês nº (0=set/26)</label><input type="text" inputmode="decimal" id="p-rendaComecaMes" step="1" min="0" max="15"></div>
+        <div class="field-row"><label for="p-rendaMarcelly">Renda mensal da Celly (€)</label><input type="text" inputmode="decimal" id="p-rendaMarcelly" step="50"></div>
       </div>
     </div>
   </section>
@@ -251,10 +272,11 @@ footer.site-footer p{ color:var(--ink-faint); font-size:.8rem; margin-bottom:14p
     </div>
     <div class="table-scroll">
       <table class="data-table" id="table-fluxo">
-        <thead><tr><th>Mês</th><th>Saldo inicial</th><th>(+) Renda</th><th>(−) Recorrentes</th><th>(−) Únicos</th><th>(−) Curso</th><th>Saldo final</th></tr></thead>
+        <thead><tr><th>Mês</th><th>Saldo inicial</th><th>(+) Renda</th><th>(−) Recorrentes</th><th>(−) Únicos</th><th>(−) Curso</th><th>Saldo final</th><th></th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
+    <p class="table-note">Renda, recorrentes, únicos e curso são editáveis célula a célula — mude o número ali para registrar o valor real daquele mês específico, sem alterar os parâmetros gerais. Célula editada manualmente <span class="is-override-sample"></span> fica destacada; o <button class="row-reset-btn" style="display:inline;pointer-events:none;">↺</button> no fim da linha volta a linha inteira para a fórmula.</p>
   </section>
 
   <section class="section" id="cartao-brasil">
@@ -266,21 +288,21 @@ footer.site-footer p{ color:var(--ink-faint); font-size:.8rem; margin-bottom:14p
     <div class="param-grid">
       <div class="param-card">
         <h3>Parcelamentos (R$)</h3>
-        <div class="field-row"><label for="p-iberiaParcela">Iberia — valor da parcela</label><input type="number" id="p-iberiaParcela" step="1"></div>
-        <div class="field-row"><label for="p-iberiaParcelasPagar">Iberia — parcelas a pagar (antes de cancelar)</label><input type="number" id="p-iberiaParcelasPagar" step="1" min="0" max="16"></div>
-        <div class="field-row"><label for="p-iberiaParcelasContratadas">Iberia — parcelas contratadas</label><input type="number" id="p-iberiaParcelasContratadas" step="1" min="0"></div>
-        <div class="field-row"><label for="p-golPrimeira">Gol — 1ª parcela</label><input type="number" id="p-golPrimeira" step="1"></div>
-        <div class="field-row"><label for="p-golDemais">Gol — demais parcelas (valor)</label><input type="number" id="p-golDemais" step="1"></div>
-        <div class="field-row"><label for="p-golNumDemais">Gol — nº de demais parcelas</label><input type="number" id="p-golNumDemais" step="1" min="0" max="16"></div>
+        <div class="field-row"><label for="p-iberiaParcela">Iberia — valor da parcela</label><input type="text" inputmode="decimal" id="p-iberiaParcela" step="1"></div>
+        <div class="field-row"><label for="p-iberiaParcelasPagar">Iberia — parcelas a pagar (antes de cancelar)</label><input type="text" inputmode="decimal" id="p-iberiaParcelasPagar" step="1" min="0" max="16"></div>
+        <div class="field-row"><label for="p-iberiaParcelasContratadas">Iberia — parcelas contratadas</label><input type="text" inputmode="decimal" id="p-iberiaParcelasContratadas" step="1" min="0"></div>
+        <div class="field-row"><label for="p-golPrimeira">Gol — 1ª parcela</label><input type="text" inputmode="decimal" id="p-golPrimeira" step="1"></div>
+        <div class="field-row"><label for="p-golDemais">Gol — demais parcelas (valor)</label><input type="text" inputmode="decimal" id="p-golDemais" step="1"></div>
+        <div class="field-row"><label for="p-golNumDemais">Gol — nº de demais parcelas</label><input type="text" inputmode="decimal" id="p-golNumDemais" step="1" min="0" max="16"></div>
       </div>
       <div class="param-card">
         <h3>Bagagio &amp; Airbnb (R$)</h3>
-        <div class="field-row"><label for="p-bagagioParcela">Bagagio — parcela</label><input type="number" id="p-bagagioParcela" step="1"></div>
-        <div class="field-row"><label for="p-bagagioNumParcelas">Bagagio — nº parcelas</label><input type="number" id="p-bagagioNumParcelas" step="1" min="0" max="16"></div>
-        <div class="field-row"><label for="p-airbnbParcela">Airbnb — parcela</label><input type="number" id="p-airbnbParcela" step="1"></div>
-        <div class="field-row"><label for="p-airbnbNumParcelas">Airbnb — nº parcelas</label><input type="number" id="p-airbnbNumParcelas" step="1" min="0" max="16"></div>
-        <div class="field-row"><label for="p-airbnbIniciaMes">Airbnb — inicia na fatura nº</label><input type="number" id="p-airbnbIniciaMes" step="1" min="1" max="16"></div>
-        <div class="field-row"><label for="p-receitaMensalBrasil">Receita mensal esperada (conta Brasil)</label><input type="number" id="p-receitaMensalBrasil" step="50"></div>
+        <div class="field-row"><label for="p-bagagioParcela">Bagagio — parcela</label><input type="text" inputmode="decimal" id="p-bagagioParcela" step="1"></div>
+        <div class="field-row"><label for="p-bagagioNumParcelas">Bagagio — nº parcelas</label><input type="text" inputmode="decimal" id="p-bagagioNumParcelas" step="1" min="0" max="16"></div>
+        <div class="field-row"><label for="p-airbnbParcela">Airbnb — parcela</label><input type="text" inputmode="decimal" id="p-airbnbParcela" step="1"></div>
+        <div class="field-row"><label for="p-airbnbNumParcelas">Airbnb — nº parcelas</label><input type="text" inputmode="decimal" id="p-airbnbNumParcelas" step="1" min="0" max="16"></div>
+        <div class="field-row"><label for="p-airbnbIniciaMes">Airbnb — inicia na fatura nº</label><input type="text" inputmode="decimal" id="p-airbnbIniciaMes" step="1" min="1" max="16"></div>
+        <div class="field-row"><label for="p-receitaMensalBrasil">Receita mensal esperada (conta Brasil)</label><input type="text" inputmode="decimal" id="p-receitaMensalBrasil" step="50"></div>
       </div>
     </div>
 
@@ -292,10 +314,11 @@ footer.site-footer p{ color:var(--ink-faint); font-size:.8rem; margin-bottom:14p
     </div>
     <div class="table-scroll">
       <table class="data-table" id="table-cartao">
-        <thead><tr><th>Mês</th><th>Iberia</th><th>Gol</th><th>Bagagio</th><th>Airbnb</th><th>Total fatura</th><th>Receita</th><th>Cobertura</th><th>Saldo devedor</th></tr></thead>
+        <thead><tr><th>Mês</th><th>Iberia</th><th>Gol</th><th>Bagagio</th><th>Airbnb</th><th>Total fatura</th><th>Receita</th><th>Cobertura</th><th>Saldo devedor</th><th></th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
+    <p class="table-note">Iberia, Gol, Bagagio, Airbnb e Receita são editáveis célula a célula — para registrar o valor real da fatura de um mês específico sem mexer nos parâmetros. Célula editada <span class="is-override-sample"></span> fica destacada; o ↺ no fim da linha restaura a fórmula.</p>
   </section>
 
   <section class="section" id="notas">
@@ -343,36 +366,81 @@ footer.site-footer p{ color:var(--ink-faint); font-size:.8rem; margin-bottom:14p
   }
 
   var FIELD_IDS = Object.keys(defaultParams());
-  var STORAGE_KEY = 'espanhaFinanceiroState_v1';
+  var STORAGE_KEY = 'espanhaFinanceiroState_v2';
 
-  function loadParams(){
+  /* Casas decimais de cada campo — 0 para contagens/índices de mês, 2 para valores em dinheiro. */
+  var FIELD_DECIMALS = {
+    cambio:2, capitalReais:2, reqLeo:2, reqMarcelly:2,
+    aluguel:2, alimentacao:2, transporte:2, outros:2, seguroPessoa:2, numPessoas:0,
+    fianca:2, trem:2, taxis:2, chip:2, comprasIniciais:2, taxaModelo:2,
+    honorariosAdvogada:2, custosDocumentaisBrasil:2, mesCustosSetup:0,
+    matricula:2, mesMatricula:0,
+    rendaLeo:2, rendaComecaMes:0, rendaMarcelly:2,
+    iberiaParcela:2, iberiaParcelasPagar:0, iberiaParcelasContratadas:0,
+    golPrimeira:2, golDemais:2, golNumDemais:0,
+    bagagioParcela:2, bagagioNumParcelas:0,
+    airbnbParcela:2, airbnbNumParcelas:0, airbnbIniciaMes:0,
+    receitaMensalBrasil:2
+  };
+
+  function defaultState(){ return { params: defaultParams(), overrides: { fluxo:{}, cartao:{} } }; }
+
+  function loadState(){
     try{
       var raw = localStorage.getItem(STORAGE_KEY);
-      if(!raw) return defaultParams();
+      if(!raw) return defaultState();
       var parsed = JSON.parse(raw);
-      var out = defaultParams();
-      FIELD_IDS.forEach(function(k){ if(typeof parsed[k] === 'number' && !isNaN(parsed[k])) out[k] = parsed[k]; });
-      return out;
-    }catch(e){ return defaultParams(); }
+      var base = defaultState();
+      if(parsed.params){
+        FIELD_IDS.forEach(function(k){ if(typeof parsed.params[k] === 'number' && !isNaN(parsed.params[k])) base.params[k] = parsed.params[k]; });
+      }
+      if(parsed.overrides){
+        if(parsed.overrides.fluxo && typeof parsed.overrides.fluxo === 'object') base.overrides.fluxo = parsed.overrides.fluxo;
+        if(parsed.overrides.cartao && typeof parsed.overrides.cartao === 'object') base.overrides.cartao = parsed.overrides.cartao;
+      }
+      return base;
+    }catch(e){ return defaultState(); }
   }
 
-  function saveParams(p){
-    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }catch(e){}
+  function saveState(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify({ params:params, overrides:overrides })); }catch(e){}
   }
 
-  var params = loadParams();
+  var state0 = loadState();
+  var params = state0.params;
+  var overrides = state0.overrides;
 
   /* =========================================================
-     FORMATAÇÃO
+     FORMATAÇÃO E LEITURA DE NÚMEROS — padrão brasileiro
+     (ponto = milhar, vírgula = decimal), tanto para exibir
+     quanto para reler o que foi digitado nos campos editáveis.
      ========================================================= */
   function fmtEUR(v){ return '€ ' + Number(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
   function fmtBRL(v){ return 'R$ ' + Number(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
   function fmtMeses(v){ return Number(v).toLocaleString('pt-BR', {minimumFractionDigits:1, maximumFractionDigits:1}); }
+  function fmtNum(v, decimals){ return Number(v).toLocaleString('pt-BR', {minimumFractionDigits:decimals, maximumFractionDigits:decimals}); }
+
+  function parseNumberInput(str){
+    if(str == null) return NaN;
+    str = String(str).trim();
+    if(str === '') return NaN;
+    str = str.replace(/[^\d,.\-]/g, '');
+    if(str.indexOf(',') > -1){ str = str.replace(/\./g, '').replace(',', '.'); }
+    var v = parseFloat(str);
+    return isNaN(v) ? NaN : v;
+  }
 
   /* =========================================================
-     MOTOR DE CÁLCULO — função pura: parâmetros -> resultados
+     MOTOR DE CÁLCULO — função pura: parâmetros + edições manuais -> resultados.
+     Cada mês usa o valor editado à mão (override) quando existe;
+     senão cai na fórmula normal, ligada aos parâmetros gerais.
      ========================================================= */
-  function compute(p){
+  function ov(store, idx, field){
+    var row = store[idx];
+    return (row && row[field] != null) ? row[field] : null;
+  }
+
+  function compute(p, over){
     var capitalEuros = p.capitalReais / p.cambio;
     var minimoLegal = p.reqLeo + p.reqMarcelly;
     var seguroTotal = p.seguroPessoa * p.numPessoas;
@@ -383,12 +451,19 @@ footer.site-footer p{ color:var(--ink-faint); font-size:.8rem; margin-bottom:14p
     var saldo = capitalEuros;
     for(var i=0;i<N;i++){
       var saldoInicial = saldo;
-      var renda = (i >= p.rendaComecaMes ? p.rendaLeo : 0) + p.rendaMarcelly;
-      var recorrente = (i === 0) ? seguroTotal : custoMensalRecorrente;
-      var unico = (i === p.mesCustosSetup) ? custosUnicosSetup : 0;
-      var curso = (i === p.mesMatricula) ? p.matricula : 0;
+      var oRenda = ov(over.fluxo, i, 'renda');
+      var renda = oRenda != null ? oRenda : ((i >= p.rendaComecaMes ? p.rendaLeo : 0) + p.rendaMarcelly);
+      var oRec = ov(over.fluxo, i, 'recorrente');
+      var recorrente = oRec != null ? oRec : ((i === 0) ? seguroTotal : custoMensalRecorrente);
+      var oUnico = ov(over.fluxo, i, 'unico');
+      var unico = oUnico != null ? oUnico : ((i === p.mesCustosSetup) ? custosUnicosSetup : 0);
+      var oCurso = ov(over.fluxo, i, 'curso');
+      var curso = oCurso != null ? oCurso : ((i === p.mesMatricula) ? p.matricula : 0);
       var saldoFinal = saldoInicial + renda - recorrente - unico - curso;
-      fluxo.push({ mes:MONTHS[i], idx:i, saldoInicial:saldoInicial, renda:renda, recorrente:recorrente, unico:unico, curso:curso, saldoFinal:saldoFinal });
+      fluxo.push({
+        mes:MONTHS[i], idx:i, saldoInicial:saldoInicial, renda:renda, recorrente:recorrente, unico:unico, curso:curso, saldoFinal:saldoFinal,
+        overridden:{ renda:oRenda!=null, recorrente:oRec!=null, unico:oUnico!=null, curso:oCurso!=null }
+      });
       saldo = saldoFinal;
     }
 
@@ -408,16 +483,24 @@ footer.site-footer p{ color:var(--ink-faint); font-size:.8rem; margin-bottom:14p
     var cartaoRows = [];
     var saldoDev = 0;
     for(var j=0;j<N;j++){
-      var iberia = (j < p.iberiaParcelasPagar) ? p.iberiaParcela : 0;
-      var gol = (j === 0) ? p.golPrimeira : (j <= p.golNumDemais ? p.golDemais : 0);
-      var bagagio = (j < p.bagagioNumParcelas) ? p.bagagioParcela : 0;
+      var oIberia = ov(over.cartao, j, 'iberia');
+      var iberia = oIberia != null ? oIberia : ((j < p.iberiaParcelasPagar) ? p.iberiaParcela : 0);
+      var oGol = ov(over.cartao, j, 'gol');
+      var gol = oGol != null ? oGol : ((j === 0) ? p.golPrimeira : (j <= p.golNumDemais ? p.golDemais : 0));
+      var oBagagio = ov(over.cartao, j, 'bagagio');
+      var bagagio = oBagagio != null ? oBagagio : ((j < p.bagagioNumParcelas) ? p.bagagioParcela : 0);
       var airbnbStart = p.airbnbIniciaMes - 1;
-      var airbnb = (j >= airbnbStart && j < airbnbStart + p.airbnbNumParcelas) ? p.airbnbParcela : 0;
+      var oAirbnb = ov(over.cartao, j, 'airbnb');
+      var airbnb = oAirbnb != null ? oAirbnb : ((j >= airbnbStart && j < airbnbStart + p.airbnbNumParcelas) ? p.airbnbParcela : 0);
       var totalFatura = iberia + gol + bagagio + airbnb;
-      var receita = p.receitaMensalBrasil;
+      var oReceita = ov(over.cartao, j, 'receita');
+      var receita = oReceita != null ? oReceita : p.receitaMensalBrasil;
       var cobertura = receita - totalFatura;
       saldoDev += cobertura;
-      cartaoRows.push({ mes:MONTHS[j], idx:j, iberia:iberia, gol:gol, bagagio:bagagio, airbnb:airbnb, totalFatura:totalFatura, receita:receita, cobertura:cobertura, saldoDevedor:saldoDev });
+      cartaoRows.push({
+        mes:MONTHS[j], idx:j, iberia:iberia, gol:gol, bagagio:bagagio, airbnb:airbnb, totalFatura:totalFatura, receita:receita, cobertura:cobertura, saldoDevedor:saldoDev,
+        overridden:{ iberia:oIberia!=null, gol:oGol!=null, bagagio:oBagagio!=null, airbnb:oAirbnb!=null, receita:oReceita!=null }
+      });
     }
     var totalPago = cartaoRows.reduce(function(s,r){ return s + r.totalFatura; }, 0);
     var economiaCancelar = (p.iberiaParcelasContratadas - p.iberiaParcelasPagar) * p.iberiaParcela;
@@ -430,19 +513,23 @@ footer.site-footer p{ color:var(--ink-faint); font-size:.8rem; margin-bottom:14p
   }
 
   /* =========================================================
-     FORMULÁRIO — liga cada input aos parâmetros
+     FORMULÁRIO DE PARÂMETROS — liga cada input aos parâmetros,
+     com números formatados (milhar/decimal em pt-BR) ao sair do campo.
      ========================================================= */
   function bindFields(){
     FIELD_IDS.forEach(function(key){
       var el = document.getElementById('p-' + key);
       if(!el) return;
-      el.value = params[key];
+      var dec = FIELD_DECIMALS[key] != null ? FIELD_DECIMALS[key] : 2;
+      el.value = fmtNum(params[key], dec);
       el.addEventListener('input', function(){
-        var v = parseFloat(el.value);
+        var v = parseNumberInput(el.value);
         params[key] = isNaN(v) ? 0 : v;
-        saveParams(params);
+        saveState();
         renderAll();
       });
+      el.addEventListener('blur', function(){ el.value = fmtNum(params[key], dec); });
+      el.addEventListener('focus', function(){ el.select(); });
     });
   }
 
@@ -469,23 +556,37 @@ footer.site-footer p{ color:var(--ink-faint); font-size:.8rem; margin-bottom:14p
     el.innerHTML = cards.map(function(c){
       return '<div class="stat-card ' + (c.cls || '') + '"><span class="stat-icon">' + c.icon + '</span><span class="stat-label">' + c.label + '</span><span class="stat-value">' + c.value + '</span><span class="stat-note">' + c.note + '</span></div>';
     }).join('');
+
+    var readout = document.getElementById('readout-capital-euros');
+    if(readout) readout.textContent = fmtEUR(r.resumo.capitalEuros) + ' disponíveis';
   }
 
   /* =========================================================
      TABELAS
      ========================================================= */
+  function editCell(table, idx, field, value, isOverridden){
+    var cls = 'cell-input' + (isOverridden ? ' is-override' : '');
+    return '<td class="editable-cell"><input type="text" inputmode="decimal" class="' + cls + '" data-table="' + table + '" data-idx="' + idx + '" data-field="' + field + '" value="' + fmtNum(value, 2) + '"></td>';
+  }
+
+  function resetCell(table, idx, hasAnyOverride){
+    return '<td class="reset-cell"><button type="button" class="row-reset-btn" data-reset="' + table + '" data-idx="' + idx + '" ' + (hasAnyOverride ? '' : 'disabled') + ' title="Restaurar fórmula desta linha">↺</button></td>';
+  }
+
   function renderFluxoTable(r){
     var tbody = document.querySelector('#table-fluxo tbody');
     tbody.innerHTML = r.fluxo.map(function(row){
       var eventRow = (row.unico > 0 || row.curso > 0) ? ' row-event' : '';
+      var anyOv = row.overridden.renda || row.overridden.recorrente || row.overridden.unico || row.overridden.curso;
       return '<tr class="' + eventRow.trim() + '">' +
         '<td>' + row.mes + '</td>' +
         '<td>' + fmtEUR(row.saldoInicial) + '</td>' +
-        '<td class="' + (row.renda > 0 ? 'pos' : '') + '">' + (row.renda > 0 ? '+' : '') + fmtEUR(row.renda) + '</td>' +
-        '<td class="neg">−' + fmtEUR(row.recorrente) + '</td>' +
-        '<td class="' + (row.unico > 0 ? 'neg' : '') + '">' + (row.unico > 0 ? '−' + fmtEUR(row.unico) : '—') + '</td>' +
-        '<td class="' + (row.curso > 0 ? 'neg' : '') + '">' + (row.curso > 0 ? '−' + fmtEUR(row.curso) : '—') + '</td>' +
+        editCell('fluxo', row.idx, 'renda', row.renda, row.overridden.renda) +
+        editCell('fluxo', row.idx, 'recorrente', row.recorrente, row.overridden.recorrente) +
+        editCell('fluxo', row.idx, 'unico', row.unico, row.overridden.unico) +
+        editCell('fluxo', row.idx, 'curso', row.curso, row.overridden.curso) +
         '<td class="' + (row.saldoFinal >= 0 ? 'pos' : 'neg') + '"><strong>' + fmtEUR(row.saldoFinal) + '</strong></td>' +
+        resetCell('fluxo', row.idx, anyOv) +
         '</tr>';
     }).join('');
   }
@@ -493,18 +594,61 @@ footer.site-footer p{ color:var(--ink-faint); font-size:.8rem; margin-bottom:14p
   function renderCartaoTable(r){
     var tbody = document.querySelector('#table-cartao tbody');
     tbody.innerHTML = r.cartao.rows.map(function(row){
+      var anyOv = row.overridden.iberia || row.overridden.gol || row.overridden.bagagio || row.overridden.airbnb || row.overridden.receita;
       return '<tr>' +
         '<td>' + row.mes + '</td>' +
-        '<td>' + (row.iberia > 0 ? fmtBRL(row.iberia) : '—') + '</td>' +
-        '<td>' + (row.gol > 0 ? fmtBRL(row.gol) : '—') + '</td>' +
-        '<td>' + (row.bagagio > 0 ? fmtBRL(row.bagagio) : '—') + '</td>' +
-        '<td>' + (row.airbnb > 0 ? fmtBRL(row.airbnb) : '—') + '</td>' +
+        editCell('cartao', row.idx, 'iberia', row.iberia, row.overridden.iberia) +
+        editCell('cartao', row.idx, 'gol', row.gol, row.overridden.gol) +
+        editCell('cartao', row.idx, 'bagagio', row.bagagio, row.overridden.bagagio) +
+        editCell('cartao', row.idx, 'airbnb', row.airbnb, row.overridden.airbnb) +
         '<td><strong>' + fmtBRL(row.totalFatura) + '</strong></td>' +
-        '<td>' + fmtBRL(row.receita) + '</td>' +
+        editCell('cartao', row.idx, 'receita', row.receita, row.overridden.receita) +
         '<td class="' + (row.cobertura >= 0 ? 'pos' : 'neg') + '">' + fmtBRL(row.cobertura) + '</td>' +
         '<td class="' + (row.saldoDevedor >= 0 ? 'pos' : 'neg') + '"><strong>' + fmtBRL(row.saldoDevedor) + '</strong></td>' +
+        resetCell('cartao', row.idx, anyOv) +
         '</tr>';
     }).join('');
+  }
+
+  /* =========================================================
+     EDIÇÃO NAS TABELAS — delegação de eventos (ligada uma vez,
+     sobrevive à reconstrução do <tbody> a cada renderAll).
+     Recalcula só ao sair do campo (blur/Enter), nunca a cada
+     tecla — evita perder o foco no meio da digitação.
+     ========================================================= */
+  function initTableEditing(){
+    [['table-fluxo','fluxo'], ['table-cartao','cartao']].forEach(function(pair){
+      var tbody = document.querySelector('#' + pair[0] + ' tbody');
+      var storeKey = pair[1];
+
+      tbody.addEventListener('change', function(e){
+        var t = e.target;
+        if(!t.classList.contains('cell-input')) return;
+        var idx = Number(t.dataset.idx), field = t.dataset.field;
+        var raw = t.value.trim();
+        var store = overrides[storeKey];
+        if(raw === ''){
+          if(store[idx]){ delete store[idx][field]; if(Object.keys(store[idx]).length === 0) delete store[idx]; }
+        } else {
+          var v = parseNumberInput(raw);
+          if(!isNaN(v)){
+            if(!store[idx]) store[idx] = {};
+            store[idx][field] = v;
+          }
+        }
+        saveState();
+        renderAll();
+      });
+
+      tbody.addEventListener('click', function(e){
+        var btn = e.target.closest('[data-reset]');
+        if(!btn || btn.disabled) return;
+        var idx = Number(btn.dataset.idx);
+        delete overrides[storeKey][idx];
+        saveState();
+        renderAll();
+      });
+    });
   }
 
   function renderCartaoDiag(r){
@@ -558,7 +702,7 @@ footer.site-footer p{ color:var(--ink-faint); font-size:.8rem; margin-bottom:14p
       var y = yAt(v);
       svg.appendChild(el('line', { x1:padL, x2:W - padR, y1:y, y2:y, stroke:'#d6ccb6', 'stroke-width':1, opacity:0.5 }));
       var t = el('text', { x:padL - 10, y:y + 4, 'text-anchor':'end', 'font-size':11, fill:'#8b8377', 'font-family':'JetBrains Mono, monospace' });
-      t.textContent = fmt(v).replace(/[€R$\s]/g, '').replace(',00','');
+      t.textContent = Math.round(v).toLocaleString('pt-BR');
       svg.appendChild(t);
     }
 
@@ -654,7 +798,7 @@ footer.site-footer p{ color:var(--ink-faint); font-size:.8rem; margin-bottom:14p
      RENDER GERAL
      ========================================================= */
   function renderAll(){
-    var r = compute(params);
+    var r = compute(params, overrides);
     renderDashboard(r);
     renderFluxoTable(r);
     renderCartaoTable(r);
@@ -670,9 +814,10 @@ footer.site-footer p{ color:var(--ink-faint); font-size:.8rem; margin-bottom:14p
      ========================================================= */
   function initButtons(){
     document.getElementById('restore-btn').addEventListener('click', function(){
-      if(confirm('Isso substitui todos os valores atuais pelos valores originais da planilha. Continuar?')){
+      if(confirm('Isso substitui todos os valores atuais e todas as edições manuais nas tabelas pelos valores originais da planilha. Continuar?')){
         params = defaultParams();
-        saveParams(params);
+        overrides = { fluxo:{}, cartao:{} };
+        saveState();
         bindFields();
         renderAll();
       }
@@ -683,6 +828,7 @@ footer.site-footer p{ color:var(--ink-faint); font-size:.8rem; margin-bottom:14p
   document.addEventListener('DOMContentLoaded', function(){
     bindFields();
     initButtons();
+    initTableEditing();
     renderAll();
   });
 })();
