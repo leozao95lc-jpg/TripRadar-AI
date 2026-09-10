@@ -111,7 +111,7 @@ button{ font-family:inherit; }
 .btn-danger-ghost:hover{ color:var(--red); border-color:var(--red); background:var(--red-soft); }
 .icon-btn{
   border:none; background:transparent; cursor:pointer; font-size:1rem; line-height:1;
-  padding:4px 6px; border-radius:var(--radius-sm); color:var(--ink-faint);
+  padding:9px 10px; border-radius:var(--radius-sm); color:var(--ink-faint);
 }
 .icon-btn.danger:hover{ background:var(--red-soft); color:var(--red); }
 
@@ -211,7 +211,7 @@ button{ font-family:inherit; }
 .timeline-items li .mono{ color:var(--ink); font-weight:700; margin-right:6px; }
 .tag-info, .tag-warn, .tag-confirm{
   font-family:'JetBrains Mono',monospace; font-size:.68rem; font-weight:700; border-radius:6px;
-  padding:2px 7px; margin-left:6px; white-space:nowrap; display:inline-block;
+  padding:2px 7px; margin-left:6px; display:inline-block;
 }
 .tag-info{ background:var(--blue-soft); color:var(--blue); }
 .tag-warn{ background:var(--gold-soft); color:var(--gold); }
@@ -223,7 +223,8 @@ button{ font-family:inherit; }
 .filter-bar{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
 .filter-btn{
   border:1px solid var(--line-strong); background:var(--surface); color:var(--ink-soft);
-  border-radius:999px; padding:8px 14px; font-size:.82rem; font-weight:700; cursor:pointer;
+  border-radius:999px; padding:10px 16px; font-size:.82rem; font-weight:700; cursor:pointer;
+  min-height:40px;
 }
 .filter-btn.active{ background:var(--ink); border-color:var(--ink); color:#fff; }
 
@@ -261,8 +262,9 @@ button{ font-family:inherit; }
 
 .check-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
 .check-list--grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:8px 18px; }
-.check-item label{ display:flex; align-items:center; gap:9px; font-size:.9rem; color:var(--ink-soft); cursor:pointer; }
-.check-item input[type="checkbox"]{ width:17px; height:17px; accent-color:var(--red); flex:0 0 auto; }
+.check-item label{ display:flex; align-items:flex-start; gap:9px; font-size:.9rem; color:var(--ink-soft); cursor:pointer; }
+.check-item input[type="checkbox"]{ width:17px; height:17px; margin-top:2px; accent-color:var(--red); flex:0 0 auto; }
+.check-item .tag-confirm{ margin-top:1px; }
 .check-item input[type="checkbox"]:checked + span{ color:var(--ink-faint); text-decoration:line-through; }
 
 .resolved-toggle{
@@ -396,7 +398,15 @@ button{ font-family:inherit; }
   .topbar-inner{ padding-top:12px; }
   .hero{ padding-top:28px; }
   .property-grid{ grid-template-columns:1fr; }
+  /* A tabela de orçamento é só 4 colunas simples — cabe na tela sem
+     herdar o min-width:560px pensado pro registro de gastos, que
+     tem mais colunas e legitimamente precisa rolar. */
+  #budget-table{ min-width:0; width:100%; table-layout:fixed; }
+  #budget-table th, #budget-table td{ padding:8px 6px; font-size:.76rem; }
+  #budget-table .budget-planejado-input{ width:100%; min-width:0; font-size:.74rem; padding:5px 3px; }
 }
+.scroll-hint{ display:none; font-size:.74rem; color:var(--ink-faint); margin:8px 2px 0; text-align:center; }
+@media (max-width:460px){ .scroll-hint{ display:block; } }
 
 /* =========================================================
    IMPRESSÃO
@@ -968,6 +978,7 @@ button{ font-family:inherit; }
       </table>
       <p class="empty-state" id="expense-empty">Nenhum gasto registrado ainda.</p>
     </div>
+    <p class="scroll-hint">↔ arraste a tabela para o lado para ver mais colunas</p>
   </section>
 
   <!-- =======================================================

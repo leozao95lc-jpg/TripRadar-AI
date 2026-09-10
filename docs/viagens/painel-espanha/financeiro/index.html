@@ -154,6 +154,8 @@ footer.site-footer p{ color:var(--ink-faint); font-size:.8rem; margin-bottom:14p
 @media (max-width:460px){
   .field-row input{ width:88px; }
 }
+.scroll-hint{ display:none; font-size:.74rem; color:var(--ink-faint); margin:8px 2px 0; text-align:center; }
+@media (max-width:460px){ .scroll-hint{ display:block; } }
 @media print{
   .topbar, .btn{ display:none !important; }
   body{ background:#fff; }
@@ -276,6 +278,7 @@ footer.site-footer p{ color:var(--ink-faint); font-size:.8rem; margin-bottom:14p
         <tbody></tbody>
       </table>
     </div>
+    <p class="scroll-hint">↔ arraste a tabela para o lado para ver todos os meses</p>
     <p class="table-note">Renda, recorrentes, únicos e curso são editáveis célula a célula — mude o número ali para registrar o valor real daquele mês específico, sem alterar os parâmetros gerais. Célula editada manualmente <span class="is-override-sample"></span> fica destacada; o <button class="row-reset-btn" style="display:inline;pointer-events:none;">↺</button> no fim da linha volta a linha inteira para a fórmula.</p>
   </section>
 
@@ -318,6 +321,7 @@ footer.site-footer p{ color:var(--ink-faint); font-size:.8rem; margin-bottom:14p
         <tbody></tbody>
       </table>
     </div>
+    <p class="scroll-hint">↔ arraste a tabela para o lado para ver todos os meses</p>
     <p class="table-note">Iberia, Gol, Bagagio, Airbnb e Receita são editáveis célula a célula — para registrar o valor real da fatura de um mês específico sem mexer nos parâmetros. Célula editada <span class="is-override-sample"></span> fica destacada; o ↺ no fim da linha restaura a fórmula.</p>
   </section>
 
