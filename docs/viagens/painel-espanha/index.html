@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel Espanha — Leonardo &amp; Marcelly</title>
-<meta name="description" content="Planner interativo da chegada de Leonardo e Marcelly na Espanha: cronograma, tarefas, documentos, moradia e visto.">
+<title>Painel Espanha — Léo &amp; Celly</title>
+<meta name="description" content="Planner interativo da chegada de Léo e Celly na Espanha: cronograma, tarefas, documentos, moradia e visto de estudos.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Karla:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -379,7 +379,7 @@ button{ font-family:inherit; }
        HERO + DASHBOARD
        ======================================================= -->
   <section class="hero">
-    <p class="eyebrow">Leonardo &amp; Marcelly · Setembro–Outubro 2026</p>
+    <p class="eyebrow">Léo &amp; Celly · Setembro–Outubro 2026</p>
     <h1>Nova vida na Espanha</h1>
     <p class="hero-sub">Painel de acompanhamento da chegada: cronograma, tarefas, documentos, moradia e o prazo do visto — tudo em um só lugar, editável e salvo automaticamente neste navegador.</p>
 
@@ -402,6 +402,12 @@ button{ font-family:inherit; }
         <span class="stat-note">antecipar, não usar como meta</span>
       </div>
       <div class="stat-card">
+        <span class="stat-icon">🎓</span>
+        <span class="stat-label">Início do curso</span>
+        <span class="stat-value num">07/12/2026</span>
+        <span class="stat-note">Gestión Empresarial · <strong class="js-countdown-curso">--</strong> dias</span>
+      </div>
+      <div class="stat-card">
         <span class="stat-icon">📱</span>
         <span class="stat-label">Celular</span>
         <span class="stat-value" id="dash-celular">Pendente</span>
@@ -414,7 +420,7 @@ button{ font-family:inherit; }
       <div class="stat-card">
         <span class="stat-icon">🩺</span>
         <span class="stat-label">Exame médico</span>
-        <span class="stat-value">Data a confirmar</span>
+        <span class="stat-value num">01/10/2026</span>
         <span class="stat-note" id="dash-exame-sub">0/9 etapas</span>
       </div>
       <div class="stat-card">
@@ -475,14 +481,14 @@ button{ font-family:inherit; }
           <li>🏠 Início da busca por moradia</li>
         </ul>
       </div>
-      <div class="timeline-day timeline-day--warn">
-        <div class="timeline-date"><span class="num">Data a confirmar</span></div>
+      <div class="timeline-day">
+        <div class="timeline-date"><span class="num">01/10</span><span class="wd" id="wd-1001"></span></div>
         <ul class="timeline-items">
-          <li>🩺 Exame médico, período da tarde <span class="tag-warn">"dia 31" não existe em setembro — confirmar a data real antes de agendar algo em cima disso</span></li>
+          <li>🩺 Exame médico do visto, período da tarde</li>
         </ul>
       </div>
       <div class="timeline-day">
-        <div class="timeline-date"><span class="num">01/10 → 07/10</span></div>
+        <div class="timeline-date"><span class="num">02/10 → 07/10</span></div>
         <ul class="timeline-items">
           <li>🏠 Visitas de imóveis</li>
           <li>📄 Finalização da documentação do visto</li>
@@ -573,8 +579,7 @@ button{ font-family:inherit; }
           </div>
           <span class="task-status" id="status-exame">Pendente</span>
         </header>
-        <div class="callout callout-warn">📅 <strong>Data a confirmar.</strong> Você indicou "dia 31 à tarde" — mas setembro tem só 30 dias. Confirme se é 30/09, 01/10, 31/10 ou outra data antes de marcar qualquer coisa em cima disso.</div>
-        <p class="task-note">Período: <strong>tarde</strong>. Objetivo: realizar o exame exigido para o visto e obter o certificado correto para o processo.</p>
+        <p class="task-note">Data confirmada: <strong>01/10</strong> (<span id="wd-1001b"></span>), período da <strong>tarde</strong>. Objetivo: realizar o exame exigido para o visto de estudos e obter o certificado correto para o processo.</p>
         <div class="progress-track"><div class="progress-fill" id="progress-exame"></div></div>
         <ul class="check-list" id="list-exame"></ul>
       </article>
@@ -597,12 +602,12 @@ button{ font-family:inherit; }
         <header class="task-head">
           <span class="task-icon">🇪🇸</span>
           <div class="task-titles">
-            <h3>Visto de nômade digital</h3>
+            <h3>Visto de estância por estudos</h3>
             <span class="priority-badge badge-urgente">🔴 Urgente</span>
           </div>
           <span class="task-status" id="status-visto">Pendente</span>
         </header>
-        <p class="task-note">Prazo informado para dar entrada: <strong>07/10</strong>. Meta real: protocolar bem antes disso, não usar o prazo como alvo.</p>
+        <p class="task-note">Curso: <strong>Gestión Empresarial</strong>, início em <strong>07/12</strong>. Prazo informado para dar entrada: <strong>07/10</strong>. Meta real: protocolar bem antes disso — nunca depois — para não colocar o início do curso em risco.</p>
         <div class="progress-track"><div class="progress-fill" id="progress-visto"></div></div>
         <ul class="check-list" id="list-visto"></ul>
         <div class="callout callout-info">Documentos e exigências ainda não confirmadas oficialmente não foram inventadas aqui — o que não está confirmado aparece marcado na seção de Documentos.</div>
@@ -652,7 +657,7 @@ button{ font-family:inherit; }
         <ul class="check-list" id="list-docs-ident"></ul>
       </div>
       <div class="docs-group">
-        <h3>💼 Profissional</h3>
+        <h3>🎓 Curso e financeiro</h3>
         <ul class="check-list" id="list-docs-prof"></ul>
       </div>
       <div class="docs-group">
@@ -927,7 +932,7 @@ button{ font-family:inherit; }
     visto: [
       {k:'visto.chegada', t:'29/09 — chegada em Valencia e organização inicial dos documentos'},
       {k:'visto.dia30', t:'30/09 — resolver chip e banco, conferência documental'},
-      {k:'visto.exame', t:'Realizar exame médico e obter o certificado (data a confirmar)'},
+      {k:'visto.exame', t:'01/10 — realizar exame médico e obter o certificado'},
       {k:'visto.finalizar', t:'01–04/10 — finalizar e revisar a documentação'},
       {k:'visto.digitalizar', t:'01–04/10 — digitalizar os documentos'},
       {k:'visto.formulario', t:'01–04/10 — preparar formulário e conferir taxas', c:true},
@@ -940,11 +945,11 @@ button{ font-family:inherit; }
       {k:'docs.ident.outros', t:'Outros documentos de identificação', c:true}
     ],
     docsProf: [
-      {k:'docs.prof.contrato', t:'Contrato de trabalho/prestação de serviços'},
-      {k:'docs.prof.renda', t:'Comprovantes de renda'},
-      {k:'docs.prof.bancarios', t:'Comprovantes bancários'},
-      {k:'docs.prof.empresa', t:'Documentos da empresa'},
-      {k:'docs.prof.outros', t:'Outros documentos profissionais', c:true}
+      {k:'docs.prof.matricula', t:'Comprovante de matrícula / carta de aceite — Gestión Empresarial'},
+      {k:'docs.prof.iniciocurso', t:'Comprovante da data de início do curso (07/12)'},
+      {k:'docs.prof.renda', t:'Comprovantes de renda / meios de subsistência', c:true},
+      {k:'docs.prof.bancarios', t:'Comprovantes bancários', c:true},
+      {k:'docs.prof.outros', t:'Outros documentos exigidos pela instituição/consulado', c:true}
     ],
     docsPessoal: [
       {k:'docs.pessoal.casamento', t:'Certidão de casamento'},
@@ -1123,6 +1128,20 @@ button{ font-family:inherit; }
     var diffDays = Math.round((target - todayMid) / 86400000);
     var text = diffDays > 0 ? String(diffDays) : (diffDays === 0 ? 'Hoje' : 'Encerrado');
     var els = document.querySelectorAll('.js-countdown-days');
+    els.forEach(function(el){ el.textContent = text; });
+  }
+
+  /* =========================================================
+     CONTAGEM REGRESSIVA — até 07/12/2026, início do curso
+     (Gestión Empresarial), mesma lógica da contagem do Airbnb
+     ========================================================= */
+  function updateCourseCountdown(){
+    var target = new Date(2026, 11, 7); // mês em JS é 0-indexado: 11 = dezembro
+    var now = new Date();
+    var todayMid = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    var diffDays = Math.round((target - todayMid) / 86400000);
+    var text = diffDays > 0 ? String(diffDays) : (diffDays === 0 ? 'Hoje' : 'Já começou');
+    var els = document.querySelectorAll('.js-countdown-curso');
     els.forEach(function(el){ el.textContent = text; });
   }
 
@@ -1402,6 +1421,8 @@ button{ font-family:inherit; }
     setWeekday('wd-0928', 2026, 9, 28);
     setWeekday('wd-0929', 2026, 9, 29);
     setWeekday('wd-0930', 2026, 9, 30);
+    setWeekday('wd-1001', 2026, 10, 1);
+    setWeekday('wd-1001b', 2026, 10, 1);
     setWeekday('wd-1007', 2026, 10, 7);
 
     renderChecklist('list-mercado', CHECKLISTS.mercado);
@@ -1430,6 +1451,7 @@ button{ font-family:inherit; }
     renderProgressBars();
     renderDashboard();
     updateCountdown();
+    updateCourseCountdown();
   });
 
 })();
