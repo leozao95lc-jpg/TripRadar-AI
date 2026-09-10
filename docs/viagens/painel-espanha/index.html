@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Espanha — Leonardo &amp; Marcelly</title>
+<meta name="description" content="Planner interativo da chegada de Leonardo e Marcelly na Espanha: cronograma, tarefas, documentos, moradia e visto.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Karla:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* =========================================================
+   TOKENS — paleta clara, inspirada na Espanha (vermelho/
+   dourado) sobre um neutro quente, com um azul mediterrâneo
+   como acento secundário para estados de progresso/link.
+   ========================================================= */
+:root{
+  --bg:#f6f3ec;
+  --bg-soft:#efe9dc;
+  --surface:#ffffff;
+  --surface-2:#fbfaf6;
+  --ink:#211d1a;
+  --ink-soft:#5a5349;
+  --ink-faint:#8b8377;
+  --line:#e4ddce;
+  --line-strong:#d6ccb6;
+
+  --red:#b8332c;
+  --red-soft:#f7e3e0;
+  --gold:#c08a26;
+  --gold-soft:#f8ecd2;
+  --blue:#2c6a8a;
+  --blue-soft:#e2edf2;
+  --green:#2f7a52;
+  --green-soft:#e2f1e8;
+
+  --shadow-sm:0 1px 2px rgba(33,29,26,.06);
+  --shadow-md:0 12px 28px -16px rgba(33,29,26,.28);
+  --radius-lg:18px;
+  --radius-md:12px;
+  --radius-sm:8px;
+}
+
+/* =========================================================
+   BASE
+   ========================================================= */
+*,*::before,*::after{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Karla', ui-sans-serif, system-ui, sans-serif;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{ font-family:'Fraunces', Georgia, serif; text-wrap:balance; margin:0; color:var(--ink); }
+.mono, .num{ font-family:'JetBrains Mono', ui-monospace, SFMono-Regular, monospace; font-variant-numeric:tabular-nums; }
+a{ color:var(--blue); }
+button{ font-family:inherit; }
+.wrap{ max-width:1180px; margin:0 auto; padding:0 20px; }
+
+/* =========================================================
+   TOPBAR
+   ========================================================= */
+.topbar{
+  position:sticky; top:0; z-index:50;
+  background:rgba(246,243,236,.92);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.topbar-inner{
+  max-width:1180px; margin:0 auto; padding:14px 20px 10px;
+  display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+}
+.brand{ display:flex; align-items:center; gap:8px; font-family:'Fraunces',serif; font-weight:600; font-size:1.15rem; }
+.autosave-note{ font-size:.72rem; color:var(--ink-faint); margin-left:6px; font-family:'JetBrains Mono',monospace; }
+.topbar-actions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.countdown-pill{
+  font-family:'JetBrains Mono',monospace; font-size:.8rem; font-weight:700;
+  background:var(--red-soft); color:var(--red); border-radius:999px; padding:6px 12px;
+  display:inline-flex; align-items:center; gap:6px; white-space:nowrap;
+}
+.pill-nav{
+  max-width:1180px; margin:0 auto; padding:0 20px 12px;
+  display:flex; gap:8px; overflow-x:auto; -webkit-overflow-scrolling:touch;
+}
+.pill-nav a{
+  flex:0 0 auto; text-decoration:none; color:var(--ink-soft); font-size:.85rem; font-weight:600;
+  background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:7px 14px;
+  white-space:nowrap; transition:background .15s, color .15s, border-color .15s;
+}
+.pill-nav a:hover{ color:var(--red); border-color:var(--red); background:var(--red-soft); }
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+.btn{
+  border:1px solid var(--line-strong); background:var(--surface); color:var(--ink);
+  border-radius:999px; padding:9px 16px; font-size:.85rem; font-weight:700; cursor:pointer;
+  transition:transform .1s, box-shadow .15s, background .15s;
+}
+.btn:hover{ box-shadow:var(--shadow-sm); }
+.btn:active{ transform:translateY(1px); }
+.btn-ghost{ background:var(--surface); }
+.btn-primary{ background:var(--red); border-color:var(--red); color:#fff; }
+.btn-primary:hover{ background:#9f2b25; }
+.btn-danger-ghost{ background:transparent; border-color:var(--line); color:var(--ink-faint); }
+.btn-danger-ghost:hover{ color:var(--red); border-color:var(--red); background:var(--red-soft); }
+.icon-btn{
+  border:none; background:transparent; cursor:pointer; font-size:1rem; line-height:1;
+  padding:4px 6px; border-radius:var(--radius-sm); color:var(--ink-faint);
+}
+.icon-btn.danger:hover{ background:var(--red-soft); color:var(--red); }
+
+/* =========================================================
+   HERO + DASHBOARD
+   ========================================================= */
+.hero{ padding:40px 0 8px; }
+.eyebrow{
+  font-family:'JetBrains Mono',monospace; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--gold); font-weight:700;
+}
+.hero h1{ font-size:clamp(2rem,5vw,2.9rem); font-weight:600; margin-top:.25em; }
+.hero-sub{ color:var(--ink-soft); max-width:60ch; margin-top:.6em; font-size:1rem; }
+
+.dashboard-grid{
+  margin-top:26px;
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px;
+}
+.stat-card{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md);
+  padding:16px 16px 14px; box-shadow:var(--shadow-sm);
+  display:flex; flex-direction:column; gap:4px;
+}
+.stat-card--accent{ border-color:var(--red); background:linear-gradient(180deg, var(--red-soft), var(--surface) 70%); }
+.stat-icon{ font-size:1.3rem; }
+.stat-label{ font-size:.74rem; letter-spacing:.03em; text-transform:uppercase; color:var(--ink-faint); font-weight:700; margin-top:4px; }
+.stat-value{ font-family:'JetBrains Mono',monospace; font-size:1.15rem; font-weight:700; color:var(--ink); }
+.stat-note{ font-size:.78rem; color:var(--ink-soft); }
+
+/* =========================================================
+   SECTIONS (shared)
+   ========================================================= */
+.section{ padding:44px 0; border-top:1px solid var(--line); }
+.section-head{ margin-bottom:20px; border-left:4px solid var(--gold); padding-left:14px; }
+.section-head h2{ font-size:1.55rem; font-weight:600; }
+.section-sub{ color:var(--ink-soft); font-size:.92rem; margin-top:6px; max-width:70ch; }
+.subsection-head{ margin:28px 0 14px; }
+.subsection-head h3{ font-size:1.15rem; font-weight:600; }
+
+/* =========================================================
+   TIMELINE (cronograma)
+   ========================================================= */
+.timeline{ display:flex; flex-direction:column; gap:0; border-left:2px solid var(--line-strong); margin-left:6px; }
+.timeline-day{ position:relative; padding:14px 0 14px 22px; }
+.timeline-day::before{
+  content:''; position:absolute; left:-7px; top:20px; width:11px; height:11px; border-radius:50%;
+  background:var(--surface); border:2px solid var(--red);
+}
+.timeline-day--warn::before{ border-color:var(--gold); }
+.timeline-day--end::before{ border-color:var(--green); background:var(--green); }
+.timeline-date{ display:flex; align-items:baseline; gap:10px; margin-bottom:6px; }
+.timeline-date .num{ font-weight:700; color:var(--red); font-size:1rem; }
+.timeline-date .wd{ font-size:.78rem; color:var(--ink-faint); text-transform:capitalize; }
+.timeline-items{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+.timeline-items li{ font-size:.92rem; color:var(--ink-soft); }
+.timeline-items li .mono{ color:var(--ink); font-weight:700; margin-right:6px; }
+.tag-info, .tag-warn, .tag-confirm{
+  font-family:'JetBrains Mono',monospace; font-size:.68rem; font-weight:700; border-radius:6px;
+  padding:2px 7px; margin-left:6px; white-space:nowrap; display:inline-block;
+}
+.tag-info{ background:var(--blue-soft); color:var(--blue); }
+.tag-warn{ background:var(--gold-soft); color:var(--gold); }
+.tag-confirm{ background:var(--red-soft); color:var(--red); }
+
+/* =========================================================
+   FILTER BAR
+   ========================================================= */
+.filter-bar{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+.filter-btn{
+  border:1px solid var(--line-strong); background:var(--surface); color:var(--ink-soft);
+  border-radius:999px; padding:8px 14px; font-size:.82rem; font-weight:700; cursor:pointer;
+}
+.filter-btn.active{ background:var(--ink); border-color:var(--ink); color:#fff; }
+
+/* =========================================================
+   TASK CARDS
+   ========================================================= */
+.task-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px; }
+.task-card{
+  background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--ink-faint);
+  border-radius:var(--radius-md); padding:18px; box-shadow:var(--shadow-sm);
+  display:flex; flex-direction:column; gap:12px;
+}
+.task-card[data-priority="urgente"]{ border-left-color:var(--red); }
+.task-card[data-priority="importante"]{ border-left-color:var(--gold); }
+.task-card[data-priority="pode-esperar"]{ border-left-color:var(--green); }
+.task-head{ display:flex; align-items:flex-start; gap:10px; }
+.task-icon{ font-size:1.35rem; }
+.task-titles{ flex:1; display:flex; flex-direction:column; gap:4px; }
+.task-titles h3{ font-size:1.05rem; font-weight:600; }
+.priority-badge{
+  font-size:.68rem; font-weight:700; border-radius:999px; padding:2px 9px; width:fit-content;
+  font-family:'JetBrains Mono',monospace;
+}
+.badge-urgente{ background:var(--red-soft); color:var(--red); }
+.badge-importante{ background:var(--gold-soft); color:var(--gold); }
+.badge-pode-esperar{ background:var(--green-soft); color:var(--green); }
+.task-status{ font-size:.76rem; font-weight:700; color:var(--ink-soft); white-space:nowrap; }
+.task-note{ font-size:.86rem; color:var(--ink-soft); margin:0; }
+.task-link{ font-size:.85rem; font-weight:700; text-decoration:none; }
+.task-link:hover{ text-decoration:underline; }
+
+.progress-track{ height:7px; border-radius:999px; background:var(--bg-soft); overflow:hidden; }
+.progress-track--lg{ height:10px; margin-bottom:16px; }
+.progress-fill{ height:100%; width:0%; background:linear-gradient(90deg, var(--gold), var(--red)); transition:width .25s ease; border-radius:999px; }
+
+.check-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+.check-list--grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:8px 18px; }
+.check-item label{ display:flex; align-items:center; gap:9px; font-size:.9rem; color:var(--ink-soft); cursor:pointer; }
+.check-item input[type="checkbox"]{ width:17px; height:17px; accent-color:var(--red); flex:0 0 auto; }
+.check-item input[type="checkbox"]:checked + span{ color:var(--ink-faint); text-decoration:line-through; }
+
+.resolved-toggle{
+  display:flex; align-items:center; gap:9px; font-size:.88rem; padding-top:8px; border-top:1px dashed var(--line);
+  cursor:pointer; color:var(--ink-soft);
+}
+.resolved-toggle input{ width:17px; height:17px; accent-color:var(--green); }
+
+.callout{ border-radius:var(--radius-sm); padding:12px 14px; font-size:.86rem; }
+.callout-warn{ background:var(--gold-soft); color:#6b4c12; border:1px solid color-mix(in srgb, var(--gold) 40%, transparent); }
+.callout-info{ background:var(--blue-soft); color:#1c4258; border:1px solid color-mix(in srgb, var(--blue) 35%, transparent); }
+
+.empty-state{ color:var(--ink-faint); font-size:.9rem; font-style:italic; }
+
+/* =========================================================
+   DOCUMENTOS
+   ========================================================= */
+.docs-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(230px,1fr)); gap:18px; }
+.docs-group{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md); padding:16px; box-shadow:var(--shadow-sm); }
+.docs-group h3{ font-size:.98rem; font-weight:600; margin-bottom:10px; }
+
+/* =========================================================
+   FORMS (imóvel / gasto)
+   ========================================================= */
+.inline-form{ background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius-md); padding:18px; margin-bottom:18px; }
+.form-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:12px 16px; margin-bottom:14px; }
+.form-grid label{ display:flex; flex-direction:column; gap:5px; font-size:.8rem; font-weight:700; color:var(--ink-soft); }
+.form-grid input, .form-grid select{
+  font-family:inherit; font-size:.9rem; padding:9px 10px; border-radius:var(--radius-sm);
+  border:1px solid var(--line-strong); background:var(--surface); color:var(--ink);
+}
+.form-grid input:focus, .form-grid select:focus{ outline:2px solid var(--blue); outline-offset:1px; }
+.span-2{ grid-column:span 2; }
+@media (max-width:520px){ .span-2{ grid-column:span 1; } }
+
+/* =========================================================
+   PROPRIEDADES (moradia)
+   ========================================================= */
+.property-grid-wrap{ display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:14px; }
+.property-card{
+  background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--ink-faint);
+  border-radius:var(--radius-md); padding:14px; box-shadow:var(--shadow-sm);
+  display:flex; flex-direction:column; gap:8px;
+}
+.property-card.status-interessante{ border-left-color:var(--blue); }
+.property-card.status-contatado{ border-left-color:var(--gold); }
+.property-card.status-responderam{ border-left-color:#2c8a7d; }
+.property-card.status-visita-marcada{ border-left-color:var(--blue); }
+.property-card.status-visitado{ border-left-color:#7a4fb0; }
+.property-card.status-em-negociacao{ border-left-color:#c9762e; }
+.property-card.status-aprovado{ border-left-color:var(--green); }
+.property-card.status-descartado{ border-left-color:var(--ink-faint); opacity:.6; }
+.property-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+.property-head h4{ font-size:1rem; font-weight:600; }
+.property-grid{ display:grid; grid-template-columns:1fr 1fr; gap:5px 12px; font-size:.82rem; color:var(--ink-soft); }
+.property-obs{ font-size:.82rem; color:var(--ink-soft); margin:0; }
+.property-link{ font-size:.82rem; font-weight:700; text-decoration:none; }
+.property-status-select{ display:flex; align-items:center; gap:8px; font-size:.78rem; font-weight:700; color:var(--ink-faint); margin-top:4px; }
+.property-status-select select{ font-family:inherit; font-size:.8rem; padding:5px 8px; border-radius:var(--radius-sm); border:1px solid var(--line-strong); }
+
+/* =========================================================
+   MAPA
+   ========================================================= */
+.places-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(230px,1fr)); gap:14px; }
+.places-grid label{ display:flex; flex-direction:column; gap:6px; font-size:.85rem; font-weight:700; color:var(--ink-soft); }
+.places-grid input{
+  font-family:inherit; font-size:.9rem; padding:10px 12px; border-radius:var(--radius-sm);
+  border:1px solid var(--line-strong); background:var(--surface); color:var(--ink); font-weight:400;
+}
+
+/* =========================================================
+   ORÇAMENTO
+   ========================================================= */
+.form-grid--expense{ grid-template-columns:repeat(auto-fit, minmax(160px,1fr)); }
+.table-scroll{ overflow-x:auto; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); }
+.expense-table{ width:100%; border-collapse:collapse; min-width:560px; }
+.expense-table th{
+  text-align:left; font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-faint);
+  padding:12px 14px; border-bottom:1px solid var(--line);
+}
+.expense-table td{ padding:10px 14px; font-size:.88rem; border-bottom:1px solid var(--line); color:var(--ink-soft); }
+.expense-table td.num{ font-weight:700; color:var(--ink); }
+.expense-table tr:last-child td{ border-bottom:none; }
+.cat-chip{ background:var(--blue-soft); color:var(--blue); border-radius:999px; padding:2px 9px; font-size:.76rem; font-weight:700; }
+#expense-empty{ padding:18px; margin:0; }
+.expense-summary{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-top:14px; }
+.expense-total{ font-size:.95rem; color:var(--ink-soft); }
+.expense-total strong{ font-family:'JetBrains Mono',monospace; color:var(--red); font-size:1.1rem; }
+.expense-by-category{ display:flex; gap:8px; flex-wrap:wrap; }
+.cat-total-chip{
+  font-family:'JetBrains Mono',monospace; font-size:.74rem; background:var(--surface-2); border:1px solid var(--line);
+  border-radius:999px; padding:4px 10px; color:var(--ink-soft);
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+.site-footer{ padding:34px 0 60px; text-align:center; border-top:1px solid var(--line); margin-top:10px; }
+.site-footer p{ color:var(--ink-faint); font-size:.8rem; margin-bottom:14px; }
+
+/* =========================================================
+   RESPONSIVE — gutters e empilhamento em telas pequenas
+   ========================================================= */
+@media (max-width:460px){
+  .topbar-inner{ padding-top:12px; }
+  .hero{ padding-top:28px; }
+  .property-grid{ grid-template-columns:1fr; }
+}
+
+/* =========================================================
+   IMPRESSÃO
+   ========================================================= */
+@media print{
+  .topbar, .pill-nav, .filter-bar, .inline-form, .task-link, .property-status-select select,
+  .icon-btn, .site-footer .btn{ display:none !important; }
+  .task-card[hidden]{ display:flex !important; }
+  body{ background:#fff; }
+  .section{ break-inside:avoid; padding:18px 0; }
+  .stat-card, .task-card, .property-card, .docs-group, .table-scroll{ box-shadow:none; border:1px solid #ccc; }
+  a[href]{ color:#000; text-decoration:none; }
+}
+</style>
+</head>
+<body>
+
+<!-- =========================================================
+     TOPO — navegação, contagem regressiva e impressão
+     ========================================================= -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">🇪🇸 <span>Painel Espanha</span><span class="autosave-note">💾 salvo automaticamente</span></div>
+    <div class="topbar-actions">
+      <span class="countdown-pill">🏠 <span class="js-countdown-days">--</span> dias até o fim do Airbnb</span>
+      <button id="print-btn" class="btn btn-ghost" type="button">📋 Imprimir / Salvar em PDF</button>
+    </div>
+  </div>
+  <nav class="pill-nav" aria-label="Navegação do painel">
+    <a href="#cronograma">Cronograma</a>
+    <a href="#tarefas">Tarefas</a>
+    <a href="#compras">Compras</a>
+    <a href="#documentos">Documentos</a>
+    <a href="#moradia">Moradia</a>
+    <a href="#card-visto">Visto</a>
+    <a href="#mapa">Mapa</a>
+    <a href="#orcamento">Orçamento</a>
+    <a href="#checklist">Checklist</a>
+  </nav>
+</header>
+
+<noscript>
+  <p class="wrap" style="padding-top:16px;color:var(--red);">Este painel precisa de JavaScript habilitado para as checklists, contadores e formulários funcionarem. O conteúdo abaixo ainda pode ser lido normalmente.</p>
+</noscript>
+
+<main class="wrap">
+
+  <!-- =======================================================
+       HERO + DASHBOARD
+       ======================================================= -->
+  <section class="hero">
+    <p class="eyebrow">Leonardo &amp; Marcelly · Setembro–Outubro 2026</p>
+    <h1>Nova vida na Espanha</h1>
+    <p class="hero-sub">Painel de acompanhamento da chegada: cronograma, tarefas, documentos, moradia e o prazo do visto — tudo em um só lugar, editável e salvo automaticamente neste navegador.</p>
+
+    <div class="dashboard-grid">
+      <div class="stat-card">
+        <span class="stat-icon">🧳</span>
+        <span class="stat-label">Chegada em Valencia</span>
+        <span class="stat-value num">29/09/2026</span>
+      </div>
+      <div class="stat-card stat-card--accent">
+        <span class="stat-icon">🏠</span>
+        <span class="stat-label">Fim do Airbnb</span>
+        <span class="stat-value num">07/10/2026</span>
+        <span class="stat-note"><strong class="js-countdown-days">--</strong> dias restantes</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">📄</span>
+        <span class="stat-label">Prazo planejado do visto</span>
+        <span class="stat-value num">07/10/2026</span>
+        <span class="stat-note">antecipar, não usar como meta</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">📱</span>
+        <span class="stat-label">Celular</span>
+        <span class="stat-value" id="dash-celular">Pendente</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">🏦</span>
+        <span class="stat-label">Conta bancária</span>
+        <span class="stat-value" id="dash-banco">Pendente</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">🩺</span>
+        <span class="stat-label">Exame médico</span>
+        <span class="stat-value">Data a confirmar</span>
+        <span class="stat-note" id="dash-exame-sub">0/9 etapas</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">🏠</span>
+        <span class="stat-label">Moradia</span>
+        <span class="stat-value" id="dash-moradia">Em busca</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">✅</span>
+        <span class="stat-label">Progresso da semana</span>
+        <span class="stat-value" id="dash-progresso-semana">0%</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       CRONOGRAMA PRINCIPAL
+       ======================================================= -->
+  <section id="cronograma" class="section">
+    <div class="section-head">
+      <h2>🗓️ Cronograma principal</h2>
+      <p class="section-sub">Da saída de casa até o fim do prazo do Airbnb. Os dias da semana abaixo são calculados automaticamente a partir das datas — não foram digitados de cabeça.</p>
+    </div>
+    <div class="timeline">
+      <div class="timeline-day">
+        <div class="timeline-date"><span class="num">27/09</span><span class="wd" id="wd-0927"></span></div>
+        <ul class="timeline-items">
+          <li>🧳 Saída de casa</li>
+          <li>🏨 Dormir em São José</li>
+        </ul>
+      </div>
+      <div class="timeline-day">
+        <div class="timeline-date"><span class="num">28/09</span><span class="wd" id="wd-0928"></span></div>
+        <ul class="timeline-items">
+          <li><span class="mono">06:05</span>✈️ Florianópolis (FLN) → Guarulhos (GRU) — Gol <span class="tag-info">chegada ~07:35</span></li>
+          <li>☕ Sala VIP — Banco Inter, aguardando a conexão</li>
+          <li><span class="mono">14:00</span>✈️ Guarulhos (GRU) → Madrid (MAD) — Iberia <span class="tag-info">chegada ~05:00 do dia seguinte, horário Espanha</span></li>
+        </ul>
+      </div>
+      <div class="timeline-day">
+        <div class="timeline-date"><span class="num">29/09</span><span class="wd" id="wd-0929"></span></div>
+        <ul class="timeline-items">
+          <li><span class="mono">~05:00</span>🇪🇸 Chegada em Madrid — reservar tempo para imigração, bagagem, banheiro/higiene, alimentação, deslocamento até a estação e margem de segurança</li>
+          <li><span class="mono">10:30</span>🚆 Madrid → Valencia — Renfe AVE <span class="tag-warn">previsão — reavaliar conforme horário real de pouso e imigração</span></li>
+          <li>🚕 Alfafar: decidir metrô, táxi ou Uber/Cabify até o Airbnb (malas + cansaço pesam na escolha)</li>
+          <li>🏠 Check-in no Airbnb em Alfafar <span class="tag-info">chegada prevista no início da tarde</span></li>
+          <li>😴 Descanso</li>
+          <li>🛒 Mercado — itens essenciais</li>
+          <li>🍽️ Jantar perto do Airbnb</li>
+        </ul>
+      </div>
+      <div class="timeline-day">
+        <div class="timeline-date"><span class="num">30/09</span><span class="wd" id="wd-0930"></span></div>
+        <ul class="timeline-items">
+          <li>📱 Chip espanhol</li>
+          <li>🏦 Banco (avaliar)</li>
+          <li>📄 Documentação</li>
+          <li>🏠 Início da busca por moradia</li>
+        </ul>
+      </div>
+      <div class="timeline-day timeline-day--warn">
+        <div class="timeline-date"><span class="num">Data a confirmar</span></div>
+        <ul class="timeline-items">
+          <li>🩺 Exame médico, período da tarde <span class="tag-warn">"dia 31" não existe em setembro — confirmar a data real antes de agendar algo em cima disso</span></li>
+        </ul>
+      </div>
+      <div class="timeline-day">
+        <div class="timeline-date"><span class="num">01/10 → 07/10</span></div>
+        <ul class="timeline-items">
+          <li>🏠 Visitas de imóveis</li>
+          <li>📄 Finalização da documentação do visto</li>
+          <li>🇪🇸 Protocolo do pedido</li>
+        </ul>
+      </div>
+      <div class="timeline-day timeline-day--end">
+        <div class="timeline-date"><span class="num">07/10</span><span class="wd" id="wd-1007"></span></div>
+        <ul class="timeline-items">
+          <li>🏠 Último dia do Airbnb</li>
+          <li>⚠️ Moradia definitiva deve estar encaminhada</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       PAINEL DE TAREFAS (prioridades + filtros)
+       ======================================================= -->
+  <section id="tarefas" class="section">
+    <div class="section-head">
+      <h2>✅ Painel de tarefas</h2>
+      <p class="section-sub">Organizadas por prioridade. Marcar os itens vai atualizando o progresso e os cards do topo automaticamente.</p>
+    </div>
+
+    <div class="filter-bar" role="group" aria-label="Filtrar tarefas por prioridade">
+      <button class="filter-btn active" data-filter="todos" type="button">Tudo</button>
+      <button class="filter-btn" data-filter="urgente" type="button">🔴 Urgente</button>
+      <button class="filter-btn" data-filter="importante" type="button">🟠 Importante</button>
+      <button class="filter-btn" data-filter="pode-esperar" type="button">🟢 Pode esperar</button>
+      <button class="filter-btn" data-filter="concluido" type="button">✅ Concluído</button>
+    </div>
+
+    <div class="task-grid">
+
+      <article class="task-card" id="card-chip" data-priority="importante">
+        <header class="task-head">
+          <span class="task-icon">📱</span>
+          <div class="task-titles">
+            <h3>Chip de celular espanhol</h3>
+            <span class="priority-badge badge-importante">🟠 Importante</span>
+          </div>
+          <span class="task-status" id="status-chip">Pendente</span>
+        </header>
+        <div class="progress-track"><div class="progress-fill" id="progress-chip"></div></div>
+        <ul class="check-list" id="list-chip"></ul>
+        <label class="resolved-toggle">
+          <input type="checkbox" id="chip-resolvido">
+          <span>Marcar tarefa inteira como <strong>Resolvido</strong></span>
+        </label>
+      </article>
+
+      <article class="task-card" id="card-banco" data-priority="importante">
+        <header class="task-head">
+          <span class="task-icon">🏦</span>
+          <div class="task-titles">
+            <h3>Abrir conta bancária</h3>
+            <span class="priority-badge badge-importante">🟠 Importante</span>
+          </div>
+          <span class="task-status" id="status-banco">Pendente</span>
+        </header>
+        <p class="task-note">Avaliar a possibilidade de abrir conta no <strong>Bradesco</strong> com o passaporte — ainda é uma hipótese, não algo garantido.</p>
+        <div class="progress-track"><div class="progress-fill" id="progress-banco"></div></div>
+        <ul class="check-list" id="list-banco"></ul>
+        <div class="callout callout-warn">⚠️ Confirmar previamente com o banco quais documentos são aceitos para abertura de conta por estrangeiro.</div>
+      </article>
+
+      <article class="task-card" id="card-docs" data-priority="importante">
+        <header class="task-head">
+          <span class="task-icon">📄</span>
+          <div class="task-titles">
+            <h3>Organizar documentação</h3>
+            <span class="priority-badge badge-importante">🟠 Importante</span>
+          </div>
+          <span class="task-status" id="status-docs">Pendente</span>
+        </header>
+        <p class="task-note">Progresso combinado de todas as categorias de documentos do visto e da instalação.</p>
+        <div class="progress-track"><div class="progress-fill" id="progress-docs"></div></div>
+        <a class="task-link" href="#documentos">Ver checklist completa de documentos ↓</a>
+      </article>
+
+      <article class="task-card" id="card-exame" data-priority="urgente">
+        <header class="task-head">
+          <span class="task-icon">🩺</span>
+          <div class="task-titles">
+            <h3>Exame médico para o visto</h3>
+            <span class="priority-badge badge-urgente">🔴 Urgente</span>
+          </div>
+          <span class="task-status" id="status-exame">Pendente</span>
+        </header>
+        <div class="callout callout-warn">📅 <strong>Data a confirmar.</strong> Você indicou "dia 31 à tarde" — mas setembro tem só 30 dias. Confirme se é 30/09, 01/10, 31/10 ou outra data antes de marcar qualquer coisa em cima disso.</div>
+        <p class="task-note">Período: <strong>tarde</strong>. Objetivo: realizar o exame exigido para o visto e obter o certificado correto para o processo.</p>
+        <div class="progress-track"><div class="progress-fill" id="progress-exame"></div></div>
+        <ul class="check-list" id="list-exame"></ul>
+      </article>
+
+      <article class="task-card" id="card-moradia" data-priority="urgente">
+        <header class="task-head">
+          <span class="task-icon">🏠</span>
+          <div class="task-titles">
+            <h3>Missão: encontrar moradia</h3>
+            <span class="priority-badge badge-urgente">🔴 Urgente</span>
+          </div>
+          <span class="task-status" id="status-moradia">Pendente</span>
+        </header>
+        <p class="task-note">A busca deve começar praticamente desde a chegada — o Airbnb acaba em <strong>07/10</strong>.</p>
+        <div class="progress-track"><div class="progress-fill" id="progress-moradia"></div></div>
+        <a class="task-link" href="#moradia">Gerenciar missão e imóveis ↓</a>
+      </article>
+
+      <article class="task-card" id="card-visto" data-priority="urgente">
+        <header class="task-head">
+          <span class="task-icon">🇪🇸</span>
+          <div class="task-titles">
+            <h3>Visto de nômade digital</h3>
+            <span class="priority-badge badge-urgente">🔴 Urgente</span>
+          </div>
+          <span class="task-status" id="status-visto">Pendente</span>
+        </header>
+        <p class="task-note">Prazo informado para dar entrada: <strong>07/10</strong>. Meta real: protocolar bem antes disso, não usar o prazo como alvo.</p>
+        <div class="progress-track"><div class="progress-fill" id="progress-visto"></div></div>
+        <ul class="check-list" id="list-visto"></ul>
+        <div class="callout callout-info">Documentos e exigências ainda não confirmadas oficialmente não foram inventadas aqui — o que não está confirmado aparece marcado na seção de Documentos.</div>
+      </article>
+
+      <article class="task-card" id="card-turismo" data-priority="pode-esperar">
+        <header class="task-head">
+          <span class="task-icon">🎉</span>
+          <div class="task-titles">
+            <h3>Explorar a região</h3>
+            <span class="priority-badge badge-pode-esperar">🟢 Pode esperar</span>
+          </div>
+          <span class="task-status" id="status-turismo">Pendente</span>
+        </header>
+        <p class="task-note">Sem pressa — só depois que o essencial estiver encaminhado.</p>
+        <div class="progress-track"><div class="progress-fill" id="progress-turismo"></div></div>
+        <ul class="check-list" id="list-turismo"></ul>
+      </article>
+
+    </div>
+
+    <p class="empty-state" id="filter-empty" hidden>Nenhuma tarefa nessa categoria no momento.</p>
+  </section>
+
+  <!-- =======================================================
+       CHECKLIST DE MERCADO
+       ======================================================= -->
+  <section id="compras" class="section">
+    <div class="section-head">
+      <h2>🛒 Checklist de mercado</h2>
+      <p class="section-sub">Compra rápida na noite de chegada, 29/09 — só o essencial para os primeiros dias.</p>
+    </div>
+    <ul class="check-list check-list--grid" id="list-mercado"></ul>
+  </section>
+
+  <!-- =======================================================
+       DOCUMENTAÇÃO
+       ======================================================= -->
+  <section id="documentos" class="section">
+    <div class="section-head">
+      <h2>📄 Documentação</h2>
+      <p class="section-sub">Checklist para revisar antes do protocolo do visto. Itens marcados com <span class="tag-confirm">CONFIRMAR</span> ainda não têm exigência confirmada — validar antes de assumir que são necessários.</p>
+    </div>
+    <div class="docs-grid">
+      <div class="docs-group">
+        <h3>🪪 Identificação</h3>
+        <ul class="check-list" id="list-docs-ident"></ul>
+      </div>
+      <div class="docs-group">
+        <h3>💼 Profissional</h3>
+        <ul class="check-list" id="list-docs-prof"></ul>
+      </div>
+      <div class="docs-group">
+        <h3>👥 Pessoal</h3>
+        <ul class="check-list" id="list-docs-pessoal"></ul>
+      </div>
+      <div class="docs-group">
+        <h3>🩺 Médica</h3>
+        <ul class="check-list" id="list-docs-medica"></ul>
+      </div>
+      <div class="docs-group">
+        <h3>🗂️ Do processo</h3>
+        <ul class="check-list" id="list-docs-processo"></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       MORADIA — missão + tracker de imóveis
+       ======================================================= -->
+  <section id="moradia" class="section">
+    <div class="section-head">
+      <h2>🏠 Missão: encontrar moradia</h2>
+      <p class="section-sub">No Airbnb até <strong>07/10</strong> (<span class="js-countdown-days">--</span> dias restantes). A busca começa já nos primeiros dias — deixar para o fim é o maior risco da semana.</p>
+    </div>
+    <ul class="check-list check-list--grid" id="list-moradia"></ul>
+
+    <div class="subsection-head">
+      <h3>Imóveis em análise</h3>
+      <p class="section-sub">Registre cada habitación/vivienda visto — endereço, condições e status da conversa. Nada aqui é inventado: os campos ficam em branco até você preencher.</p>
+    </div>
+
+    <form id="property-form" class="inline-form">
+      <div class="form-grid">
+        <label>Endereço <input type="text" name="endereco" placeholder="Rua, número, bairro..."></label>
+        <label>Bairro <input type="text" name="bairro" placeholder="Ex.: Alfafar, Ruzafa..."></label>
+        <label>Preço <input type="text" name="preco" placeholder="Ex.: 650€/mês"></label>
+        <label>Caução/fiança <input type="text" name="caucao" placeholder="Ex.: 1 mês"></label>
+        <label>Despesas incluídas? <input type="text" name="despesas" placeholder="Água, luz, internet..."></label>
+        <label>Distância até transporte <input type="text" name="distancia" placeholder="Ex.: 5 min a pé do metrô"></label>
+        <label class="span-2">Observações <input type="text" name="obs" placeholder="Qualquer detalhe relevante"></label>
+        <label class="span-2">Link do anúncio <input type="url" name="link" placeholder="https://..."></label>
+      </div>
+      <button type="submit" class="btn btn-primary">+ Adicionar imóvel</button>
+    </form>
+
+    <div id="property-list" class="property-grid-wrap"></div>
+  </section>
+
+  <!-- =======================================================
+       MAPA / LOCALIZAÇÃO
+       ======================================================= -->
+  <section id="mapa" class="section">
+    <div class="section-head">
+      <h2>📍 Nossa base</h2>
+      <p class="section-sub">Alfafar — Valência, Espanha. Preencha os campos conforme forem descobrindo os lugares reais; nenhum endereço foi inventado aqui.</p>
+    </div>
+    <div class="places-grid">
+      <label>🏠 Airbnb <input type="text" id="place-airbnb" placeholder="Endereço ainda não preenchido"></label>
+      <label>🛒 Supermercado mais próximo <input type="text" id="place-mercado" placeholder="A preencher"></label>
+      <label>🚉 Estação de transporte mais próxima <input type="text" id="place-estacaoTransporte" placeholder="A preencher"></label>
+      <label>💊 Farmácia <input type="text" id="place-farmacia" placeholder="A preencher"></label>
+      <label>🏦 Banco <input type="text" id="place-banco" placeholder="A preencher"></label>
+      <label>🩺 Clínica do exame <input type="text" id="place-clinica" placeholder="A preencher"></label>
+      <label>🚆 Estação de trem <input type="text" id="place-estacaoTrem" placeholder="A preencher"></label>
+      <label class="span-2">🏘️ Imóveis visitados <input type="text" id="place-imoveisVisitados" placeholder="Anote endereços conforme for visitando"></label>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       ORÇAMENTO
+       ======================================================= -->
+  <section id="orcamento" class="section">
+    <div class="section-head">
+      <h2>💶 Orçamento dos primeiros dias</h2>
+      <p class="section-sub">Registro simples dos gastos. Valores em euros por padrão — ajuste manualmente se algum lançamento for em reais.</p>
+    </div>
+
+    <form id="expense-form" class="inline-form">
+      <div class="form-grid form-grid--expense">
+        <label>Data <input type="date" name="data" id="expense-date" required></label>
+        <label>Descrição <input type="text" name="desc" placeholder="Ex.: Táxi até o Airbnb" required></label>
+        <label>Categoria
+          <select name="categoria">
+            <option>Transporte</option>
+            <option>Alimentação</option>
+            <option>Mercado</option>
+            <option>Chip</option>
+            <option>Documentação</option>
+            <option>Exame médico</option>
+            <option>Moradia</option>
+            <option>Outros</option>
+          </select>
+        </label>
+        <label>Valor (€) <input type="number" name="valor" min="0" step="0.01" placeholder="0,00" required></label>
+        <label class="span-2">Observação <input type="text" name="obs" placeholder="Opcional"></label>
+      </div>
+      <button type="submit" class="btn btn-primary">+ Adicionar gasto</button>
+    </form>
+
+    <div class="table-scroll">
+      <table class="expense-table">
+        <thead>
+          <tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th><th>Obs.</th><th></th></tr>
+        </thead>
+        <tbody id="expense-tbody"></tbody>
+      </table>
+      <p class="empty-state" id="expense-empty">Nenhum gasto registrado ainda.</p>
+    </div>
+
+    <div class="expense-summary">
+      <div class="expense-total">Total gasto: <strong id="expense-total">€ 0,00</strong></div>
+      <div class="expense-by-category" id="expense-by-category"></div>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       CHECKLIST GERAL DA PRIMEIRA SEMANA
+       ======================================================= -->
+  <section id="checklist" class="section">
+    <div class="section-head">
+      <h2>📋 Checklist da primeira semana</h2>
+      <p class="section-sub"><span id="semana-count">0 de 0 concluídos</span> — <strong id="semana-percent">0%</strong></p>
+    </div>
+    <div class="progress-track progress-track--lg"><div class="progress-fill" id="progress-semana"></div></div>
+    <ul class="check-list check-list--grid" id="list-semana"></ul>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <p>Dados salvos apenas neste navegador (localStorage) — nada é enviado para nenhum servidor.</p>
+  <button id="clear-data-btn" class="btn btn-danger-ghost" type="button">🗑️ Limpar todos os dados salvos</button>
+</footer>
+
+<script>
+(function(){
+  'use strict';
+
+  /* =========================================================
+     ESTADO & PERSISTÊNCIA (localStorage)
+     ========================================================= */
+  var STORAGE_KEY = 'espanhaPlannerState_v1';
+
+  function defaultState(){
+    return { checks:{}, properties:[], expenses:[], places:{} };
+  }
+
+  function loadState(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return defaultState();
+      var parsed = JSON.parse(raw);
+      var base = defaultState();
+      return {
+        checks: parsed.checks || base.checks,
+        properties: Array.isArray(parsed.properties) ? parsed.properties : base.properties,
+        expenses: Array.isArray(parsed.expenses) ? parsed.expenses : base.expenses,
+        places: parsed.places || base.places
+      };
+    }catch(e){
+      console.warn('Não foi possível ler os dados salvos, iniciando do zero.', e);
+      return defaultState();
+    }
+  }
+
+  var state = loadState();
+  var currentFilter = 'todos';
+
+  function saveState(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    catch(e){ console.warn('Não foi possível salvar os dados neste navegador.', e); }
+  }
+
+  /* =========================================================
+     UTILITÁRIOS
+     ========================================================= */
+  function escapeHtml(str){
+    return String(str == null ? '' : str).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+
+  function safeLink(url){
+    if(!url) return null;
+    var trimmed = String(url).trim();
+    return /^https?:\/\//i.test(trimmed) ? trimmed : null;
+  }
+
+  function slug(s){
+    return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-');
+  }
+
+  function formatDateBR(iso){
+    if(!iso) return '—';
+    var parts = iso.split('-');
+    if(parts.length !== 3) return iso;
+    return parts[2] + '/' + parts[1] + '/' + parts[0];
+  }
+
+  function setWeekday(id, y, m, d){
+    var el = document.getElementById(id);
+    if(!el) return;
+    var date = new Date(y, m - 1, d);
+    el.textContent = date.toLocaleDateString('pt-BR', { weekday:'long' });
+  }
+
+  /* =========================================================
+     DEFINIÇÃO DAS CHECKLISTS
+     "c:true" = item ainda não confirmado (mostra etiqueta CONFIRMAR)
+     ========================================================= */
+  var CHECKLISTS = {
+    mercado: [
+      {k:'mercado.agua', t:'Água'},
+      {k:'mercado.cafe', t:'Café'},
+      {k:'mercado.leite', t:'Leite'},
+      {k:'mercado.pao', t:'Pão'},
+      {k:'mercado.ovos', t:'Ovos'},
+      {k:'mercado.frutas', t:'Frutas'},
+      {k:'mercado.rapidos', t:'Alimentos rápidos/práticos'},
+      {k:'mercado.higiene', t:'Produtos de higiene pessoal'},
+      {k:'mercado.papel', t:'Papel higiênico'},
+      {k:'mercado.limpeza', t:'Produtos de limpeza básicos'},
+      {k:'mercado.cafedamanha', t:'Itens para o café da manhã'},
+      {k:'mercado.outros', t:'Outros itens básicos'}
+    ],
+    chip: [
+      {k:'chip.pesquisar', t:'Pesquisar operadoras'},
+      {k:'chip.comparar', t:'Comparar planos'},
+      {k:'chip.comprar', t:'Comprar chip/eSIM'},
+      {k:'chip.ativar', t:'Ativar'},
+      {k:'chip.internet', t:'Garantir internet móvel funcionando'},
+      {k:'chip.numero', t:'Guardar o número espanhol'}
+    ],
+    banco: [
+      {k:'banco.passaporte', t:'Passaporte'},
+      {k:'banco.docs', t:'Demais documentos disponíveis'},
+      {k:'banco.comprovante', t:'Comprovante de endereço, se solicitado', c:true},
+      {k:'banco.nietie', t:'NIE/TIE, se aplicável', c:true},
+      {k:'banco.telefone', t:'Número de telefone espanhol'},
+      {k:'banco.outros', t:'Demais documentos exigidos pelo banco', c:true}
+    ],
+    exame: [
+      {k:'exame.endereco', t:'Confirmar endereço da clínica'},
+      {k:'exame.horario', t:'Confirmar horário'},
+      {k:'exame.passaporte', t:'Levar passaporte'},
+      {k:'exame.docs', t:'Levar documentos solicitados'},
+      {k:'exame.realizar', t:'Realizar exame'},
+      {k:'exame.certificado', t:'Solicitar certificado/atestado'},
+      {k:'exame.assinatura', t:'Conferir assinatura/carimbo'},
+      {k:'exame.fisico', t:'Guardar versão física'},
+      {k:'exame.digital', t:'Guardar versão digital'}
+    ],
+    moradiaMissao: [
+      {k:'moradia.perfis', t:'Criar/organizar perfis nos portais imobiliários'},
+      {k:'moradia.habitaciones', t:'Pesquisar habitaciones'},
+      {k:'moradia.viviendas', t:'Pesquisar viviendas'},
+      {k:'moradia.salvar', t:'Salvar anúncios interessantes'},
+      {k:'moradia.contato', t:'Entrar em contato com proprietários/agências'},
+      {k:'moradia.marcar', t:'Marcar visitas'},
+      {k:'moradia.visitar', t:'Visitar imóveis'},
+      {k:'moradia.comparar', t:'Comparar preços'},
+      {k:'moradia.localizacao', t:'Verificar localização'},
+      {k:'moradia.transporte', t:'Verificar transporte público'},
+      {k:'moradia.condicoes', t:'Verificar condições do imóvel'},
+      {k:'moradia.documentacao', t:'Confirmar documentação exigida', c:true},
+      {k:'moradia.negociar', t:'Negociar condições'},
+      {k:'moradia.escolher', t:'Escolher imóvel'},
+      {k:'moradia.contrato', t:'Assinar contrato'},
+      {k:'moradia.mudanca', t:'Organizar mudança'}
+    ],
+    visto: [
+      {k:'visto.chegada', t:'29/09 — chegada em Valencia e organização inicial dos documentos'},
+      {k:'visto.dia30', t:'30/09 — resolver chip e banco, conferência documental'},
+      {k:'visto.exame', t:'Realizar exame médico e obter o certificado (data a confirmar)'},
+      {k:'visto.finalizar', t:'01–04/10 — finalizar e revisar a documentação'},
+      {k:'visto.digitalizar', t:'01–04/10 — digitalizar os documentos'},
+      {k:'visto.formulario', t:'01–04/10 — preparar formulário e conferir taxas', c:true},
+      {k:'visto.protocolo', t:'Preparar e protocolar o pedido, idealmente antes de 07/10'}
+    ],
+    docsIdent: [
+      {k:'docs.ident.passaporte', t:'Passaporte'},
+      {k:'docs.ident.copias', t:'Cópias do passaporte'},
+      {k:'docs.ident.nie', t:'NIE, se já disponível'},
+      {k:'docs.ident.outros', t:'Outros documentos de identificação', c:true}
+    ],
+    docsProf: [
+      {k:'docs.prof.contrato', t:'Contrato de trabalho/prestação de serviços'},
+      {k:'docs.prof.renda', t:'Comprovantes de renda'},
+      {k:'docs.prof.bancarios', t:'Comprovantes bancários'},
+      {k:'docs.prof.empresa', t:'Documentos da empresa'},
+      {k:'docs.prof.outros', t:'Outros documentos profissionais', c:true}
+    ],
+    docsPessoal: [
+      {k:'docs.pessoal.casamento', t:'Certidão de casamento'},
+      {k:'docs.pessoal.marcelly', t:'Documentos da Marcelly', c:true},
+      {k:'docs.pessoal.outros', t:'Outros documentos pessoais', c:true}
+    ],
+    docsMedica: [
+      {k:'docs.medica.exame', t:'Exame médico'},
+      {k:'docs.medica.certificado', t:'Certificado médico'},
+      {k:'docs.medica.outros', t:'Outros documentos solicitados', c:true}
+    ],
+    docsProcesso: [
+      {k:'docs.processo.formulario', t:'Formulário', c:true},
+      {k:'docs.processo.taxa', t:'Taxa', c:true},
+      {k:'docs.processo.fotos', t:'Fotografias, se necessárias', c:true},
+      {k:'docs.processo.copias', t:'Cópias'},
+      {k:'docs.processo.apostilamentos', t:'Apostilamentos', c:true},
+      {k:'docs.processo.traducoes', t:'Traduções juramentadas', c:true},
+      {k:'docs.processo.protocolo', t:'Comprovante de protocolo'}
+    ],
+    turismo: [
+      {k:'turismo.pesquisar', t:'Pesquisar pontos turísticos de Valencia'},
+      {k:'turismo.passeio', t:'Definir um passeio para o primeiro fim de semana livre'},
+      {k:'turismo.sempressa', t:'Aproveitar sem pressa — isso pode esperar'}
+    ],
+    semanaGeral: [
+      {k:'semana.chegar', t:'Chegar em Valencia'},
+      {k:'semana.checkin', t:'Fazer check-in'},
+      {k:'semana.basicos', t:'Comprar itens básicos'},
+      {k:'semana.chip', t:'Comprar chip espanhol'},
+      {k:'semana.internet', t:'Ter internet móvel funcionando'},
+      {k:'semana.conta', t:'Avaliar abertura de conta'},
+      {k:'semana.documentos', t:'Organizar documentos'},
+      {k:'semana.exame', t:'Realizar exame médico'},
+      {k:'semana.docvisto', t:'Finalizar documentação do visto'},
+      {k:'semana.protocolar', t:'Protocolar pedido do visto'},
+      {k:'semana.buscamoradia', t:'Começar busca de moradia'},
+      {k:'semana.contatos', t:'Fazer contatos'},
+      {k:'semana.visitas', t:'Marcar visitas'},
+      {k:'semana.visitarimoveis', t:'Visitar imóveis'},
+      {k:'semana.escolhermoradia', t:'Escolher moradia'},
+      {k:'semana.saidaairbnb', t:'Organizar saída do Airbnb'}
+    ]
+  };
+
+  var DOCS_ALL = [].concat(
+    CHECKLISTS.docsIdent, CHECKLISTS.docsProf, CHECKLISTS.docsPessoal,
+    CHECKLISTS.docsMedica, CHECKLISTS.docsProcesso
+  );
+
+  var PROGRESS_TARGETS = [
+    {bar:'progress-chip', status:'status-chip', items:CHECKLISTS.chip, card:'card-chip', resolvedKey:'chip.resolvido'},
+    {bar:'progress-banco', status:'status-banco', items:CHECKLISTS.banco, card:'card-banco'},
+    {bar:'progress-docs', status:'status-docs', items:DOCS_ALL, card:'card-docs'},
+    {bar:'progress-exame', status:'status-exame', items:CHECKLISTS.exame, card:'card-exame'},
+    {bar:'progress-moradia', status:'status-moradia', items:CHECKLISTS.moradiaMissao, card:'card-moradia'},
+    {bar:'progress-visto', status:'status-visto', items:CHECKLISTS.visto, card:'card-visto'},
+    {bar:'progress-turismo', status:'status-turismo', items:CHECKLISTS.turismo, card:'card-turismo'}
+  ];
+
+  /* =========================================================
+     CHECKLISTS — renderização genérica
+     ========================================================= */
+  function progressOf(items){
+    var total = items.length;
+    var done = items.filter(function(i){ return !!state.checks[i.k]; }).length;
+    return { done:done, total:total, pct: total ? Math.round((done/total)*100) : 0 };
+  }
+
+  function renderChecklist(containerId, items){
+    var el = document.getElementById(containerId);
+    if(!el) return;
+    el.innerHTML = '';
+    items.forEach(function(item){
+      var li = document.createElement('li');
+      li.className = 'check-item';
+      var label = document.createElement('label');
+      var input = document.createElement('input');
+      input.type = 'checkbox';
+      input.id = item.k;
+      input.checked = !!state.checks[item.k];
+      input.addEventListener('change', function(){
+        state.checks[item.k] = input.checked;
+        saveState();
+        renderProgressBars();
+        renderDashboard();
+      });
+      var span = document.createElement('span');
+      span.textContent = item.t;
+      label.appendChild(input);
+      label.appendChild(span);
+      if(item.c){
+        var tag = document.createElement('span');
+        tag.className = 'tag-confirm';
+        tag.textContent = 'CONFIRMAR';
+        label.appendChild(tag);
+      }
+      li.appendChild(label);
+      el.appendChild(li);
+    });
+  }
+
+  function renderProgressBars(){
+    PROGRESS_TARGETS.forEach(function(cfg){
+      var p = progressOf(cfg.items);
+      var barEl = document.getElementById(cfg.bar);
+      if(barEl) barEl.style.width = p.pct + '%';
+
+      var resolved = cfg.resolvedKey && !!state.checks[cfg.resolvedKey];
+      var effectivePct = resolved ? 100 : p.pct;
+
+      var statusEl = document.getElementById(cfg.status);
+      if(statusEl){
+        if(resolved) statusEl.textContent = 'Resolvido ✅';
+        else if(p.pct === 100) statusEl.textContent = 'Concluído ✅';
+        else if(p.pct === 0) statusEl.textContent = 'Pendente';
+        else statusEl.textContent = 'Em andamento (' + p.done + '/' + p.total + ')';
+      }
+
+      var cardEl = document.getElementById(cfg.card);
+      if(cardEl) cardEl.dataset.progress = String(effectivePct);
+    });
+
+    var semana = progressOf(CHECKLISTS.semanaGeral);
+    var semanaBar = document.getElementById('progress-semana');
+    if(semanaBar) semanaBar.style.width = semana.pct + '%';
+    var semanaPercent = document.getElementById('semana-percent');
+    if(semanaPercent) semanaPercent.textContent = semana.pct + '%';
+    var semanaCount = document.getElementById('semana-count');
+    if(semanaCount) semanaCount.textContent = semana.done + ' de ' + semana.total + ' concluídos';
+
+    applyFilter(currentFilter);
+  }
+
+  /* =========================================================
+     DASHBOARD (topo)
+     ========================================================= */
+  function renderDashboard(){
+    var chipResolvido = !!state.checks['chip.resolvido'];
+    var dashCelular = document.getElementById('dash-celular');
+    if(dashCelular) dashCelular.textContent = chipResolvido ? 'Resolvido ✅' : 'Pendente';
+
+    var bancoProg = progressOf(CHECKLISTS.banco);
+    var dashBanco = document.getElementById('dash-banco');
+    if(dashBanco){
+      if(bancoProg.pct === 100) dashBanco.textContent = 'Avaliação concluída';
+      else if(bancoProg.done > 0) dashBanco.textContent = 'Em andamento (' + bancoProg.done + '/' + bancoProg.total + ')';
+      else dashBanco.textContent = 'Pendente';
+    }
+
+    var exameProg = progressOf(CHECKLISTS.exame);
+    var dashExameSub = document.getElementById('dash-exame-sub');
+    if(dashExameSub) dashExameSub.textContent = exameProg.done + '/' + exameProg.total + ' etapas';
+
+    var aprovado = state.properties.some(function(p){ return p.status === 'Aprovado'; });
+    var dashMoradia = document.getElementById('dash-moradia');
+    if(dashMoradia){
+      if(aprovado) dashMoradia.textContent = 'Definida ✅';
+      else if(state.properties.length === 1) dashMoradia.textContent = '1 imóvel em análise';
+      else if(state.properties.length > 1) dashMoradia.textContent = state.properties.length + ' imóveis em análise';
+      else dashMoradia.textContent = 'Em busca';
+    }
+
+    var semana = progressOf(CHECKLISTS.semanaGeral);
+    var dashSemana = document.getElementById('dash-progresso-semana');
+    if(dashSemana) dashSemana.textContent = semana.pct + '%';
+  }
+
+  /* =========================================================
+     CONTAGEM REGRESSIVA — até 07/10/2026, com base na data real do aparelho
+     ========================================================= */
+  function updateCountdown(){
+    var target = new Date(2026, 9, 7); // mês em JS é 0-indexado: 9 = outubro
+    var now = new Date();
+    var todayMid = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    var diffDays = Math.round((target - todayMid) / 86400000);
+    var text = diffDays > 0 ? String(diffDays) : (diffDays === 0 ? 'Hoje' : 'Encerrado');
+    var els = document.querySelectorAll('.js-countdown-days');
+    els.forEach(function(el){ el.textContent = text; });
+  }
+
+  /* =========================================================
+     FILTROS DO PAINEL DE TAREFAS
+     ========================================================= */
+  function initFilters(){
+    var btns = document.querySelectorAll('.filter-btn');
+    btns.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        btns.forEach(function(b){ b.classList.remove('active'); });
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        applyFilter(currentFilter);
+      });
+    });
+  }
+
+  function applyFilter(filter){
+    var cards = document.querySelectorAll('.task-card');
+    cards.forEach(function(card){
+      var priority = card.dataset.priority;
+      var progress = Number(card.dataset.progress || 0);
+      var show = true;
+      if(filter === 'urgente') show = priority === 'urgente';
+      else if(filter === 'importante') show = priority === 'importante';
+      else if(filter === 'pode-esperar') show = priority === 'pode-esperar';
+      else if(filter === 'concluido') show = progress === 100;
+      card.hidden = !show;
+    });
+    var visibleCount = document.querySelectorAll('.task-card:not([hidden])').length;
+    var emptyMsg = document.getElementById('filter-empty');
+    if(emptyMsg) emptyMsg.hidden = visibleCount > 0;
+  }
+
+  /* =========================================================
+     IMÓVEIS (moradia)
+     ========================================================= */
+  var STATUS_LIST = ['Interessante','Contatado','Responderam','Visita marcada','Visitado','Em negociação','Aprovado','Descartado'];
+
+  function renderProperties(){
+    var wrap = document.getElementById('property-list');
+    if(!wrap) return;
+    wrap.innerHTML = '';
+
+    if(state.properties.length === 0){
+      var p = document.createElement('p');
+      p.className = 'empty-state';
+      p.textContent = 'Nenhum imóvel adicionado ainda. Use o formulário acima para começar a registrar as opções.';
+      wrap.appendChild(p);
+      return;
+    }
+
+    state.properties.forEach(function(prop){
+      var card = document.createElement('article');
+      card.className = 'property-card status-' + slug(prop.status || 'Interessante');
+
+      var link = safeLink(prop.link);
+      var optionsHtml = STATUS_LIST.map(function(s){
+        return '<option value="' + escapeHtml(s) + '"' + (s === prop.status ? ' selected' : '') + '>' + escapeHtml(s) + '</option>';
+      }).join('');
+
+      card.innerHTML =
+        '<div class="property-head">' +
+          '<h4>' + escapeHtml(prop.endereco || 'Endereço não informado') + '</h4>' +
+          '<button class="icon-btn danger" data-del="' + prop.id + '" title="Remover imóvel" aria-label="Remover imóvel">🗑</button>' +
+        '</div>' +
+        '<div class="property-grid">' +
+          '<span><strong>Bairro:</strong> ' + escapeHtml(prop.bairro || '—') + '</span>' +
+          '<span><strong>Preço:</strong> ' + escapeHtml(prop.preco || '—') + '</span>' +
+          '<span><strong>Caução:</strong> ' + escapeHtml(prop.caucao || '—') + '</span>' +
+          '<span><strong>Despesas incluídas:</strong> ' + escapeHtml(prop.despesas || '—') + '</span>' +
+          '<span><strong>Transporte:</strong> ' + escapeHtml(prop.distancia || '—') + '</span>' +
+        '</div>' +
+        (prop.obs ? '<p class="property-obs">' + escapeHtml(prop.obs) + '</p>' : '') +
+        (link ? '<a class="property-link" href="' + escapeHtml(link) + '" target="_blank" rel="noopener noreferrer">Ver anúncio ↗</a>' : '') +
+        '<label class="property-status-select"><span>Status</span><select data-status="' + prop.id + '">' + optionsHtml + '</select></label>';
+
+      wrap.appendChild(card);
+    });
+
+    wrap.querySelectorAll('[data-del]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(confirm('Remover este imóvel da lista?')){
+          state.properties = state.properties.filter(function(p){ return p.id !== btn.dataset.del; });
+          saveState();
+          renderProperties();
+          renderDashboard();
+        }
+      });
+    });
+
+    wrap.querySelectorAll('[data-status]').forEach(function(sel){
+      sel.addEventListener('change', function(){
+        var prop = state.properties.find(function(p){ return p.id === sel.dataset.status; });
+        if(prop){
+          prop.status = sel.value;
+          saveState();
+          renderProperties();
+          renderDashboard();
+        }
+      });
+    });
+  }
+
+  function initPropertyForm(){
+    var form = document.getElementById('property-form');
+    if(!form) return;
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var f = e.target;
+      var endereco = f.endereco.value.trim();
+      var bairro = f.bairro.value.trim();
+      if(!endereco && !bairro){
+        alert('Informe ao menos o endereço ou o bairro do imóvel.');
+        return;
+      }
+      var prop = {
+        id: 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+        endereco: endereco,
+        bairro: bairro,
+        preco: f.preco.value.trim(),
+        caucao: f.caucao.value.trim(),
+        despesas: f.despesas.value.trim(),
+        distancia: f.distancia.value.trim(),
+        obs: f.obs.value.trim(),
+        link: f.link.value.trim(),
+        status: 'Interessante'
+      };
+      state.properties.unshift(prop);
+      saveState();
+      f.reset();
+      renderProperties();
+      renderDashboard();
+    });
+  }
+
+  /* =========================================================
+     ORÇAMENTO
+     ========================================================= */
+  function renderExpenses(){
+    var tbody = document.getElementById('expense-tbody');
+    var emptyMsg = document.getElementById('expense-empty');
+    if(!tbody) return;
+    tbody.innerHTML = '';
+
+    if(state.expenses.length === 0){
+      if(emptyMsg) emptyMsg.hidden = false;
+    } else {
+      if(emptyMsg) emptyMsg.hidden = true;
+      var sorted = state.expenses.slice().sort(function(a, b){ return a.data < b.data ? 1 : -1; });
+      sorted.forEach(function(exp){
+        var tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td>' + formatDateBR(exp.data) + '</td>' +
+          '<td>' + escapeHtml(exp.desc) + '</td>' +
+          '<td><span class="cat-chip">' + escapeHtml(exp.categoria) + '</span></td>' +
+          '<td class="num">€ ' + Number(exp.valor).toFixed(2).replace('.', ',') + '</td>' +
+          '<td>' + escapeHtml(exp.obs || '—') + '</td>' +
+          '<td><button class="icon-btn danger" data-delexp="' + exp.id + '" aria-label="Remover gasto">🗑</button></td>';
+        tbody.appendChild(tr);
+      });
+      tbody.querySelectorAll('[data-delexp]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          state.expenses = state.expenses.filter(function(e){ return e.id !== btn.dataset.delexp; });
+          saveState();
+          renderExpenses();
+        });
+      });
+    }
+
+    var total = state.expenses.reduce(function(sum, e){ return sum + Number(e.valor || 0); }, 0);
+    var totalEl = document.getElementById('expense-total');
+    if(totalEl) totalEl.textContent = '€ ' + total.toFixed(2).replace('.', ',');
+
+    var byCat = {};
+    state.expenses.forEach(function(e){
+      byCat[e.categoria] = (byCat[e.categoria] || 0) + Number(e.valor || 0);
+    });
+    var catWrap = document.getElementById('expense-by-category');
+    if(catWrap){
+      catWrap.innerHTML = '';
+      Object.keys(byCat).sort(function(a, b){ return byCat[b] - byCat[a]; }).forEach(function(cat){
+        var chip = document.createElement('span');
+        chip.className = 'cat-total-chip';
+        chip.textContent = cat + ': € ' + byCat[cat].toFixed(2).replace('.', ',');
+        catWrap.appendChild(chip);
+      });
+    }
+  }
+
+  function initExpenseForm(){
+    var form = document.getElementById('expense-form');
+    if(!form) return;
+    var dateInput = document.getElementById('expense-date');
+    if(dateInput) dateInput.valueAsDate = new Date();
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var f = e.target;
+      var valor = parseFloat(f.valor.value);
+      if(!f.data.value || !f.desc.value.trim() || isNaN(valor) || valor <= 0){
+        alert('Preencha data, descrição e um valor válido maior que zero.');
+        return;
+      }
+      state.expenses.push({
+        id: 'e_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+        data: f.data.value,
+        desc: f.desc.value.trim(),
+        categoria: f.categoria.value,
+        valor: valor,
+        obs: f.obs.value.trim()
+      });
+      saveState();
+      f.reset();
+      if(dateInput) dateInput.valueAsDate = new Date();
+      renderExpenses();
+    });
+  }
+
+  /* =========================================================
+     MAPA / LOCALIZAÇÃO (campos editáveis)
+     ========================================================= */
+  var PLACE_FIELDS = ['airbnb', 'mercado', 'estacaoTransporte', 'farmacia', 'banco', 'clinica', 'estacaoTrem', 'imoveisVisitados'];
+
+  function bindPlaces(){
+    PLACE_FIELDS.forEach(function(key){
+      var el = document.getElementById('place-' + key);
+      if(!el) return;
+      el.value = state.places[key] || '';
+      el.addEventListener('input', function(){
+        state.places[key] = el.value;
+        saveState();
+      });
+    });
+  }
+
+  /* =========================================================
+     RESOLVIDO — chip (campo extra fora da checklist padrão)
+     ========================================================= */
+  function bindChipResolvido(){
+    var el = document.getElementById('chip-resolvido');
+    if(!el) return;
+    el.checked = !!state.checks['chip.resolvido'];
+    el.addEventListener('change', function(){
+      state.checks['chip.resolvido'] = el.checked;
+      saveState();
+      renderProgressBars();
+      renderDashboard();
+    });
+  }
+
+  /* =========================================================
+     LIMPAR DADOS / IMPRIMIR
+     ========================================================= */
+  function initFooterActions(){
+    var clearBtn = document.getElementById('clear-data-btn');
+    if(clearBtn){
+      clearBtn.addEventListener('click', function(){
+        if(confirm('Isso vai apagar todos os checklists marcados, imóveis, gastos e locais salvos neste navegador. Deseja continuar?')){
+          localStorage.removeItem(STORAGE_KEY);
+          location.reload();
+        }
+      });
+    }
+    var printBtn = document.getElementById('print-btn');
+    if(printBtn){
+      printBtn.addEventListener('click', function(){ window.print(); });
+    }
+  }
+
+  /* =========================================================
+     INICIALIZAÇÃO
+     ========================================================= */
+  document.addEventListener('DOMContentLoaded', function(){
+    setWeekday('wd-0927', 2026, 9, 27);
+    setWeekday('wd-0928', 2026, 9, 28);
+    setWeekday('wd-0929', 2026, 9, 29);
+    setWeekday('wd-0930', 2026, 9, 30);
+    setWeekday('wd-1007', 2026, 10, 7);
+
+    renderChecklist('list-mercado', CHECKLISTS.mercado);
+    renderChecklist('list-chip', CHECKLISTS.chip);
+    renderChecklist('list-banco', CHECKLISTS.banco);
+    renderChecklist('list-exame', CHECKLISTS.exame);
+    renderChecklist('list-moradia', CHECKLISTS.moradiaMissao);
+    renderChecklist('list-visto', CHECKLISTS.visto);
+    renderChecklist('list-turismo', CHECKLISTS.turismo);
+    renderChecklist('list-docs-ident', CHECKLISTS.docsIdent);
+    renderChecklist('list-docs-prof', CHECKLISTS.docsProf);
+    renderChecklist('list-docs-pessoal', CHECKLISTS.docsPessoal);
+    renderChecklist('list-docs-medica', CHECKLISTS.docsMedica);
+    renderChecklist('list-docs-processo', CHECKLISTS.docsProcesso);
+    renderChecklist('list-semana', CHECKLISTS.semanaGeral);
+
+    bindChipResolvido();
+    renderProperties();
+    initPropertyForm();
+    renderExpenses();
+    initExpenseForm();
+    bindPlaces();
+    initFilters();
+    initFooterActions();
+
+    renderProgressBars();
+    renderDashboard();
+    updateCountdown();
+  });
+
+})();
+</script>
+
+</body>
+</html>
