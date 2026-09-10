@@ -1,0 +1,487 @@
+<title>Roteiro Espanha — Chegada</title>
+<meta name="description" content="Itinerário dos primeiros dias de Leonardo e Marcelly na Espanha, de Florianópolis a Valencia, com pendências de instalação e visto.">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Karla:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  :root {
+    --ground: #eef1f6;
+    --surface: #ffffff;
+    --surface-2: #f4f6fa;
+    --ink: #1c2430;
+    --ink-soft: #4c5566;
+    --ink-faint: #7c8494;
+    --line: #d8dee8;
+    --line-soft: #e6eaf1;
+    --accent: #d97e1f;
+    --accent-ink: #ffffff;
+    --accent-soft: #fbeadb;
+    --iberia: #274a72;
+    --iberia-soft: #e6ecf4;
+    --warn: #b3401f;
+    --warn-soft: #fbe6de;
+    --ok: #2f7a5c;
+    --shadow: 0 1px 2px rgba(28,36,48,.04), 0 8px 24px -12px rgba(28,36,48,.12);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #131924;
+      --surface: #1a212e;
+      --surface-2: #1f2735;
+      --ink: #eef1f6;
+      --ink-soft: #b5bdcc;
+      --ink-faint: #808a9c;
+      --line: #2d3646;
+      --line-soft: #232b3a;
+      --accent: #eb9a3d;
+      --accent-ink: #1c1204;
+      --accent-soft: #3a2a13;
+      --iberia: #8fadd6;
+      --iberia-soft: #202c40;
+      --warn: #e5825f;
+      --warn-soft: #3a2118;
+      --ok: #5fbb96;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 28px -12px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #131924;
+    --surface: #1a212e;
+    --surface-2: #1f2735;
+    --ink: #eef1f6;
+    --ink-soft: #b5bdcc;
+    --ink-faint: #808a9c;
+    --line: #2d3646;
+    --line-soft: #232b3a;
+    --accent: #eb9a3d;
+    --accent-ink: #1c1204;
+    --accent-soft: #3a2a13;
+    --iberia: #8fadd6;
+    --iberia-soft: #202c40;
+    --warn: #e5825f;
+    --warn-soft: #3a2118;
+    --ok: #5fbb96;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 28px -12px rgba(0,0,0,.5);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: 'Karla', ui-sans-serif, system-ui, sans-serif;
+    padding: 0 20px 64px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+
+  h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; text-wrap: balance; margin: 0; }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* ---- Header ---- */
+  header {
+    padding: 48px 0 28px;
+    border-bottom: 1px solid var(--line);
+  }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .72rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  header h1 {
+    font-size: clamp(1.9rem, 5vw, 2.6rem);
+    font-weight: 600;
+    margin-top: .3em;
+    color: var(--ink);
+  }
+  header p.sub {
+    color: var(--ink-soft);
+    font-size: 1rem;
+    margin-top: .6em;
+    max-width: 56ch;
+  }
+
+  .route-strip {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 22px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .82rem;
+  }
+  .route-strip .leg {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-weight: 700;
+    letter-spacing: .03em;
+    box-shadow: var(--shadow);
+  }
+  .route-strip .arrow { color: var(--ink-faint); }
+  .route-strip .carrier {
+    font-size: .68rem;
+    color: var(--ink-faint);
+    font-weight: 400;
+    margin-left: 4px;
+  }
+
+  /* ---- Day sections ---- */
+  .day {
+    position: relative;
+    padding: 30px 0 30px 0;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .day:last-of-type { border-bottom: none; }
+
+  .day-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .day-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .day-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .day-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .68rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--iberia);
+    background: var(--iberia-soft);
+    border-radius: 5px;
+    padding: 2px 8px;
+    font-weight: 700;
+  }
+
+  .events {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-left: 2px solid var(--line);
+    margin-left: 4px;
+  }
+  .event {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    gap: 16px;
+    padding: 10px 0 10px 18px;
+    position: relative;
+  }
+  .event::before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    top: 18px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 2px solid var(--accent);
+  }
+  .event .time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--ink);
+    padding-top: 1px;
+  }
+  .event .time.tbd { color: var(--ink-faint); font-weight: 500; }
+  .event .desc strong { font-weight: 700; }
+  .event .desc { color: var(--ink-soft); font-size: .93rem; }
+  .event .desc b.hl { color: var(--ink); font-weight: 600; }
+  .event .note {
+    display: block;
+    margin-top: 3px;
+    font-size: .82rem;
+    color: var(--ink-faint);
+  }
+
+  .span-block {
+    margin-top: 6px;
+    padding: 14px 16px;
+    background: var(--surface-2);
+    border-radius: 10px;
+    font-size: .9rem;
+    color: var(--ink-soft);
+  }
+  .span-block strong { color: var(--ink); }
+
+  /* ---- Callouts ---- */
+  .callout {
+    border-radius: 12px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+    font-size: .92rem;
+  }
+  .callout + .callout { margin-top: 12px; }
+  .callout .c-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .72rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .callout.warn { background: var(--warn-soft); border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent); }
+  .callout.warn .c-title { color: var(--warn); }
+  .callout.info { background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); }
+  .callout.info .c-title { color: var(--accent); }
+  .callout p { margin: 0; color: var(--ink-soft); }
+  .callout p + p { margin-top: 6px; }
+  .callout ul { margin: 6px 0 0; padding-left: 1.1em; color: var(--ink-soft); }
+  .callout li + li { margin-top: 3px; }
+
+  /* ---- Window section (02–06/10) ---- */
+  .window {
+    margin-top: 18px;
+  }
+  .window .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .task-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 13px 14px;
+    box-shadow: var(--shadow);
+  }
+  .task-card .t-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .68rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 700;
+  }
+  .task-card p { margin: 5px 0 0; font-size: .88rem; color: var(--ink-soft); }
+
+  /* ---- Deadline banner ---- */
+  .deadline {
+    margin-top: 34px;
+    border-radius: 14px;
+    background: var(--iberia);
+    color: #fff;
+    padding: 22px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 28px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  :root:not([data-theme="light"]) .deadline,
+  :root[data-theme="dark"] .deadline { color: #eef1f6; }
+  .deadline .d-left { max-width: 40ch; }
+  .deadline .d-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .7rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    opacity: .75;
+  }
+  .deadline h3 { font-size: 1.2rem; margin-top: 4px; color: inherit; }
+  .deadline .d-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .deadline .d-date span { display:block; font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; opacity:.7; font-weight:600; font-family:'Karla',sans-serif; }
+
+  footer {
+    margin-top: 30px;
+    text-align: center;
+    font-size: .78rem;
+    color: var(--ink-faint);
+  }
+
+  @media (max-width: 460px) {
+    .event { grid-template-columns: 58px 1fr; gap: 10px; }
+    .deadline { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Leonardo &amp; Marcelly · Setembro–Outubro 2026</div>
+    <h1>De Florianópolis a Alfafar</h1>
+    <p class="sub">Roteiro dos dez primeiros dias na Espanha: embarque, pouso em Madrid, instalação em Valencia e as pendências que precisam estar resolvidas antes do prazo do visto.</p>
+    <div class="route-strip">
+      <span class="leg">FLN</span><span class="arrow">→</span><span class="leg">GRU <span class="carrier">Gol</span></span>
+      <span class="arrow" style="margin:0 4px;">···</span>
+      <span class="leg">GRU</span><span class="arrow">→</span><span class="leg">MAD <span class="carrier">Iberia</span></span>
+      <span class="arrow" style="margin:0 4px;">···</span>
+      <span class="leg">MAD</span><span class="arrow">→</span><span class="leg">VLC <span class="carrier">Renfe AVE</span></span>
+    </div>
+  </header>
+
+  <!-- 27/09 -->
+  <section class="day">
+    <div class="day-head">
+      <span class="day-date num">27/09 · dom</span>
+      <span class="day-title">Deslocamento até São José</span>
+    </div>
+    <div class="events">
+      <div class="event">
+        <span class="time tbd">—</span>
+        <div class="desc">Saída de casa e pernoite em São José, mais perto do aeroporto de Florianópolis (FLN) para o embarque de madrugada no dia seguinte.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 28/09 -->
+  <section class="day">
+    <div class="day-head">
+      <span class="day-date num">28/09 · seg</span>
+      <span class="day-title">Florianópolis → São Paulo → Madrid</span>
+      <span class="day-tag">Dia de voo</span>
+    </div>
+    <div class="events">
+      <div class="event">
+        <span class="time num">06:05</span>
+        <div class="desc"><b class="hl">Embarque FLN → GRU</b> pela Gol.<span class="note">Chegada prevista às 07:35 em São Paulo.</span></div>
+      </div>
+      <div class="event">
+        <span class="time num">07:35–14:00</span>
+        <div class="desc"><b class="hl">Conexão em São Paulo</b> — cerca de 6h30 de espera.<span class="note">Sala VIP via Banco Inter — bom uso do tempo parado; confirmar acesso e horário de fechamento do lounge antes de ir.</span></div>
+      </div>
+      <div class="event">
+        <span class="time num">14:00</span>
+        <div class="desc"><b class="hl">Embarque GRU → MAD</b> pela Iberia (voo noturno intercontinental).<span class="note">Pouso previsto às 05:00 do dia seguinte, horário da Espanha.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 29/09 -->
+  <section class="day">
+    <div class="day-head">
+      <span class="day-date num">29/09 · ter</span>
+      <span class="day-title">Madrid → Valencia → Alfafar</span>
+      <span class="day-tag">Chegada</span>
+    </div>
+    <div class="events">
+      <div class="event">
+        <span class="time num">05:00</span>
+        <div class="desc"><b class="hl">Pouso em Madrid (MAD)</b>, horário local da Espanha.<span class="note">~5h30 de margem até o trem — dá para imigração, bagagem e deslocamento até a estação com folga.</span></div>
+      </div>
+      <div class="event">
+        <span class="time num">10:30</span>
+        <div class="desc"><b class="hl">Trem Renfe AVE, Madrid → Valencia.</b><span class="note">Confirmar estação de embarque em Madrid (Atocha) com antecedência.</span></div>
+      </div>
+      <div class="event">
+        <span class="time tbd">↳</span>
+        <div class="desc">Decidir <b class="hl">metrô ou táxi/Uber</b> da estação até o Airbnb em <b class="hl">Alfafar</b>. Com bagagem de mudança, táxi tende a compensar o tempo economizado.</div>
+      </div>
+      <div class="event">
+        <span class="time tbd">tarde</span>
+        <div class="desc">Chegada prevista no <b class="hl">início da tarde</b>. Descanso após a noite em claro.</div>
+      </div>
+      <div class="event">
+        <span class="time tbd">noite</span>
+        <div class="desc">Jantar em algum lugar por perto e passagem pelo <b class="hl">mercado</b> para itens essenciais (água, café da manhã, produtos de higiene).</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 30/09 -->
+  <section class="day">
+    <div class="day-head">
+      <span class="day-date num">30/09 · qua</span>
+      <span class="day-title">Burocracia básica</span>
+    </div>
+    <div class="events">
+      <div class="event">
+        <span class="time tbd">—</span>
+        <div class="desc"><b class="hl">Chip de celular</b> espanhol.</div>
+      </div>
+      <div class="event">
+        <span class="time tbd">—</span>
+        <div class="desc"><b class="hl">Abertura de conta bancária</b> (Bradesco, com passaporte).<span class="note">Confirmar por telefone/site quais documentos além do passaporte a agência vai pedir — evita retrabalho se exigirem comprovante de morada.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 01/10 -->
+  <section class="day">
+    <div class="day-head">
+      <span class="day-date num">01/10 · qui</span>
+      <span class="day-title">Exame médico do visto</span>
+    </div>
+    <div class="callout warn" style="margin-bottom:14px;">
+      <span class="c-title">Ajuste de data</span>
+      <p>Você marcou isso como "dia 31" — setembro tem só 30 dias. Assumindo que é <strong>01/10</strong>, a sequência lógica do roteiro. Vale confirmar o comprovante da clínica antes de seguir com esse plano.</p>
+    </div>
+    <div class="events">
+      <div class="event">
+        <span class="time tbd">tarde</span>
+        <div class="desc"><b class="hl">Exame médico</b> exigido para o processo de visto.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02-06/10 window -->
+  <section class="day window">
+    <div class="day-head">
+      <span class="day-date num">02–06/10</span>
+      <span class="day-title">Janela para buscar moradia</span>
+    </div>
+    <div class="span-block">
+      Enquanto seguem no Airbnb (estadia até <strong>07/10</strong>), esse é o período aberto para visitar <strong>quartos (habitaciones)</strong> e <strong>imóveis (viviendas) para alugar</strong>. Sem compromissos fixados neste intervalo — o risco é deixar tudo para os últimos dias.
+    </div>
+    <div class="grid">
+      <div class="task-card">
+        <div class="t-label">Buscar</div>
+        <p>Levantar anúncios (Idealista, Fotocasa, grupos locais) antes mesmo de chegar, para já sair visitando a partir do dia 2.</p>
+      </div>
+      <div class="task-card">
+        <div class="t-label">Visitar</div>
+        <p>Priorizar imóveis com contrato formal — normalmente exigido como comprovante de morada no processo do visto.</p>
+      </div>
+      <div class="task-card">
+        <div class="t-label">Fechar</div>
+        <p>Ter o contrato assinado com folga antes de 07/10, não no próprio dia — é o mesmo prazo da entrega da documentação.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="callout info" style="margin-top:22px;">
+    <span class="c-title">Ponto de atenção</span>
+    <p>O prazo de <strong>07/10</strong> está sendo usado para duas coisas ao mesmo tempo: fim da estadia no Airbnb <em>e</em> limite para dar entrada na documentação do visto. Empilhar mudança de endereço e protocolo de visto no mesmo dia é o cenário de maior risco do roteiro.</p>
+    <ul>
+      <li>Definir a moradia até <strong>04–05/10</strong>, deixando 2 dias de colchão.</li>
+      <li>Reunir a documentação do visto (exame médico, comprovante de morada, conta bancária) assim que o contrato de aluguel sair — não esperar o dia 07.</li>
+    </ul>
+  </div>
+
+  <div class="deadline">
+    <div class="d-left">
+      <div class="d-eyebrow">Prazo final</div>
+      <h3>Documentação do visto</h3>
+    </div>
+    <div class="d-date num">07/10<span>antecipar, não usar como meta</span></div>
+  </div>
+
+  <footer>Roteiro de chegada · Florianópolis → São Paulo → Madrid → Valencia (Alfafar)</footer>
+
+</div>
