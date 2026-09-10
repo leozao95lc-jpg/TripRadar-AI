@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Financeiro — Léo &amp; Celly</title>
+<meta name="description" content="Calculadora de fluxo de caixa editável para a mudança a Valência: 16 meses (set/2026 a dez/2027), meios econômicos do visto e o cartão de crédito do Brasil.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Karla:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Mesma paleta do painel de chegada, para consistência visual entre as duas páginas. */
+:root{
+  --bg:#f6f3ec; --bg-soft:#efe9dc; --surface:#ffffff; --surface-2:#fbfaf6;
+  --ink:#211d1a; --ink-soft:#5a5349; --ink-faint:#8b8377;
+  --line:#e4ddce; --line-strong:#d6ccb6;
+  --red:#b8332c; --red-soft:#f7e3e0;
+  --gold:#c08a26; --gold-soft:#f8ecd2;
+  --blue:#2c6a8a; --blue-soft:#e2edf2;
+  --green:#2f7a52; --green-soft:#e2f1e8;
+  --shadow-sm:0 1px 2px rgba(33,29,26,.06);
+  --shadow-md:0 12px 28px -16px rgba(33,29,26,.28);
+  --radius-lg:18px; --radius-md:12px; --radius-sm:8px;
+}
+*,*::before,*::after{ box-sizing:border-box; }
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:'Karla', ui-sans-serif, system-ui, sans-serif; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{ font-family:'Fraunces', Georgia, serif; text-wrap:balance; margin:0; color:var(--ink); }
+.mono, .num{ font-family:'JetBrains Mono', ui-monospace, SFMono-Regular, monospace; font-variant-numeric:tabular-nums; }
+.wrap{ max-width:1180px; margin:0 auto; padding:0 20px; }
+
+/* Topbar */
+.topbar{ position:sticky; top:0; z-index:50; background:rgba(246,243,236,.92); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); }
+.topbar-inner{ max-width:1180px; margin:0 auto; padding:14px 20px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+.back-link{ display:inline-flex; align-items:center; gap:6px; text-decoration:none; color:var(--ink-soft); font-size:.85rem; font-weight:700; }
+.back-link:hover{ color:var(--red); }
+.brand{ display:flex; align-items:center; gap:8px; font-family:'Fraunces',serif; font-weight:600; font-size:1.1rem; }
+.topbar-actions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+
+/* Buttons */
+.btn{ border:1px solid var(--line-strong); background:var(--surface); color:var(--ink); border-radius:999px; padding:9px 16px; font-size:.83rem; font-weight:700; cursor:pointer; }
+.btn:hover{ box-shadow:var(--shadow-sm); }
+.btn-ghost{ background:var(--surface); }
+.btn-primary{ background:var(--red); border-color:var(--red); color:#fff; }
+.btn-primary:hover{ background:#9f2b25; }
+
+/* Hero */
+.hero{ padding:36px 0 8px; }
+.eyebrow{ font-family:'JetBrains Mono',monospace; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--gold); font-weight:700; }
+.hero h1{ font-size:clamp(1.9rem,5vw,2.6rem); font-weight:600; margin-top:.25em; }
+.hero-sub{ color:var(--ink-soft); max-width:64ch; margin-top:.6em; font-size:.96rem; }
+
+.dashboard-grid{ margin-top:24px; display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; }
+.stat-card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md); padding:16px 16px 14px; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; gap:4px; }
+.stat-card--warn{ border-color:var(--red); background:linear-gradient(180deg, var(--red-soft), var(--surface) 70%); }
+.stat-card--good{ border-color:var(--green); background:linear-gradient(180deg, var(--green-soft), var(--surface) 70%); }
+.stat-icon{ font-size:1.25rem; }
+.stat-label{ font-size:.72rem; letter-spacing:.03em; text-transform:uppercase; color:var(--ink-faint); font-weight:700; margin-top:4px; }
+.stat-value{ font-family:'JetBrains Mono',monospace; font-size:1.15rem; font-weight:700; color:var(--ink); }
+.stat-note{ font-size:.76rem; color:var(--ink-soft); }
+
+/* Sections */
+.section{ padding:40px 0; border-top:1px solid var(--line); }
+.section-head{ margin-bottom:18px; border-left:4px solid var(--gold); padding-left:14px; }
+.section-head h2{ font-size:1.4rem; font-weight:600; }
+.section-sub{ color:var(--ink-soft); font-size:.9rem; margin-top:6px; max-width:74ch; }
+
+/* Parameter cards */
+.param-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:16px; }
+.param-card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md); padding:18px; box-shadow:var(--shadow-sm); }
+.param-card h3{ font-size:1rem; font-weight:600; margin-bottom:4px; }
+.param-card .param-hint{ font-size:.8rem; color:var(--ink-faint); margin-bottom:12px; }
+.field-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:7px 0; border-bottom:1px solid var(--line-soft, var(--line)); }
+.field-row:last-child{ border-bottom:none; }
+.field-row label{ font-size:.85rem; color:var(--ink-soft); flex:1; }
+.field-row input{
+  width:110px; text-align:right; font-family:'JetBrains Mono',monospace; font-size:.88rem;
+  padding:6px 8px; border-radius:var(--radius-sm); border:1px solid var(--line-strong); background:var(--surface-2); color:var(--ink);
+}
+.field-row input:focus{ outline:2px solid var(--blue); outline-offset:1px; }
+.field-unfilled{ background:var(--gold-soft) !important; border-color:var(--gold) !important; }
+.field-note{ font-size:.72rem; color:var(--ink-faint); }
+.fill-badge{
+  font-family:'JetBrains Mono',monospace; font-size:.64rem; font-weight:700; background:var(--gold-soft); color:#6b4c12;
+  border-radius:5px; padding:1px 6px; margin-left:6px; white-space:nowrap;
+}
+
+.callout{ border-radius:var(--radius-sm); padding:12px 14px; font-size:.86rem; margin-bottom:16px; }
+.callout-warn{ background:var(--gold-soft); color:#6b4c12; border:1px solid color-mix(in srgb, var(--gold) 40%, transparent); }
+.callout-info{ background:var(--blue-soft); color:#1c4258; border:1px solid color-mix(in srgb, var(--blue) 35%, transparent); }
+.callout ul{ margin:6px 0 0; padding-left:1.1em; }
+.callout li + li{ margin-top:4px; }
+
+/* Chart */
+.chart-wrap{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md); padding:18px; box-shadow:var(--shadow-sm); position:relative; }
+.chart-wrap svg{ width:100%; height:auto; display:block; overflow:visible; }
+.chart-tooltip{
+  position:absolute; pointer-events:none; background:var(--ink); color:#fff; font-family:'JetBrains Mono',monospace;
+  font-size:.74rem; padding:6px 9px; border-radius:6px; transform:translate(-50%,-115%); white-space:nowrap; opacity:0; transition:opacity .1s;
+  z-index:5;
+}
+.chart-tooltip.show{ opacity:1; }
+.chart-legend{ display:flex; gap:16px; margin-top:10px; font-size:.78rem; color:var(--ink-soft); flex-wrap:wrap; }
+.chart-legend span{ display:inline-flex; align-items:center; gap:6px; }
+.chart-legend i{ width:10px; height:10px; border-radius:2px; display:inline-block; }
+
+/* Table */
+.table-scroll{ overflow-x:auto; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); margin-top:16px; }
+table.data-table{ width:100%; border-collapse:collapse; min-width:720px; }
+table.data-table th{ text-align:right; font-size:.68rem; text-transform:uppercase; letter-spacing:.03em; color:var(--ink-faint); padding:10px 12px; border-bottom:1px solid var(--line); white-space:nowrap; }
+table.data-table th:first-child, table.data-table td:first-child{ text-align:left; }
+table.data-table td{ padding:8px 12px; font-size:.82rem; text-align:right; border-bottom:1px solid var(--line); color:var(--ink-soft); font-family:'JetBrains Mono',monospace; white-space:nowrap; }
+table.data-table tr:last-child td{ border-bottom:none; }
+table.data-table td.neg{ color:var(--red); }
+table.data-table td.pos{ color:var(--green); }
+table.data-table tr.row-event td{ background:var(--gold-soft); }
+
+/* Diagnostics row */
+.diag-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:12px; margin-top:16px; }
+.diag-card{ background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius-sm); padding:12px 14px; }
+.diag-card .d-label{ font-size:.72rem; color:var(--ink-faint); font-weight:700; text-transform:uppercase; letter-spacing:.02em; }
+.diag-card .d-value{ font-family:'JetBrains Mono',monospace; font-size:1.05rem; font-weight:700; margin-top:3px; }
+.diag-card .d-note{ font-size:.76rem; color:var(--ink-soft); margin-top:3px; }
+
+.fixlist{ font-size:.86rem; color:var(--ink-soft); }
+.fixlist li{ margin-bottom:8px; }
+
+footer.site-footer{ padding:34px 0 60px; text-align:center; border-top:1px solid var(--line); margin-top:10px; }
+footer.site-footer p{ color:var(--ink-faint); font-size:.8rem; margin-bottom:14px; }
+
+@media (max-width:460px){
+  .field-row input{ width:88px; }
+}
+@media print{
+  .topbar, .btn{ display:none !important; }
+  body{ background:#fff; }
+  .stat-card, .param-card, .chart-wrap, .table-scroll, .diag-card{ box-shadow:none; border:1px solid #ccc; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="back-link" href="../index.html">← Painel Espanha</a>
+    <div class="brand">💶 Financeiro — Léo &amp; Celly</div>
+    <div class="topbar-actions">
+      <button id="restore-btn" class="btn btn-ghost" type="button">🔄 Restaurar padrões</button>
+      <button id="print-btn" class="btn btn-ghost" type="button">📋 Imprimir</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <p class="eyebrow">Mudança para Valência · set/2026 – dez/2027</p>
+    <h1>Quanto tempo o dinheiro aguenta</h1>
+    <p class="hero-sub">Calculadora editável — mude qualquer número azul e tudo recalcula na hora. Os valores salvam automaticamente neste navegador. Não depende mais da planilha: essa página é a ferramenta viva agora.</p>
+
+    <div class="dashboard-grid" id="dashboard-cards"></div>
+  </section>
+
+  <section class="section" id="fixes">
+    <div class="section-head">
+      <h2>🔧 O que mudou em relação à planilha original</h2>
+      <p class="section-sub">Reconstruí a lógica do zero em vez de copiar os números — nesse processo, três pontos da planilha original não se sustentaram na conferência linha a linha.</p>
+    </div>
+    <ul class="fixlist">
+      <li><strong>Gol, set/26:</strong> a célula original somava a parcela do mês seguinte por engano (referência para frente) — o valor de set/26 saía R$ 291,35 em vez de R$ 107,92. Corrigido.</li>
+      <li><strong>"Nº de demais parcelas" do Gol:</strong> o parâmetro dizia 6, mas a tabela original tinha só 5 valores digitados à mão — o parâmetro nunca esteve realmente ligado à tabela. Aqui ele liga de verdade: mude o número e a tabela responde.</li>
+      <li><strong>Receita mensal do cartão Brasil:</strong> na planilha, parava de ser aplicada a partir de mar/27 (célula em branco, não decisão consciente). Aqui é aplicada todo mês por padrão — zere o campo manualmente se algum mês não tiver essa entrada.</li>
+    </ul>
+    <div class="callout callout-info" style="margin-top:14px;">O horizonte de 16 meses (set/26–dez/27) e o rótulo "sem renda" na planilha original diziam "12 meses" mas a fórmula somava 15 — na prática o número batia porque o modelo real já cobria os 16 meses corretamente. Aqui isso já sai calculado direto da contagem real de meses, sem número mágico solto.</div>
+  </section>
+
+  <section class="section" id="parametros-eur">
+    <div class="section-head">
+      <h2>⚙️ Parâmetros — vida em euros</h2>
+      <p class="section-sub">Campos com <span class="fill-badge">PREENCHER</span> ainda estão zerados na planilha original — o resultado abaixo os subestima até você atualizar.</p>
+    </div>
+
+    <div class="param-grid">
+      <div class="param-card">
+        <h3>Câmbio &amp; capital</h3>
+        <p class="param-hint">Base para converter o capital em reais para euros disponíveis.</p>
+        <div class="field-row"><label for="p-cambio">Câmbio EUR/BRL (R$ por €)</label><input type="number" id="p-cambio" step="0.01"></div>
+        <div class="field-row"><label for="p-capitalReais">Capital inicial (R$)</label><input type="number" id="p-capitalReais" step="100"></div>
+      </div>
+
+      <div class="param-card">
+        <h3>Meios econômicos exigidos</h3>
+        <p class="param-hint">Mínimo legal para a Extranjería (base IPREM).</p>
+        <div class="field-row"><label for="p-reqLeo">Léo — titular (€)</label><input type="number" id="p-reqLeo" step="10"></div>
+        <div class="field-row"><label for="p-reqMarcelly">Celly — acompanhante (€)</label><input type="number" id="p-reqMarcelly" step="10"></div>
+      </div>
+
+      <div class="param-card">
+        <h3>Custos mensais recorrentes (€)</h3>
+        <p class="param-hint">Aplicados todo mês a partir de out/26 — set/26 conta só o seguro.</p>
+        <div class="field-row"><label for="p-aluguel">Aluguel (quarto/estúdio)</label><input type="number" id="p-aluguel" step="10"></div>
+        <div class="field-row"><label for="p-alimentacao">Alimentação (casal)</label><input type="number" id="p-alimentacao" step="10"></div>
+        <div class="field-row"><label for="p-transporte">Transporte</label><input type="number" id="p-transporte" step="5"></div>
+        <div class="field-row"><label for="p-outros">Outros (lazer, telefone, imprevistos)</label><input type="number" id="p-outros" step="10"></div>
+        <div class="field-row"><label for="p-seguroPessoa">Seguro saúde por pessoa</label><input type="number" id="p-seguroPessoa" step="0.01"></div>
+        <div class="field-row"><label for="p-numPessoas">Nº de pessoas</label><input type="number" id="p-numPessoas" step="1" min="1"></div>
+      </div>
+
+      <div class="param-card">
+        <h3>Custos únicos de instalação (€)</h3>
+        <p class="param-hint">Aplicados de uma vez, no mês escolhido abaixo.</p>
+        <div class="field-row"><label for="p-fianca">Fiança/depósito do quarto</label><input type="number" id="p-fianca" step="10"></div>
+        <div class="field-row"><label for="p-trem">Trem Madrid–Valência (2 pax)</label><input type="number" id="p-trem" step="5"></div>
+        <div class="field-row"><label for="p-taxis">Táxis chegada</label><input type="number" id="p-taxis" step="5"></div>
+        <div class="field-row"><label for="p-chip">Chip/eSIM (2 pax)</label><input type="number" id="p-chip" step="5"></div>
+        <div class="field-row"><label for="p-comprasIniciais">Compras iniciais da casa</label><input type="number" id="p-comprasIniciais" step="10"></div>
+        <div class="field-row"><label for="p-taxaModelo">Taxa modelo 790-052 (2 pax)</label><input type="number" id="p-taxaModelo" step="5"></div>
+        <div class="field-row"><label for="p-honorariosAdvogada">Honorários advogada (Bruna) <span class="fill-badge" id="badge-honorarios" hidden>PREENCHER</span></label><input type="number" id="p-honorariosAdvogada" step="10"></div>
+        <div class="field-row"><label for="p-custosDocumentaisBrasil">Custos documentais Brasil <span class="fill-badge" id="badge-docsbr" hidden>PREENCHER</span></label><input type="number" id="p-custosDocumentaisBrasil" step="10"></div>
+        <div class="field-row"><label for="p-mesCustosSetup">Mês do pagamento (0=set/26)</label><input type="number" id="p-mesCustosSetup" step="1" min="0" max="15"></div>
+      </div>
+
+      <div class="param-card">
+        <h3>Curso — Gestión Empresarial</h3>
+        <p class="param-hint">Início confirmado em 07/12/2026.</p>
+        <div class="field-row"><label for="p-matricula">Matrícula/curso <span class="fill-badge" id="badge-matricula" hidden>PREENCHER</span></label><input type="number" id="p-matricula" step="10"></div>
+        <div class="field-row"><label for="p-mesMatricula">Mês do pagamento (0=set/26)</label><input type="number" id="p-mesMatricula" step="1" min="0" max="15"></div>
+      </div>
+
+      <div class="param-card">
+        <h3>Renda (cenário)</h3>
+        <p class="param-hint">Marcelly não pode trabalhar durante a estância — fixo em €0 por padrão.</p>
+        <div class="field-row"><label for="p-rendaLeo">Renda líquida mensal do Léo (€)</label><input type="number" id="p-rendaLeo" step="50"></div>
+        <div class="field-row"><label for="p-rendaComecaMes">Começa no mês nº (0=set/26)</label><input type="number" id="p-rendaComecaMes" step="1" min="0" max="15"></div>
+        <div class="field-row"><label for="p-rendaMarcelly">Renda mensal da Celly (€)</label><input type="number" id="p-rendaMarcelly" step="50"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="fluxo">
+    <div class="section-head">
+      <h2>📈 Fluxo de caixa — 16 meses</h2>
+      <p class="section-sub">set/2026 a dez/2027. A linha mostra o saldo em euros ao final de cada mês.</p>
+    </div>
+    <div class="chart-wrap">
+      <svg id="chart-eur" viewBox="0 0 820 300" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="chart-tooltip" id="tooltip-eur"></div>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table" id="table-fluxo">
+        <thead><tr><th>Mês</th><th>Saldo inicial</th><th>(+) Renda</th><th>(−) Recorrentes</th><th>(−) Únicos</th><th>(−) Curso</th><th>Saldo final</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section" id="cartao-brasil">
+    <div class="section-head">
+      <h2>💳 Cartão Brasil (R$) — fluxo independente</h2>
+      <p class="section-sub">Não entra no orçamento em euros. Dívida das compras da viagem (passagens, Bagagio, Airbnb 29/09–07/10), paga conforme entra dinheiro na conta do Brasil.</p>
+    </div>
+
+    <div class="param-grid">
+      <div class="param-card">
+        <h3>Parcelamentos (R$)</h3>
+        <div class="field-row"><label for="p-iberiaParcela">Iberia — valor da parcela</label><input type="number" id="p-iberiaParcela" step="1"></div>
+        <div class="field-row"><label for="p-iberiaParcelasPagar">Iberia — parcelas a pagar (antes de cancelar)</label><input type="number" id="p-iberiaParcelasPagar" step="1" min="0" max="16"></div>
+        <div class="field-row"><label for="p-iberiaParcelasContratadas">Iberia — parcelas contratadas</label><input type="number" id="p-iberiaParcelasContratadas" step="1" min="0"></div>
+        <div class="field-row"><label for="p-golPrimeira">Gol — 1ª parcela</label><input type="number" id="p-golPrimeira" step="1"></div>
+        <div class="field-row"><label for="p-golDemais">Gol — demais parcelas (valor)</label><input type="number" id="p-golDemais" step="1"></div>
+        <div class="field-row"><label for="p-golNumDemais">Gol — nº de demais parcelas</label><input type="number" id="p-golNumDemais" step="1" min="0" max="16"></div>
+      </div>
+      <div class="param-card">
+        <h3>Bagagio &amp; Airbnb (R$)</h3>
+        <div class="field-row"><label for="p-bagagioParcela">Bagagio — parcela</label><input type="number" id="p-bagagioParcela" step="1"></div>
+        <div class="field-row"><label for="p-bagagioNumParcelas">Bagagio — nº parcelas</label><input type="number" id="p-bagagioNumParcelas" step="1" min="0" max="16"></div>
+        <div class="field-row"><label for="p-airbnbParcela">Airbnb — parcela</label><input type="number" id="p-airbnbParcela" step="1"></div>
+        <div class="field-row"><label for="p-airbnbNumParcelas">Airbnb — nº parcelas</label><input type="number" id="p-airbnbNumParcelas" step="1" min="0" max="16"></div>
+        <div class="field-row"><label for="p-airbnbIniciaMes">Airbnb — inicia na fatura nº</label><input type="number" id="p-airbnbIniciaMes" step="1" min="1" max="16"></div>
+        <div class="field-row"><label for="p-receitaMensalBrasil">Receita mensal esperada (conta Brasil)</label><input type="number" id="p-receitaMensalBrasil" step="50"></div>
+      </div>
+    </div>
+
+    <div class="diag-grid" id="diag-cartao"></div>
+
+    <div class="chart-wrap" style="margin-top:18px;">
+      <svg id="chart-brl" viewBox="0 0 820 300" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="chart-tooltip" id="tooltip-brl"></div>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table" id="table-cartao">
+        <thead><tr><th>Mês</th><th>Iberia</th><th>Gol</th><th>Bagagio</th><th>Airbnb</th><th>Total fatura</th><th>Receita</th><th>Cobertura</th><th>Saldo devedor</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section" id="notas">
+    <div class="section-head">
+      <h2>📌 O que fica de fora desta conta</h2>
+    </div>
+    <div class="callout callout-info">Airbnb de 29/09 a 07/10 e as passagens aéreas já compradas são pagos com outros recursos — não entram no fluxo de caixa em euros acima. As parcelas dessas mesmas passagens/Airbnb aparecem no Cartão Brasil (R$), que é o rastreamento da dívida, não do gasto em si.</div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <p>Dados salvos apenas neste navegador (localStorage) — nada é enviado para nenhum servidor.</p>
+</footer>
+
+<script>
+(function(){
+  'use strict';
+
+  /* =========================================================
+     MESES DO MODELO — set/2026 a dez/2027 (16 meses, índice 0-15)
+     ========================================================= */
+  var MONTHS = ['set/26','out/26','nov/26','dez/26','jan/27','fev/27','mar/27','abr/27','mai/27','jun/27','jul/27','ago/27','set/27','out/27','nov/27','dez/27'];
+  var N = MONTHS.length;
+
+  /* =========================================================
+     PARÂMETROS PADRÃO — valores extraídos da planilha original
+     "Orcamento_Valencia_Leo_Marcelly_1.xlsx"
+     ========================================================= */
+  function defaultParams(){
+    return {
+      cambio:6.29, capitalReais:82200,
+      reqLeo:7200, reqMarcelly:5400,
+      aluguel:800, alimentacao:350, transporte:40, outros:150, seguroPessoa:54.61, numPessoas:2,
+      fianca:800, trem:70, taxis:55, chip:20, comprasIniciais:250, taxaModelo:40,
+      honorariosAdvogada:0, custosDocumentaisBrasil:0, mesCustosSetup:1,
+      matricula:0, mesMatricula:2,
+      rendaLeo:1200, rendaComecaMes:4, rendaMarcelly:0,
+      iberiaParcela:1357.92, iberiaParcelasPagar:5, iberiaParcelasContratadas:10,
+      golPrimeira:107.92, golDemais:183.43, golNumDemais:6,
+      bagagioParcela:200, bagagioNumParcelas:10,
+      airbnbParcela:275.75, airbnbNumParcelas:6, airbnbIniciaMes:2,
+      receitaMensalBrasil:2400
+    };
+  }
+
+  var FIELD_IDS = Object.keys(defaultParams());
+  var STORAGE_KEY = 'espanhaFinanceiroState_v1';
+
+  function loadParams(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return defaultParams();
+      var parsed = JSON.parse(raw);
+      var out = defaultParams();
+      FIELD_IDS.forEach(function(k){ if(typeof parsed[k] === 'number' && !isNaN(parsed[k])) out[k] = parsed[k]; });
+      return out;
+    }catch(e){ return defaultParams(); }
+  }
+
+  function saveParams(p){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }catch(e){}
+  }
+
+  var params = loadParams();
+
+  /* =========================================================
+     FORMATAÇÃO
+     ========================================================= */
+  function fmtEUR(v){ return '€ ' + Number(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+  function fmtBRL(v){ return 'R$ ' + Number(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+  function fmtMeses(v){ return Number(v).toLocaleString('pt-BR', {minimumFractionDigits:1, maximumFractionDigits:1}); }
+
+  /* =========================================================
+     MOTOR DE CÁLCULO — função pura: parâmetros -> resultados
+     ========================================================= */
+  function compute(p){
+    var capitalEuros = p.capitalReais / p.cambio;
+    var minimoLegal = p.reqLeo + p.reqMarcelly;
+    var seguroTotal = p.seguroPessoa * p.numPessoas;
+    var custoMensalRecorrente = p.aluguel + p.alimentacao + p.transporte + p.outros + seguroTotal;
+    var custosUnicosSetup = p.fianca + p.trem + p.taxis + p.chip + p.comprasIniciais + p.taxaModelo + p.honorariosAdvogada + p.custosDocumentaisBrasil;
+
+    var fluxo = [];
+    var saldo = capitalEuros;
+    for(var i=0;i<N;i++){
+      var saldoInicial = saldo;
+      var renda = (i >= p.rendaComecaMes ? p.rendaLeo : 0) + p.rendaMarcelly;
+      var recorrente = (i === 0) ? seguroTotal : custoMensalRecorrente;
+      var unico = (i === p.mesCustosSetup) ? custosUnicosSetup : 0;
+      var curso = (i === p.mesMatricula) ? p.matricula : 0;
+      var saldoFinal = saldoInicial + renda - recorrente - unico - curso;
+      fluxo.push({ mes:MONTHS[i], idx:i, saldoInicial:saldoInicial, renda:renda, recorrente:recorrente, unico:unico, curso:curso, saldoFinal:saldoFinal });
+      saldo = saldoFinal;
+    }
+
+    var necessidadeTotal = fluxo.reduce(function(s,r){ return s + r.recorrente + r.unico + r.curso; }, 0);
+    var rendaTotal = fluxo.reduce(function(s,r){ return s + r.renda; }, 0);
+    var autonomiaSemRenda = custoMensalRecorrente > 0 ? capitalEuros / custoMensalRecorrente : 0;
+    var gapSemRenda = capitalEuros - necessidadeTotal;
+    var saldoFinalProjetado = fluxo[N-1].saldoFinal;
+
+    var resumo = {
+      capitalEuros:capitalEuros, minimoLegal:minimoLegal, sobraMinimo:capitalEuros - minimoLegal,
+      custoMensalRecorrente:custoMensalRecorrente, necessidadeTotal:necessidadeTotal,
+      autonomiaSemRenda:autonomiaSemRenda, gapSemRenda:gapSemRenda, rendaTotal:rendaTotal,
+      saldoFinalProjetado:saldoFinalProjetado, numMeses:N
+    };
+
+    var cartaoRows = [];
+    var saldoDev = 0;
+    for(var j=0;j<N;j++){
+      var iberia = (j < p.iberiaParcelasPagar) ? p.iberiaParcela : 0;
+      var gol = (j === 0) ? p.golPrimeira : (j <= p.golNumDemais ? p.golDemais : 0);
+      var bagagio = (j < p.bagagioNumParcelas) ? p.bagagioParcela : 0;
+      var airbnbStart = p.airbnbIniciaMes - 1;
+      var airbnb = (j >= airbnbStart && j < airbnbStart + p.airbnbNumParcelas) ? p.airbnbParcela : 0;
+      var totalFatura = iberia + gol + bagagio + airbnb;
+      var receita = p.receitaMensalBrasil;
+      var cobertura = receita - totalFatura;
+      saldoDev += cobertura;
+      cartaoRows.push({ mes:MONTHS[j], idx:j, iberia:iberia, gol:gol, bagagio:bagagio, airbnb:airbnb, totalFatura:totalFatura, receita:receita, cobertura:cobertura, saldoDevedor:saldoDev });
+    }
+    var totalPago = cartaoRows.reduce(function(s,r){ return s + r.totalFatura; }, 0);
+    var economiaCancelar = (p.iberiaParcelasContratadas - p.iberiaParcelasPagar) * p.iberiaParcela;
+    var seIntegral = p.iberiaParcela * p.iberiaParcelasContratadas;
+    var picoFatura = cartaoRows.reduce(function(m,r){ return Math.max(m, r.totalFatura); }, 0);
+
+    var cartao = { rows:cartaoRows, totalPago:totalPago, economiaCancelar:economiaCancelar, seIntegral:seIntegral, picoFatura:picoFatura };
+
+    return { resumo:resumo, fluxo:fluxo, cartao:cartao };
+  }
+
+  /* =========================================================
+     FORMULÁRIO — liga cada input aos parâmetros
+     ========================================================= */
+  function bindFields(){
+    FIELD_IDS.forEach(function(key){
+      var el = document.getElementById('p-' + key);
+      if(!el) return;
+      el.value = params[key];
+      el.addEventListener('input', function(){
+        var v = parseFloat(el.value);
+        params[key] = isNaN(v) ? 0 : v;
+        saveParams(params);
+        renderAll();
+      });
+    });
+  }
+
+  function updateUnfilledBadges(){
+    [['honorariosAdvogada','badge-honorarios'], ['custosDocumentaisBrasil','badge-docsbr'], ['matricula','badge-matricula']].forEach(function(pair){
+      var badge = document.getElementById(pair[1]);
+      if(badge) badge.hidden = params[pair[0]] !== 0;
+    });
+  }
+
+  /* =========================================================
+     DASHBOARD
+     ========================================================= */
+  function renderDashboard(r){
+    var cards = [
+      { icon:'💰', label:'Capital disponível', value:fmtEUR(r.resumo.capitalEuros), note:'R$ ' + params.capitalReais.toLocaleString('pt-BR') + ' ÷ ' + params.cambio.toString().replace('.', ',') },
+      { icon:'⚖️', label:'Mínimo legal exigido', value:fmtEUR(r.resumo.minimoLegal), note:'Léo + Celly, base IPREM' },
+      { icon: r.resumo.sobraMinimo < 500 ? '⚠️' : '✅', label:'Sobra sobre o mínimo', value:fmtEUR(r.resumo.sobraMinimo), note: r.resumo.sobraMinimo < 500 ? 'Quase todo o capital é o próprio mínimo legal' : 'Margem acima do exigido', cls: r.resumo.sobraMinimo < 500 ? 'stat-card--warn' : '' },
+      { icon:'📅', label:'Custo mensal recorrente', value:fmtEUR(r.resumo.custoMensalRecorrente), note:'Aluguel + alimentação + transporte + outros + seguro' },
+      { icon:'⏳', label:'Autonomia sem renda', value:fmtMeses(r.resumo.autonomiaSemRenda) + ' meses', note:'Capital ÷ custo mensal recorrente' },
+      { icon: r.resumo.saldoFinalProjetado >= 0 ? '📈' : '📉', label:'Saldo projetado dez/2027', value:fmtEUR(r.resumo.saldoFinalProjetado), note: (r.resumo.numMeses) + ' meses simulados, com a renda do cenário', cls: r.resumo.saldoFinalProjetado >= 0 ? 'stat-card--good' : 'stat-card--warn' }
+    ];
+    var el = document.getElementById('dashboard-cards');
+    el.innerHTML = cards.map(function(c){
+      return '<div class="stat-card ' + (c.cls || '') + '"><span class="stat-icon">' + c.icon + '</span><span class="stat-label">' + c.label + '</span><span class="stat-value">' + c.value + '</span><span class="stat-note">' + c.note + '</span></div>';
+    }).join('');
+  }
+
+  /* =========================================================
+     TABELAS
+     ========================================================= */
+  function renderFluxoTable(r){
+    var tbody = document.querySelector('#table-fluxo tbody');
+    tbody.innerHTML = r.fluxo.map(function(row){
+      var eventRow = (row.unico > 0 || row.curso > 0) ? ' row-event' : '';
+      return '<tr class="' + eventRow.trim() + '">' +
+        '<td>' + row.mes + '</td>' +
+        '<td>' + fmtEUR(row.saldoInicial) + '</td>' +
+        '<td class="' + (row.renda > 0 ? 'pos' : '') + '">' + (row.renda > 0 ? '+' : '') + fmtEUR(row.renda) + '</td>' +
+        '<td class="neg">−' + fmtEUR(row.recorrente) + '</td>' +
+        '<td class="' + (row.unico > 0 ? 'neg' : '') + '">' + (row.unico > 0 ? '−' + fmtEUR(row.unico) : '—') + '</td>' +
+        '<td class="' + (row.curso > 0 ? 'neg' : '') + '">' + (row.curso > 0 ? '−' + fmtEUR(row.curso) : '—') + '</td>' +
+        '<td class="' + (row.saldoFinal >= 0 ? 'pos' : 'neg') + '"><strong>' + fmtEUR(row.saldoFinal) + '</strong></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  function renderCartaoTable(r){
+    var tbody = document.querySelector('#table-cartao tbody');
+    tbody.innerHTML = r.cartao.rows.map(function(row){
+      return '<tr>' +
+        '<td>' + row.mes + '</td>' +
+        '<td>' + (row.iberia > 0 ? fmtBRL(row.iberia) : '—') + '</td>' +
+        '<td>' + (row.gol > 0 ? fmtBRL(row.gol) : '—') + '</td>' +
+        '<td>' + (row.bagagio > 0 ? fmtBRL(row.bagagio) : '—') + '</td>' +
+        '<td>' + (row.airbnb > 0 ? fmtBRL(row.airbnb) : '—') + '</td>' +
+        '<td><strong>' + fmtBRL(row.totalFatura) + '</strong></td>' +
+        '<td>' + fmtBRL(row.receita) + '</td>' +
+        '<td class="' + (row.cobertura >= 0 ? 'pos' : 'neg') + '">' + fmtBRL(row.cobertura) + '</td>' +
+        '<td class="' + (row.saldoDevedor >= 0 ? 'pos' : 'neg') + '"><strong>' + fmtBRL(row.saldoDevedor) + '</strong></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  function renderCartaoDiag(r){
+    var el = document.getElementById('diag-cartao');
+    var cards = [
+      { label:'Total efetivamente pago', value:fmtBRL(r.cartao.totalPago) },
+      { label:'Economia por cancelar a Iberia', value:fmtBRL(r.cartao.economiaCancelar), note:'Só existe se o cancelamento não gerar multa diferente' },
+      { label:'Se pagasse Iberia integral', value:fmtBRL(r.cartao.seIntegral) },
+      { label:'Pico de fatura mensal', value:fmtBRL(r.cartao.picoFatura), note:'Precisa ter essa entrada garantida na conta Brasil' }
+    ];
+    el.innerHTML = cards.map(function(c){
+      return '<div class="diag-card"><div class="d-label">' + c.label + '</div><div class="d-value">' + c.value + '</div>' + (c.note ? '<div class="d-note">' + c.note + '</div>' : '') + '</div>';
+    }).join('');
+  }
+
+  /* =========================================================
+     GRÁFICO DE LINHA — SVG genérico com hover/tooltip
+     ========================================================= */
+  function renderLineChart(svgId, tooltipId, points, color, fmt){
+    var svg = document.getElementById(svgId);
+    var tooltip = document.getElementById(tooltipId);
+    var W = 820, H = 300;
+    var padL = 76, padR = 20, padT = 24, padB = 40;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+
+    var values = points.map(function(p){ return p.y; });
+    var minV = Math.min.apply(null, values.concat([0]));
+    var maxV = Math.max.apply(null, values.concat([0]));
+    if(minV === maxV){ minV -= 1; maxV += 1; }
+    var range = maxV - minV;
+    var padRange = range * 0.12;
+    minV -= padRange; maxV += padRange;
+    range = maxV - minV;
+
+    function xAt(i){ return padL + (points.length === 1 ? 0 : (i / (points.length - 1)) * plotW); }
+    function yAt(v){ return padT + plotH - ((v - minV) / range) * plotH; }
+
+    var svgns = 'http://www.w3.org/2000/svg';
+    while(svg.firstChild) svg.removeChild(svg.firstChild);
+
+    function el(tag, attrs){
+      var e = document.createElementNS(svgns, tag);
+      for(var k in attrs) e.setAttribute(k, attrs[k]);
+      return e;
+    }
+
+    // Linhas de grade horizontais (4 faixas) com rótulo de valor
+    var steps = 4;
+    for(var s=0;s<=steps;s++){
+      var v = minV + (range * s / steps);
+      var y = yAt(v);
+      svg.appendChild(el('line', { x1:padL, x2:W - padR, y1:y, y2:y, stroke:'#d6ccb6', 'stroke-width':1, opacity:0.5 }));
+      var t = el('text', { x:padL - 10, y:y + 4, 'text-anchor':'end', 'font-size':11, fill:'#8b8377', 'font-family':'JetBrains Mono, monospace' });
+      t.textContent = fmt(v).replace(/[€R$\s]/g, '').replace(',00','');
+      svg.appendChild(t);
+    }
+
+    // Linha de referência zero, se a faixa cruza zero
+    if(minV < 0 && maxV > 0){
+      var y0 = yAt(0);
+      svg.appendChild(el('line', { x1:padL, x2:W - padR, y1:y0, y2:y0, stroke:'#b8332c', 'stroke-width':1.2, 'stroke-dasharray':'4,3', opacity:0.6 }));
+    }
+
+    // Rótulos de mês no eixo X (a cada 2 meses para não lotar)
+    points.forEach(function(p, i){
+      if(i % 2 !== 0 && i !== points.length - 1) return;
+      var x = xAt(i);
+      var tx = el('text', { x:x, y:H - 12, 'text-anchor':'middle', 'font-size':10, fill:'#8b8377', 'font-family':'JetBrains Mono, monospace' });
+      tx.textContent = p.label;
+      svg.appendChild(tx);
+    });
+
+    // Área preenchida (gradiente)
+    var gradId = svgId + '-grad';
+    var defs = el('defs', {});
+    var grad = el('linearGradient', { id:gradId, x1:'0', y1:'0', x2:'0', y2:'1' });
+    grad.appendChild(el('stop', { offset:'0%', 'stop-color':color, 'stop-opacity':0.28 }));
+    grad.appendChild(el('stop', { offset:'100%', 'stop-color':color, 'stop-opacity':0.02 }));
+    defs.appendChild(grad);
+    svg.appendChild(defs);
+
+    var areaPath = 'M ' + xAt(0) + ' ' + yAt(points[0].y);
+    points.forEach(function(p,i){ if(i>0) areaPath += ' L ' + xAt(i) + ' ' + yAt(p.y); });
+    areaPath += ' L ' + xAt(points.length-1) + ' ' + (padT+plotH) + ' L ' + xAt(0) + ' ' + (padT+plotH) + ' Z';
+    svg.appendChild(el('path', { d:areaPath, fill:'url(#' + gradId + ')', stroke:'none' }));
+
+    // Linha
+    var linePath = 'M ' + xAt(0) + ' ' + yAt(points[0].y);
+    points.forEach(function(p,i){ if(i>0) linePath += ' L ' + xAt(i) + ' ' + yAt(p.y); });
+    svg.appendChild(el('path', { d:linePath, fill:'none', stroke:color, 'stroke-width':2.5, 'stroke-linejoin':'round', 'stroke-linecap':'round' }));
+
+    // Marcador + rótulo no ponto final
+    var lastIdx = points.length - 1;
+    svg.appendChild(el('circle', { cx:xAt(lastIdx), cy:yAt(points[lastIdx].y), r:4.5, fill:color, stroke:'#fff', 'stroke-width':1.5 }));
+    var lastLabel = el('text', { x:xAt(lastIdx) - 6, y:yAt(points[lastIdx].y) - 10, 'text-anchor':'end', 'font-size':11, 'font-weight':700, fill:'#211d1a', 'font-family':'JetBrains Mono, monospace' });
+    lastLabel.textContent = fmt(points[lastIdx].y);
+    svg.appendChild(lastLabel);
+
+    // Marcador no ponto mínimo (se for diferente do final e do inicial)
+    var minIdx = 0;
+    points.forEach(function(p,i){ if(p.y < points[minIdx].y) minIdx = i; });
+    if(minIdx !== lastIdx && minIdx !== 0){
+      svg.appendChild(el('circle', { cx:xAt(minIdx), cy:yAt(points[minIdx].y), r:4, fill:'#fff', stroke:color, 'stroke-width':2 }));
+      var minLabel = el('text', { x:xAt(minIdx), y:yAt(points[minIdx].y) + 18, 'text-anchor':'middle', 'font-size':10, fill:'#5a5349', 'font-family':'JetBrains Mono, monospace' });
+      minLabel.textContent = 'mín. ' + fmt(points[minIdx].y);
+      svg.appendChild(minLabel);
+    }
+
+    // Camada de hover: crosshair + tooltip
+    var hoverLine = el('line', { x1:0, x2:0, y1:padT, y2:padT+plotH, stroke:'#211d1a', 'stroke-width':1, opacity:0 });
+    svg.appendChild(hoverLine);
+    var hoverDot = el('circle', { r:5, fill:color, stroke:'#fff', 'stroke-width':2, opacity:0 });
+    svg.appendChild(hoverDot);
+
+    var overlay = el('rect', { x:padL, y:padT, width:plotW, height:plotH, fill:'transparent' });
+    svg.appendChild(overlay);
+
+    function handleMove(evt){
+      var rect = svg.getBoundingClientRect();
+      var clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+      var xPx = (clientX - rect.left) * (W / rect.width);
+      var relX = xPx - padL;
+      var idx = Math.round((relX / plotW) * (points.length - 1));
+      idx = Math.max(0, Math.min(points.length - 1, idx));
+      var p = points[idx];
+      var px = xAt(idx), py = yAt(p.y);
+      hoverLine.setAttribute('x1', px); hoverLine.setAttribute('x2', px); hoverLine.setAttribute('opacity', 0.35);
+      hoverDot.setAttribute('cx', px); hoverDot.setAttribute('cy', py); hoverDot.setAttribute('opacity', 1);
+      var wrapRect = svg.parentElement.getBoundingClientRect();
+      var svgScale = rect.width / W;
+      tooltip.style.left = (rect.left - wrapRect.left + px * svgScale) + 'px';
+      tooltip.style.top = (rect.top - wrapRect.top + py * svgScale) + 'px';
+      tooltip.textContent = p.label + ' — ' + fmt(p.y);
+      tooltip.classList.add('show');
+    }
+    function handleLeave(){
+      hoverLine.setAttribute('opacity', 0); hoverDot.setAttribute('opacity', 0);
+      tooltip.classList.remove('show');
+    }
+    overlay.addEventListener('mousemove', handleMove);
+    overlay.addEventListener('mouseleave', handleLeave);
+    overlay.addEventListener('touchmove', handleMove, { passive:true });
+    overlay.addEventListener('touchend', handleLeave);
+  }
+
+  /* =========================================================
+     RENDER GERAL
+     ========================================================= */
+  function renderAll(){
+    var r = compute(params);
+    renderDashboard(r);
+    renderFluxoTable(r);
+    renderCartaoTable(r);
+    renderCartaoDiag(r);
+    updateUnfilledBadges();
+
+    renderLineChart('chart-eur', 'tooltip-eur', r.fluxo.map(function(row){ return { x:row.idx, y:row.saldoFinal, label:row.mes }; }), '#2c6a8a', fmtEUR);
+    renderLineChart('chart-brl', 'tooltip-brl', r.cartao.rows.map(function(row){ return { x:row.idx, y:row.saldoDevedor, label:row.mes }; }), '#b8332c', fmtBRL);
+  }
+
+  /* =========================================================
+     BOTÕES
+     ========================================================= */
+  function initButtons(){
+    document.getElementById('restore-btn').addEventListener('click', function(){
+      if(confirm('Isso substitui todos os valores atuais pelos valores originais da planilha. Continuar?')){
+        params = defaultParams();
+        saveParams(params);
+        bindFields();
+        renderAll();
+      }
+    });
+    document.getElementById('print-btn').addEventListener('click', function(){ window.print(); });
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    bindFields();
+    initButtons();
+    renderAll();
+  });
+})();
+</script>
+
+</body>
+</html>
