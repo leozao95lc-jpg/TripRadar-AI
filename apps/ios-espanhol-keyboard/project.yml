@@ -1,0 +1,70 @@
+name: EspanholIAKeyboard
+options:
+  bundleIdPrefix: com.tripradar.espanholiakeyboard
+  deploymentTarget:
+    iOS: "16.0"
+  developmentLanguage: pt-BR
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    APP_GROUP_ID: "group.com.tripradar.espanholiakeyboard"
+    KEYCHAIN_ACCESS_GROUP: "$(AppIdentifierPrefix)com.tripradar.espanholiakeyboard.shared"
+
+targets:
+  EspanholIAKeyboard:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: App
+      - path: Shared
+    info:
+      path: App/Info.plist
+    entitlements:
+      path: App/EspanholIAKeyboard.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - "group.com.tripradar.espanholiakeyboard"
+        keychain-access-groups:
+          - "$(AppIdentifierPrefix)com.tripradar.espanholiakeyboard.shared"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.tripradar.espanholiakeyboard
+        TARGETED_DEVICE_FAMILY: "1"
+    dependencies:
+      - target: KeyboardExtension
+        embed: true
+
+  KeyboardExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: KeyboardExtension
+      - path: Shared
+    info:
+      path: KeyboardExtension/Info.plist
+    entitlements:
+      path: KeyboardExtension/KeyboardExtension.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - "group.com.tripradar.espanholiakeyboard"
+        keychain-access-groups:
+          - "$(AppIdentifierPrefix)com.tripradar.espanholiakeyboard.shared"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.tripradar.espanholiakeyboard.keyboard
+        TARGETED_DEVICE_FAMILY: "1"
+        SKIP_INSTALL: true
+
+schemes:
+  EspanholIAKeyboard:
+    build:
+      targets:
+        EspanholIAKeyboard: all
+        KeyboardExtension: all
+    run:
+      config: Debug
+    archive:
+      config: Release
