@@ -10,7 +10,7 @@ final class KeyboardViewModel: ObservableObject {
     @Published var variant: SpanishVariant
     @Published var autoDetectEnabled: Bool
 
-    weak var proxy: TextDocumentProxyProviding?
+    var proxy: TextDocumentProxyProviding?
     var hasFullAccessProvider: () -> Bool = { false }
     var advanceToNextInputMode: () -> Void = {}
 

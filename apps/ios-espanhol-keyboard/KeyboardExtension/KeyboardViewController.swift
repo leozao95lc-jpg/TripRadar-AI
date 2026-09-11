@@ -16,7 +16,7 @@ final class KeyboardViewController: UIInputViewController {
         super.viewDidLoad()
 
         let vm = KeyboardViewModel()
-        vm.proxy = textDocumentProxy
+        vm.proxy = SystemTextDocumentProxy(proxy: textDocumentProxy)
         vm.hasFullAccessProvider = { [weak self] in self?.hasFullAccess ?? false }
         vm.advanceToNextInputMode = { [weak self] in self?.advanceToNextInputMode() }
         self.viewModel = vm
@@ -48,7 +48,7 @@ final class KeyboardViewController: UIInputViewController {
         super.textDidChange(textInput)
         // Refresh the proxy reference: iOS may hand out a new proxy instance
         // as the host app's text field changes.
-        viewModel.proxy = textDocumentProxy
+        viewModel.proxy = SystemTextDocumentProxy(proxy: textDocumentProxy)
     }
 
     deinit {
