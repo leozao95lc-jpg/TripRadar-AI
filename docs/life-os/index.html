@@ -9,82 +9,82 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
-/* ============================= TOKENS ============================= */
+/* ============================= DESIGN TOKENS ============================= */
 :root{
-  --bg:#0a0d13; --bg-elev:#10141d; --card:#141a25; --card2:#1a2230;
-  --text:#eef1f7; --text-dim:#c3cbdb; --muted:#7c8aa0; --border:#232c3c; --border-soft:#1c2433;
-  --primary:#7c6df2; --primary-dim:#5d4fc4; --primary2:#a99cff;
-  --accent:#22d3b8; --gold:#f0b34d;
-  --success:#33c07a; --warning:#f0b34d; --danger:#f0596a;
-  --radius-lg:22px; --radius:16px; --radius-sm:11px;
-  --shadow-sm:0 2px 10px rgba(0,0,0,.18);
-  --shadow:0 14px 34px -8px rgba(0,0,0,.45);
+  --bg:#080b12; --bg-elev:#0b0f17; --card:#111722; --card2:#151c28;
+  --text:#f5f7fa; --text-dim:#c7ced9; --muted:#8b95a7; --border:#202938; --border-soft:#182131;
+  --accent:#2dd4bf; --accent-dim:#17a398; --accent-soft:rgba(45,212,191,.14);
+  --warning:#f0b34d; --danger:#f0596a;
+  --success:var(--accent);
+  --radius-lg:20px; --radius:15px; --radius-sm:11px;
+  --shadow-sm:0 2px 12px rgba(0,0,0,.22);
+  --shadow:0 16px 38px -10px rgba(0,0,0,.5);
   --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:18px; --sp-5:26px; --sp-6:38px;
   --font: "Inter", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
-  --font-display: "Sora", var(--font);
+  --font-display: "Manrope", var(--font);
 }
 [data-theme="light"]{
-  --bg:#f2f4f9; --bg-elev:#ffffff; --card:#ffffff; --card2:#f4f6fb;
-  --text:#171b26; --text-dim:#3b4457; --muted:#69748a; --border:#e4e8f0; --border-soft:#edf0f6;
-  --shadow-sm:0 2px 10px rgba(30,41,70,.05);
-  --shadow:0 14px 34px -10px rgba(30,41,70,.14);
+  --bg:#f3f5f8; --bg-elev:#ffffff; --card:#ffffff; --card2:#f1f4f8;
+  --text:#10141c; --text-dim:#3d4757; --muted:#666f80; --border:#e3e7ee; --border-soft:#edf0f5;
+  --accent:#0e9c8c; --accent-dim:#0b8276; --accent-soft:rgba(14,156,140,.12);
+  --shadow-sm:0 2px 12px rgba(20,30,50,.05);
+  --shadow:0 16px 38px -12px rgba(20,30,50,.13);
 }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
 body{
-  background:
-    radial-gradient(1100px 520px at 12% -8%, rgba(124,109,242,.14), transparent 60%),
-    radial-gradient(900px 460px at 100% 0%, rgba(34,211,184,.08), transparent 55%),
-    var(--bg);
-  color:var(--text); font-family:var(--font); font-size:15px; line-height:1.5;
+  background:var(--bg);
+  color:var(--text); font-family:var(--font); font-size:15px; line-height:1.55;
   -webkit-font-smoothing:antialiased; min-height:100vh;
 }
-[data-theme="light"] body{
-  background:
-    radial-gradient(1100px 520px at 12% -8%, rgba(124,109,242,.08), transparent 60%),
-    radial-gradient(900px 460px at 100% 0%, rgba(34,211,184,.06), transparent 55%),
-    var(--bg);
-}
-h1,h2,h3,h4{margin:0 0 4px 0; font-family:var(--font-display); font-weight:700; letter-spacing:-.2px;}
+h1,h2,h3,h4{margin:0 0 4px 0; font-family:var(--font-display); font-weight:700; letter-spacing:-.3px;}
 p{margin:0 0 8px 0;}
-a{color:var(--primary2); text-decoration:none;}
+a{color:var(--accent); text-decoration:none;}
 button{font-family:inherit;}
 input,select,textarea{
   font-family:inherit; background:var(--card2); color:var(--text); border:1px solid var(--border);
   border-radius:10px; padding:10px 12px; font-size:14px; transition:border-color .15s, box-shadow .15s;
 }
 input::placeholder,textarea::placeholder{color:var(--muted);}
-input:focus,select:focus,textarea:focus{outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(124,109,242,.18);}
+input:focus,select:focus,textarea:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft);}
 .hidden{display:none !important;}
 ::-webkit-scrollbar{width:8px;height:8px;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}
-::selection{background:rgba(124,109,242,.35);}
+::selection{background:var(--accent-soft);}
 
 /* ============================= LAYOUT ============================= */
 .app{display:flex; min-height:100vh;}
 .sidebar{
-  width:256px; flex:0 0 256px; background:var(--bg-elev); border-right:1px solid var(--border-soft);
-  padding:20px 14px; display:flex; flex-direction:column; gap:2px; position:sticky; top:0; height:100vh; overflow-y:auto; z-index:60;
+  width:250px; flex:0 0 250px; background:var(--bg-elev); border-right:1px solid var(--border-soft);
+  padding:20px 14px; display:flex; flex-direction:column; gap:1px; position:sticky; top:0; height:100vh; overflow-y:auto; z-index:60;
+  transition:width .2s ease, flex-basis .2s ease;
 }
-.brand{display:flex; align-items:center; gap:11px; padding:4px 10px 22px 8px;}
+.sidebar.collapsed{width:76px; flex:0 0 76px;}
+.sidebar.collapsed .navitem span:not(.ic){display:none;}
+.sidebar.collapsed .brand .name, .sidebar.collapsed .brand .sub{display:none;}
+.sidebar.collapsed .navitem{justify-content:center;}
+.sidebar.collapsed .navitem .ic{width:auto;}
+.brand{display:flex; align-items:center; gap:11px; padding:4px 10px 20px 8px;}
 .brand .logo{
-  font-size:19px; width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center;
-  background:linear-gradient(135deg,var(--primary),#5850c9); box-shadow:0 4px 14px -2px rgba(124,109,242,.55);
+  font-size:17px; width:36px; height:36px; border-radius:11px; display:flex; align-items:center; justify-content:center; flex:0 0 36px;
+  background:var(--card2); border:1px solid var(--border-soft); color:var(--accent); font-family:var(--font-display); font-weight:800;
 }
-.brand .name{font-family:var(--font-display); font-weight:800; font-size:17px; letter-spacing:.2px;}
+.brand .name{font-family:var(--font-display); font-weight:800; font-size:16px; letter-spacing:.1px;}
 .brand .sub{font-size:11px; color:var(--muted); margin-top:1px;}
 .navitem{
-  display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:12px; cursor:pointer;
+  display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:11px; cursor:pointer;
   color:var(--text-dim); font-size:13.5px; font-weight:600; transition:background .15s, color .15s;
   user-select:none; position:relative;
 }
 .navitem:hover{background:var(--card2); color:var(--text);}
-.navitem.active{background:rgba(124,109,242,.13); color:var(--primary2);}
-.navitem.active::before{content:''; position:absolute; left:-14px; top:8px; bottom:8px; width:3px; border-radius:3px; background:linear-gradient(180deg,var(--primary),var(--accent));}
-.navitem .ic{font-size:16px; width:22px; text-align:center; opacity:.92;}
+.navitem.active{background:var(--accent-soft); color:var(--accent);}
+.navitem.active::before{content:''; position:absolute; left:-14px; top:8px; bottom:8px; width:3px; border-radius:3px; background:var(--accent);}
+.navitem .ic{font-size:15px; width:20px; text-align:center; opacity:.9;}
+.sidebar-collapse-btn{background:none; border:1px solid var(--border-soft); color:var(--muted); border-radius:9px; padding:7px; cursor:pointer; margin:6px 4px 14px; align-self:flex-end; font-size:13px;}
 .sidebar-foot{margin-top:auto; padding:10px; font-size:10.5px; color:var(--muted); line-height:1.5;}
+.sidebar.collapsed .sidebar-foot{display:none;}
 
 .topbar{
   display:none; align-items:center; justify-content:space-between; padding:12px 16px;
@@ -93,90 +93,102 @@ input:focus,select:focus,textarea:focus{outline:none; border-color:var(--primary
 .hamburger{background:none;border:none;font-size:20px;color:var(--text);cursor:pointer;padding:6px 10px;border-radius:9px;}
 .hamburger:active{background:var(--card2);}
 .topbar .tb-brand{font-family:var(--font-display); font-weight:800; font-size:14px; display:flex; align-items:center; gap:7px;}
+.bottom-nav{display:none; position:fixed; left:0; right:0; bottom:0; z-index:45; background:var(--bg-elev); border-top:1px solid var(--border-soft); padding:6px 4px calc(6px + env(safe-area-inset-bottom));}
+.bottom-nav-inner{display:flex; overflow-x:auto; gap:2px;}
+.bottom-nav-item{flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 12px; border-radius:10px; color:var(--muted); font-size:10px; font-weight:700; cursor:pointer; min-width:58px;}
+.bottom-nav-item.active{color:var(--accent); background:var(--accent-soft);}
+.bottom-nav-item .ic{font-size:17px;}
 
 .main{flex:1; min-width:0; padding:30px 34px 70px; max-width:1180px; margin:0 auto; width:100%;}
 .view{display:none; animation:fadein .3s ease;}
 .view.active{display:block;}
 @keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
 
-.overlay-bg{position:fixed; inset:0; background:rgba(6,8,14,.55); backdrop-filter:blur(2px); z-index:55; display:none;}
+.overlay-bg{position:fixed; inset:0; background:rgba(2,4,8,.6); backdrop-filter:blur(2px); z-index:55; display:none;}
 .overlay-bg.show{display:block;}
 
 @media (max-width:900px){
   .topbar{display:flex;}
-  .sidebar{position:fixed; left:0; top:0; transform:translateX(-100%); transition:transform .25s ease; box-shadow:var(--shadow);}
+  .bottom-nav{display:block;}
+  .sidebar{position:fixed; left:0; top:0; transform:translateX(-100%); transition:transform .25s ease; box-shadow:var(--shadow); width:250px !important; flex-basis:250px !important;}
   .sidebar.open{transform:translateX(0);}
-  .main{padding:18px 15px 90px;}
+  .main{padding:16px 14px 96px;}
 }
 
 /* ============================= COMPONENTS ============================= */
 .grid{display:grid; gap:var(--sp-4); grid-template-columns:repeat(auto-fit,minmax(225px,1fr));}
 .grid-2{display:grid; gap:var(--sp-4); grid-template-columns:repeat(auto-fit,minmax(340px,1fr));}
+.grid-3{display:grid; gap:var(--sp-4); grid-template-columns:repeat(auto-fit,minmax(280px,1fr));}
 .card{
   background:var(--card); border:1px solid var(--border-soft); border-radius:var(--radius-lg); padding:20px;
   box-shadow:var(--shadow-sm); transition:box-shadow .2s, transform .2s, border-color .2s;
 }
+.card.hoverable:hover{transform:translateY(-2px); border-color:var(--border);}
 .card.tight{padding:16px;}
 .card-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; gap:8px;}
 .card-title{font-family:var(--font-display); font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px; letter-spacing:.1px;}
 .muted{color:var(--muted); font-size:13px;}
 .dim{color:var(--text-dim);}
+.accent-text{color:var(--accent);}
 .row{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
 .row.between{justify-content:space-between;}
 .stack{display:flex; flex-direction:column; gap:10px;}
 
-.bar{height:10px; background:var(--card2); border-radius:20px; overflow:hidden; border:1px solid var(--border-soft);}
-.bar>span{display:block; height:100%; background:linear-gradient(90deg,var(--primary),var(--accent)); border-radius:20px; transition:width .5s ease;}
+.bar{height:9px; background:var(--card2); border-radius:20px; overflow:hidden; border:1px solid var(--border-soft);}
+.bar>span{display:block; height:100%; background:var(--accent); border-radius:20px; transition:width .6s cubic-bezier(.22,.9,.3,1);}
 .bar.sm{height:6px;}
-.bar.warn>span{background:linear-gradient(90deg,var(--warning),#ffd27a);}
-.bar.ok>span{background:linear-gradient(90deg,var(--success),var(--accent));}
+.bar.warn>span{background:var(--warning);}
+.bar.danger>span{background:var(--danger);}
 
 .btn{
-  border:1px solid var(--border); background:var(--card2); color:var(--text); padding:9px 15px; border-radius:12px;
+  border:1px solid var(--border); background:var(--card2); color:var(--text); padding:9px 15px; border-radius:11px;
   font-size:13px; font-weight:600; cursor:pointer; transition:transform .12s, background .15s, border-color .15s, box-shadow .15s;
   display:inline-flex; align-items:center; gap:6px; letter-spacing:.1px;
 }
 .btn:hover{background:var(--border-soft); border-color:var(--border);}
 .btn:active{transform:scale(.97);}
-.btn.primary{background:linear-gradient(135deg,var(--primary),#6a5cd6); border:1px solid rgba(124,109,242,.5); color:#fff; box-shadow:0 6px 16px -4px rgba(124,109,242,.5);}
-.btn.primary:hover{filter:brightness(1.07);}
-.btn.success{background:linear-gradient(135deg,#33c07a,#22d3b8); border:none; color:#08221a; font-weight:700;}
+.btn.primary{background:var(--accent); border:1px solid var(--accent); color:#03251f; font-weight:700;}
+.btn.primary:hover{background:var(--accent-dim); border-color:var(--accent-dim);}
+.btn.success{background:var(--accent); border:none; color:#03251f; font-weight:700;}
 .btn.danger{background:var(--danger); border:none; color:#2a0006;}
 .btn.ghost{background:transparent; border-color:var(--border-soft);}
 .btn.xs{padding:5px 10px; font-size:11.5px; border-radius:9px;}
 .btn:disabled{opacity:.45; cursor:not-allowed;}
 
 .badge{display:inline-flex; align-items:center; gap:4px; font-size:10.5px; font-weight:700; padding:4px 10px; border-radius:20px; background:var(--card2); border:1px solid var(--border-soft); color:var(--muted); letter-spacing:.2px; text-transform:uppercase;}
-.badge.primary{background:rgba(124,109,242,.15); color:var(--primary2); border-color:transparent;}
-.badge.success{background:rgba(51,192,122,.14); color:var(--success); border-color:transparent;}
+.badge.primary{background:var(--accent-soft); color:var(--accent); border-color:transparent;}
+.badge.success{background:var(--accent-soft); color:var(--accent); border-color:transparent;}
 .badge.warn{background:rgba(240,179,77,.15); color:var(--warning); border-color:transparent;}
 .badge.danger{background:rgba(240,89,106,.15); color:var(--danger); border-color:transparent;}
 
 .chip{padding:7px 13px; border-radius:20px; border:1px solid var(--border); background:var(--card2); font-size:12px; font-weight:600; cursor:pointer; color:var(--text-dim); transition:.15s;}
-.chip.active{background:var(--primary); border-color:var(--primary); color:#fff;}
+.chip.active{background:var(--accent); border-color:var(--accent); color:#03251f;}
 
-.check-item{display:flex; align-items:center; gap:13px; padding:13px 14px; border-radius:14px; background:var(--card2); border:1px solid var(--border-soft); transition:.15s;}
-.check-item.done{border-color:rgba(51,192,122,.4); background:rgba(51,192,122,.06);}
+.check-item{display:flex; align-items:center; gap:13px; padding:13px 14px; border-radius:13px; background:var(--card2); border:1px solid var(--border-soft); transition:.15s;}
+.check-item.done{border-color:rgba(45,212,191,.35); background:var(--accent-soft);}
 .check-item .cbox{
-  width:24px;height:24px;border-radius:50%;border:2px solid var(--border); flex:0 0 24px;
+  width:23px;height:23px;border-radius:50%;border:2px solid var(--border); flex:0 0 23px;
   display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer; color:transparent; transition:.15s;
 }
-.check-item.done .cbox{background:var(--success); border-color:var(--success); color:#08221a;}
+.check-item.done .cbox{background:var(--accent); border-color:var(--accent); color:#03251f;}
 .check-item .ic-badge{font-size:15px; opacity:.95;}
 .check-item .body{flex:1; min-width:0;}
 .check-item .title{font-weight:600; font-size:13.5px; display:flex; align-items:center; gap:7px;}
 .check-item .desc{font-size:11.5px; color:var(--muted);}
+.check-item.xp-pop{animation:xppop .5s ease;}
+@keyframes xppop{ 0%{transform:scale(1);} 30%{transform:scale(1.015); box-shadow:0 0 0 4px var(--accent-soft);} 100%{transform:scale(1);} }
 
-.list-item{padding:12px 14px; border-radius:13px; background:var(--card2); border:1px solid var(--border-soft); margin-bottom:8px;}
+.list-item{padding:12px 14px; border-radius:12px; background:var(--card2); border:1px solid var(--border-soft); margin-bottom:8px;}
 .list-item:last-child{margin-bottom:0;}
 
 table{width:100%; border-collapse:collapse; font-size:13px;}
 th,td{padding:9px 8px; text-align:left; border-bottom:1px solid var(--border-soft);}
 th{color:var(--muted); font-weight:700; font-size:10.5px; text-transform:uppercase; letter-spacing:.4px;}
 
-.modal-overlay{position:fixed; inset:0; background:rgba(6,8,14,.6); backdrop-filter:blur(2px); z-index:200; display:none; align-items:center; justify-content:center; padding:16px;}
+.modal-overlay{position:fixed; inset:0; background:rgba(2,4,8,.65); backdrop-filter:blur(2px); z-index:200; display:none; align-items:center; justify-content:center; padding:16px;}
 .modal-overlay.show{display:flex;}
-.modal{background:var(--bg-elev); border:1px solid var(--border-soft); border-radius:var(--radius-lg); padding:24px; width:100%; max-width:480px; max-height:88vh; overflow-y:auto; box-shadow:var(--shadow);}
+.modal{background:var(--bg-elev); border:1px solid var(--border-soft); border-radius:var(--radius-lg); padding:24px; width:100%; max-width:480px; max-height:88vh; overflow-y:auto; box-shadow:var(--shadow); animation:modalin .18s ease;}
+@keyframes modalin{from{opacity:0; transform:translateY(6px) scale(.98);} to{opacity:1; transform:none;}}
 .modal h3{margin-bottom:16px; font-size:17px;}
 .field{display:flex; flex-direction:column; gap:6px; margin-bottom:13px;}
 .field label{font-size:11.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.3px;}
@@ -184,39 +196,40 @@ th{color:var(--muted); font-weight:700; font-size:10.5px; text-transform:upperca
 .modal-actions{display:flex; justify-content:flex-end; gap:8px; margin-top:18px;}
 
 .toast-wrap{position:fixed; bottom:20px; right:20px; z-index:300; display:flex; flex-direction:column; gap:8px; max-width:320px;}
-.toast{background:var(--bg-elev); border:1px solid var(--border-soft); border-left:3px solid var(--primary); border-radius:12px; padding:12px 14px; box-shadow:var(--shadow); font-size:13px; animation:toastin .25s ease;}
+.toast{background:var(--bg-elev); border:1px solid var(--border-soft); border-left:3px solid var(--accent); border-radius:12px; padding:12px 14px; box-shadow:var(--shadow); font-size:13px; animation:toastin .25s ease;}
 @keyframes toastin{from{opacity:0; transform:translateY(8px);} to{opacity:1;}}
 
 .emoji-row{display:flex; gap:8px; flex-wrap:wrap;}
 .emoji-btn{font-size:21px; padding:9px 13px; border-radius:13px; background:var(--card2); border:2px solid transparent; cursor:pointer; transition:.15s;}
-.emoji-btn.sel{border-color:var(--primary); background:rgba(124,109,242,.14);}
+.emoji-btn.sel{border-color:var(--accent); background:var(--accent-soft);}
 
 .week-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:8px;}
-.week-day{text-align:center; padding:12px 4px; border-radius:14px; background:var(--card2); border:1px solid var(--border-soft);}
+.week-day{text-align:center; padding:12px 4px; border-radius:13px; background:var(--card2); border:1px solid var(--border-soft);}
 .week-day .dname{font-size:10.5px; color:var(--muted); font-weight:700; letter-spacing:.3px;}
 .week-day .icons{display:flex; flex-direction:column; gap:5px; margin-top:8px; font-size:14px;}
-.week-day.today{border-color:var(--primary); box-shadow:0 0 0 1px var(--primary) inset;}
-.week-day.rest{background:rgba(124,109,242,.06);}
+.week-day.today{border-color:var(--accent); box-shadow:0 0 0 1px var(--accent) inset;}
+.week-day.rest{background:var(--accent-soft);}
 
 .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:6px;}
 .cal-cell{aspect-ratio:1; border-radius:11px; background:var(--card2); border:1px solid var(--border-soft); display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:12px; cursor:pointer; gap:3px; position:relative; transition:.15s;}
 .cal-cell:hover{background:var(--border-soft); transform:translateY(-1px);}
 .cal-cell.empty{background:transparent; border:none; cursor:default;}
-.cal-cell.today{border-color:var(--primary); box-shadow:0 0 0 1px var(--primary) inset;}
+.cal-cell.today{border-color:var(--accent); box-shadow:0 0 0 1px var(--accent) inset;}
 .cal-cell .dnum{font-weight:700;}
 .cal-cell .dots{display:flex; gap:2px;}
 .dot{width:5px;height:5px;border-radius:50%;}
 
 .progress-ring-label{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:7px; font-size:12px;}
 .big-num{font-family:var(--font-display); font-size:26px; font-weight:800;}
+.big-num.accent{color:var(--accent);}
 
 .timeline-item{display:flex; gap:14px; padding:16px 0; border-bottom:1px solid var(--border-soft);}
 .timeline-item:last-child{border-bottom:none;}
-.timeline-dot{width:11px;height:11px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent)); flex:0 0 11px; margin-top:6px;}
+.timeline-dot{width:11px;height:11px;border-radius:50%;background:var(--accent); flex:0 0 11px; margin-top:6px;}
 .photo-grid{display:flex; gap:8px; flex-wrap:wrap; margin-top:9px;}
 .photo-grid img{width:80px;height:80px;object-fit:cover;border-radius:12px; border:1px solid var(--border-soft);}
 
-.mission-row{display:flex; align-items:center; gap:11px; padding:11px 13px; border-radius:13px; background:var(--card2); border:1px solid var(--border-soft); margin-bottom:8px;}
+.mission-row{display:flex; align-items:center; gap:11px; padding:11px 13px; border-radius:12px; background:var(--card2); border:1px solid var(--border-soft); margin-bottom:8px;}
 .mission-row .stat-dot{font-size:17px; cursor:pointer;}
 .mission-row .m-body{flex:1; min-width:0;}
 .mission-row .m-title{font-weight:600; font-size:13px;}
@@ -227,33 +240,70 @@ canvas{max-width:100%;}
 
 .hero{
   border-radius:var(--radius-lg); padding:26px 28px; position:relative; overflow:hidden;
-  background:linear-gradient(135deg, rgba(124,109,242,.16), rgba(34,211,184,.07));
-  border:1px solid var(--border-soft); margin-bottom:22px;
+  background:var(--card); border:1px solid var(--border-soft); margin-bottom:22px;
 }
-.hero::before{content:''; position:absolute; inset:0; background:radial-gradient(420px 200px at 100% 0%, rgba(240,179,77,.10), transparent 70%); pointer-events:none;}
+.hero::before{content:''; position:absolute; inset:0; background:radial-gradient(460px 220px at 100% 0%, var(--accent-soft), transparent 70%); pointer-events:none;}
 .hero-top{display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; position:relative;}
 .hero h1{font-size:23px;}
 .hero .quote{font-size:13px; color:var(--muted); margin-top:5px;}
 .hero-stats{display:flex; gap:24px; flex-wrap:wrap;}
 .hero-stat{text-align:center; min-width:52px;}
 .hero-stat .v{font-family:var(--font-display); font-size:19px; font-weight:800;}
+.hero-stat .v.accent{color:var(--accent);}
 .hero-stat .l{font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; margin-top:1px;}
 
 .section-title{font-size:11.5px; text-transform:uppercase; letter-spacing:1.2px; color:var(--muted); font-weight:800; margin:30px 0 13px; display:flex; align-items:center; gap:8px;}
 .section-title:first-child{margin-top:0;}
 .section-title::after{content:''; flex:1; height:1px; background:var(--border-soft);}
+.section-title .link{margin-left:auto; font-size:11px; text-transform:none; letter-spacing:0; font-weight:700; color:var(--accent); cursor:pointer; flex:0 0 auto;}
+.section-title .link::before{display:none;}
 
 .filters{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;}
 .two-col{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
 @media (max-width:520px){.two-col{grid-template-columns:1fr;}}
 
 .empty-state{text-align:center; padding:34px 12px; color:var(--muted); font-size:13px;}
+.empty-state .ic{font-size:26px; display:block; margin-bottom:8px; opacity:.7;}
+
+/* ---- tabs (Progresso) ---- */
+.tabs{display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap; border-bottom:1px solid var(--border-soft); padding-bottom:0;}
+.tab{padding:9px 14px; font-size:12.5px; font-weight:700; color:var(--muted); cursor:pointer; border-radius:10px 10px 0 0; position:relative; top:1px;}
+.tab.active{color:var(--accent); border-bottom:2px solid var(--accent);}
+
+/* ---- Life Score ---- */
+.life-score-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:14px;}
+@media (max-width:640px){.life-score-grid{grid-template-columns:repeat(2,1fr);}}
+.score-item{text-align:left;}
+.score-item .row.between{margin-bottom:6px; font-size:12px;}
+.score-item .sv{font-family:var(--font-display); font-weight:800; font-size:15px;}
+
+/* ---- trips ---- */
+.trip-card{border-radius:var(--radius-lg); overflow:hidden; background:var(--card); border:1px solid var(--border-soft); box-shadow:var(--shadow-sm); transition:transform .2s, border-color .2s;}
+.trip-card:hover{transform:translateY(-3px); border-color:var(--border);}
+.trip-cover{height:130px; background:linear-gradient(135deg, var(--card2), var(--border-soft)); display:flex; align-items:center; justify-content:center; font-size:34px; position:relative; overflow:hidden;}
+.trip-cover img{width:100%; height:100%; object-fit:cover;}
+.trip-status{position:absolute; top:10px; right:10px;}
+.trip-body{padding:14px 16px;}
+.trip-title{font-family:var(--font-display); font-weight:700; font-size:14.5px; display:flex; align-items:center; gap:6px;}
+.trip-meta{font-size:11.5px; color:var(--muted); margin-top:4px;}
+.trip-stats{display:flex; gap:14px; margin-top:10px; font-size:11.5px; color:var(--text-dim);}
+.country-chip{display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border-radius:20px; background:var(--card2); border:1px solid var(--border-soft); font-size:12px; font-weight:600;}
+.country-dot{width:7px; height:7px; border-radius:50%;}
+.legend-row{display:flex; gap:16px; flex-wrap:wrap; font-size:11.5px; color:var(--muted); margin-bottom:12px;}
+.legend-row .li{display:flex; align-items:center; gap:6px;}
+
+/* ---- journal / reflexões ---- */
+.journal-entry{padding:16px; border-radius:13px; background:var(--card2); border:1px solid var(--border-soft); margin-bottom:10px;}
+.journal-entry .je-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;}
+.journal-entry .je-date{font-weight:700; font-size:12.5px;}
+.journal-entry .je-mood{font-size:16px;}
+.journal-entry .je-text{font-size:13.5px; color:var(--text-dim); white-space:pre-wrap;}
 
 /* ============================= COACH CHAT ============================= */
 .coach-wrap{display:flex; flex-direction:column; height:min(68vh,620px); background:var(--card); border:1px solid var(--border-soft); border-radius:var(--radius-lg); overflow:hidden; box-shadow:var(--shadow-sm);}
 .coach-msgs{flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:12px;}
 .coach-msg{max-width:78%; padding:11px 15px; border-radius:16px; font-size:13.5px; line-height:1.5; white-space:pre-wrap;}
-.coach-msg.user{align-self:flex-end; background:linear-gradient(135deg,var(--primary),#6a5cd6); color:#fff; border-bottom-right-radius:4px;}
+.coach-msg.user{align-self:flex-end; background:var(--accent); color:#03251f; border-bottom-right-radius:4px; font-weight:600;}
 .coach-msg.assistant{align-self:flex-start; background:var(--card2); border:1px solid var(--border-soft); border-bottom-left-radius:4px;}
 .coach-msg.system{align-self:center; color:var(--muted); font-size:12px; background:none;}
 .coach-input-row{display:flex; gap:8px; padding:14px; border-top:1px solid var(--border-soft); background:var(--bg-elev);}
@@ -273,39 +323,40 @@ canvas{max-width:100%;}
   <!-- SIDEBAR -->
   <nav class="sidebar" id="sidebar">
     <div class="brand">
-      <div class="logo">🎮</div>
+      <div class="logo">OS</div>
       <div>
         <div class="name">LIFE OS</div>
-        <div class="sub">construindo minha vida</div>
+        <div class="sub">o painel da minha vida</div>
       </div>
     </div>
+    <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Recolher menu">«</button>
     <div id="navList"></div>
-    <div class="sidebar-foot">v1.0 · dados salvos localmente no navegador</div>
+    <div class="sidebar-foot">dados salvos localmente no navegador</div>
   </nav>
 
   <div style="flex:1; min-width:0; display:flex; flex-direction:column;">
     <div class="topbar">
       <button class="hamburger" id="hamburgerBtn">☰</button>
-      <div style="font-weight:800;">🎮 LIFE OS</div>
+      <div class="tb-brand">LIFE OS</div>
       <div style="width:30px;"></div>
     </div>
     <main class="main" id="main">
       <div class="view" id="view-dashboard"></div>
+      <div class="view" id="view-objetivos"></div>
       <div class="view" id="view-checkin"></div>
+      <div class="view" id="view-progresso"></div>
       <div class="view" id="view-saude"></div>
-      <div class="view" id="view-mente"></div>
-      <div class="view" id="view-ia"></div>
-      <div class="view" id="view-coach"></div>
-      <div class="view" id="view-carreira"></div>
-      <div class="view" id="view-vida"></div>
-      <div class="view" id="view-experiencias"></div>
       <div class="view" id="view-financas"></div>
-      <div class="view" id="view-semana"></div>
-      <div class="view" id="view-mes"></div>
-      <div class="view" id="view-graficos"></div>
+      <div class="view" id="view-carreira"></div>
+      <div class="view" id="view-aprendizado"></div>
+      <div class="view" id="view-viagens"></div>
+      <div class="view" id="view-vida"></div>
+      <div class="view" id="view-reflexoes"></div>
+      <div class="view" id="view-coach"></div>
       <div class="view" id="view-future"></div>
       <div class="view" id="view-config"></div>
     </main>
+    <nav class="bottom-nav" id="bottomNav"><div class="bottom-nav-inner" id="bottomNavInner"></div></nav>
   </div>
 </div>
 
@@ -410,6 +461,7 @@ function defaultData(){
       waterGoal:2000, stepsBase:8000, spanishGoal:45, sleepGoalMin:7, sleepGoalMax:8,
       financeGoal:30000, xpValues:defaultXpValues(), reminders:defaultReminders(),
       coachApiUrl:'',
+      lifeScoreWeights:{saude:1, financas:1, carreira:1, desenvolvimento:1, relacionamentos:1, experiencias:1},
     },
     progression:{runPhase:1, runTargetMin:30, runTargetKm:null, consistentWeeks:0, academiaUnlocked:false, lastEvaluatedWeek:null},
     days:{},
@@ -420,6 +472,7 @@ function defaultData(){
     aiLog:[],
     achievements:[],
     coach:{messages:[]},
+    trips:[],
     futureMe: JSON.parse(JSON.stringify(DEFAULT_FUTURE)).tresMeses ? {
       tresMeses: DEFAULT_FUTURE.tresMeses.map(t=>({id:uid(),text:t,done:false})),
       umAno: DEFAULT_FUTURE.umAno.map(t=>({id:uid(),text:t,done:false})),
@@ -454,6 +507,8 @@ function load(){
     data.achievements = parsed.achievements || [];
     data.futureMe = parsed.futureMe || defaultData().futureMe;
     data.coach = Object.assign({messages:[]}, parsed.coach||{});
+    data.trips = parsed.trips || [];
+    data.settings.lifeScoreWeights = Object.assign(defaultData().settings.lifeScoreWeights, (parsed.settings||{}).lifeScoreWeights||{});
   }catch(e){
     console.error('Falha ao carregar dados, iniciando novo LIFE OS', e);
     data = defaultData();
@@ -528,6 +583,7 @@ function defaultDay(dateObj){
     mealRating: null,
     sleep:{ sleepTime:'', wakeTime:'', hours:0, quality:0 },
     mood:{ score:0, note:'' },
+    journal:'',
     spanish:{ minutes:0, skills:[], note:'' },
     qualityTime:{ done:false, note:'' },
     checkin:{ done:false },
@@ -545,6 +601,7 @@ function getDay(key){
   const d = data.days[key];
   if(!d.xpFlags) d.xpFlags = { exercise:false, water:false, sleep:false, spanish:false, checkin:false, qualityTime:false };
   if(!d.xpLog) d.xpLog = [];
+  if(d.journal===undefined) d.journal = '';
   return d;
 }
 function peekDay(key){ return data.days[key] || null; }
@@ -727,6 +784,8 @@ const ACHIEVEMENT_DEFS = [
   {id:'finance1000', title:'💰 Primeiros €1.000 guardados', test:()=> data.finance.current>=1000},
   {id:'financeGoal', title:'💰 Meta financeira alcançada!', test:()=> data.finance.current>=data.settings.financeGoal},
   {id:'quests5', title:'🌎 5 Life Quests concluídas', test:()=> data.quests.filter(q=>q.status==='done').length>=5},
+  {id:'firsttrip', title:'✈️ Primeira viagem internacional', test:()=> data.trips.some(t=>t.status==='visited'||t.status==='lived')},
+  {id:'firstmission', title:'🎯 Primeiro objetivo concluído', test:()=> data.career.missions.some(m=>m.status==='concluido')},
 ];
 function unlockAchievement(id, title, desc){
   if(data.achievements.some(a=>a.id===id)) return;
@@ -741,32 +800,43 @@ function checkAchievements(){
 
 /* ============================= 6) NAVEGAÇÃO ============================= */
 const NAV = [
-  {id:'dashboard', label:'Dashboard', icon:'🏠'},
-  {id:'checkin', label:'Check-in', icon:'✅'},
-  {id:'saude', label:'Corpo & Saúde', icon:'🏃'},
-  {id:'mente', label:'Mente & Espanhol', icon:'🧠'},
-  {id:'ia', label:'IA & Build Mode', icon:'🤖'},
-  {id:'coach', label:'Coach IA', icon:'🧭'},
-  {id:'carreira', label:'Carreira', icon:'💼'},
-  {id:'vida', label:'Nossa História', icon:'❤️'},
-  {id:'experiencias', label:'Life Quests', icon:'🌎'},
+  {id:'dashboard', label:'Hoje', icon:'⌂'},
+  {id:'objetivos', label:'Objetivos', icon:'🎯'},
+  {id:'checkin', label:'Tarefas', icon:'✓'},
+  {id:'progresso', label:'Progresso', icon:'📈'},
+  {id:'saude', label:'Saúde', icon:'🏋️'},
   {id:'financas', label:'Finanças', icon:'💰'},
-  {id:'semana', label:'Semana', icon:'📅'},
-  {id:'mes', label:'Mês', icon:'🗓️'},
-  {id:'graficos', label:'Gráficos', icon:'📈'},
-  {id:'future', label:'Future Me', icon:'🔮'},
-  {id:'config', label:'Configurações', icon:'⚙️'},
+  {id:'carreira', label:'Carreira', icon:'💼'},
+  {id:'aprendizado', label:'Aprendizado', icon:'📚'},
+  {id:'viagens', label:'Viagens', icon:'🌎'},
+  {id:'vida', label:'Memórias', icon:'📸'},
+  {id:'reflexoes', label:'Reflexões', icon:'🧠'},
+  {id:'config', label:'Configurações', icon:'⚙'},
 ];
+// Bottom mobile nav shows only the 4 most-used destinations; everything else is one tap away via "Mais".
+const BOTTOM_NAV_IDS = ['dashboard','objetivos','checkin','progresso'];
 
-let state = { view:'dashboard', weekOffset:0, calYear:new Date().getFullYear(), calMonth:new Date().getMonth(), memFilters:{year:'',city:'',category:''} };
+let state = {
+  view:'dashboard', weekOffset:0, calYear:new Date().getFullYear(), calMonth:new Date().getMonth(),
+  memFilters:{year:'',city:'',category:''}, progressoTab:'semana', sidebarCollapsed:false,
+};
 
 function renderSidebar(){
   const navList = document.getElementById('navList');
   navList.innerHTML = NAV.map(n=>
-    `<div class="navitem ${state.view===n.id?'active':''}" data-action="nav" data-view="${n.id}">
+    `<div class="navitem ${state.view===n.id?'active':''}" data-action="nav" data-view="${n.id}" title="${esc(n.label)}">
       <span class="ic">${n.icon}</span><span>${n.label}</span>
     </div>`
   ).join('');
+  const bn = document.getElementById('bottomNavInner');
+  if(bn){
+    const otherActive = !BOTTOM_NAV_IDS.includes(state.view);
+    bn.innerHTML = NAV.filter(n=>BOTTOM_NAV_IDS.includes(n.id)).map(n=>
+      `<div class="bottom-nav-item ${state.view===n.id?'active':''}" data-action="nav" data-view="${n.id}">
+        <span class="ic">${n.icon}</span><span>${n.label}</span>
+      </div>`
+    ).join('') + `<div class="bottom-nav-item ${otherActive?'active':''}" data-action="open-mobile-menu"><span class="ic">☰</span><span>Mais</span></div>`;
+  }
 }
 
 function setView(view){
@@ -782,18 +852,17 @@ function setView(view){
 function renderCurrentView(){
   switch(state.view){
     case 'dashboard': renderDashboard(); break;
+    case 'objetivos': renderObjetivos(); break;
     case 'checkin': renderCheckin(); break;
+    case 'progresso': renderProgresso(); break;
     case 'saude': renderSaude(); break;
-    case 'mente': renderMente(); break;
-    case 'ia': renderIA(); break;
-    case 'coach': renderCoach(); break;
-    case 'carreira': renderCarreira(); break;
-    case 'vida': renderVida(); break;
-    case 'experiencias': renderExperiencias(); break;
     case 'financas': renderFinancas(); break;
-    case 'semana': renderSemana(); break;
-    case 'mes': renderMes(); break;
-    case 'graficos': renderGraficos(); break;
+    case 'carreira': renderCarreira(); break;
+    case 'aprendizado': renderAprendizado(); break;
+    case 'viagens': renderViagens(); break;
+    case 'vida': renderVida(); break;
+    case 'reflexoes': renderReflexoes(); break;
+    case 'coach': renderCoach(); break;
     case 'future': renderFuture(); break;
     case 'config': renderConfig(); break;
   }
@@ -803,6 +872,11 @@ function renderAll(){
   applyTheme();
   renderSidebar();
   setView(state.view);
+}
+
+function toggleSidebar(){
+  state.sidebarCollapsed = !state.sidebarCollapsed;
+  document.getElementById('sidebar').classList.toggle('collapsed', state.sidebarCollapsed);
 }
 
 function openSidebarMobile(){ document.getElementById('sidebar').classList.add('open'); document.getElementById('overlayBg').classList.add('show'); }
@@ -838,55 +912,183 @@ function heroHeader(subtitleHtml){
 function greeting(){ const h = new Date().getHours(); return h<12?'Bom dia':(h<18?'Boa tarde':'Boa noite'); }
 function greetingEmoji(){ const h = new Date().getHours(); return h<12?'☀️':(h<18?'🌤️':'🌙'); }
 
-/* ---------- DASHBOARD ---------- */
+/* ---------- LIFE SCORE ---------- */
+function periodConsistency(predicate, days, excludeSundays){
+  let ok=0, total=0;
+  for(let i=0;i<days;i++){
+    const d = addDays(new Date(), -i);
+    if(excludeSundays && d.getDay()===0) continue;
+    total++;
+    if(predicate(peekDay(fmtKey(d)), d)) ok++;
+  }
+  return total ? Math.round(ok/total*100) : 0;
+}
+
+function computeLifeScore(){
+  const s = data.settings;
+  const saudeSub = [
+    periodConsistency(d=>!!(d && d.exercise.done && d.exercise.type!=='descanso'), 7, true),
+    periodConsistency(d=>!!(d && d.water.ml>=s.waterGoal), 7, false),
+    periodConsistency(d=>!!(d && d.sleep.hours>=s.sleepGoalMin), 7, false),
+    periodConsistency(d=>!!(d && d.steps.actual>=d.steps.goal), 7, false),
+  ];
+  const saude = Math.round(saudeSub.reduce((a,b)=>a+b,0)/saudeSub.length);
+
+  const financas = pct(data.finance.current, s.financeGoal);
+
+  const missionsDone = data.career.missions.filter(m=>m.status==='concluido').length;
+  const carreira = data.career.missions.length ? Math.round(missionsDone/data.career.missions.length*100) : 0;
+
+  const espanholW = periodConsistency(d=>!!(d && d.spanish.minutes>=s.spanishGoal), 7, false);
+  const iaCount7 = data.aiLog.filter(l=> new Date(l.date) >= addDays(new Date(),-7)).length;
+  const iaW = Math.min(100, iaCount7*20);
+  const desenvolvimento = Math.round((espanholW+iaW)/2);
+
+  const relacionamentos = periodConsistency(d=>!!(d && d.qualityTime.done), 30, false);
+
+  const questsPct = data.quests.length ? Math.round(data.quests.filter(q=>q.status==='done').length/data.quests.length*100) : 0;
+  const visitedCountries = new Set(data.trips.filter(t=>t.status==='visited'||t.status==='lived').map(t=>t.country)).size;
+  const tripsPct = Math.min(100, visitedCountries*20);
+  const experiencias = data.trips.length ? Math.round((questsPct+tripsPct)/2) : questsPct;
+
+  const parts = {saude, financas, carreira, desenvolvimento, relacionamentos, experiencias};
+  const w = s.lifeScoreWeights || {};
+  let sumW=0, sumWV=0;
+  Object.keys(parts).forEach(k=>{ const wt = w[k]??1; sumW+=wt; sumWV+=wt*parts[k]; });
+  const overall = sumW ? Math.round(sumWV/sumW) : 0;
+  return Object.assign({overall}, parts);
+}
+
+const LIFE_SCORE_LABELS = {saude:'🏋️ Saúde', financas:'💰 Finanças', carreira:'💼 Carreira', desenvolvimento:'📚 Desenvolvimento', relacionamentos:'❤️ Relações', experiencias:'🌎 Experiências'};
+
+function lifeScoreCard(){
+  const score = computeLifeScore();
+  return `<div class="card hoverable" data-action="nav" data-view="progresso" style="cursor:pointer;">
+    <div class="card-head">
+      <div class="card-title">LIFE SCORE</div>
+      <div class="big-num accent">${score.overall}<span class="muted" style="font-size:14px; font-weight:600;"> / 100</span></div>
+    </div>
+    <div class="bar"><span style="width:${score.overall}%"></span></div>
+    <div class="life-score-grid">
+      ${Object.keys(LIFE_SCORE_LABELS).map(k=>`
+        <div class="score-item">
+          <div class="row between"><span class="muted">${LIFE_SCORE_LABELS[k]}</span><span class="sv">${score[k]}</span></div>
+          <div class="bar sm"><span style="width:${score[k]}%"></span></div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+/* ---------- eventos & memórias (helpers para Home) ---------- */
+function findNextEvent(){
+  const now = new Date(); now.setHours(0,0,0,0);
+  const candidates = [];
+  data.trips.forEach(t=>{
+    if(t.status==='planned' && t.startDate){
+      const d = parseKey(t.startDate);
+      if(d>=now) candidates.push({label:(t.flag?t.flag+' ':'🌎 ')+t.title, date:d});
+    }
+  });
+  data.career.missions.forEach(m=>{
+    if(m.status!=='concluido' && m.deadline){
+      const d = parseKey(m.deadline);
+      if(d>=now) candidates.push({label:(m.icon||'💼')+' '+m.title, date:d});
+    }
+  });
+  if(!candidates.length) return null;
+  candidates.sort((a,b)=>a.date-b.date);
+  const next = candidates[0];
+  const days = Math.round((next.date-now)/86400000);
+  return {label:next.label, days};
+}
+function getRecentMemory(){
+  if(!data.relationship.memories.length) return null;
+  return data.relationship.memories.slice().sort((a,b)=>b.date.localeCompare(a.date))[0];
+}
+
+/* ---------- HOME ("HOJE") ---------- */
 function renderDashboard(){
   const key = todayKey();
   const day = getDay(key);
   const s = data.settings;
 
   const todayItems = [
-    {icon:'🏃', label: day.exercise.type==='descanso' ? 'Dia de descanso' : (WEEKLY_PLAN[new Date().getDay()].label), done: day.exercise.done, action:'saude'},
+    {icon:'🏋️', label: day.exercise.type==='descanso' ? 'Dia de descanso' : (WEEKLY_PLAN[new Date().getDay()].label), done: day.exercise.done, action:'saude'},
     {icon:'👣', label:`Passos ${day.steps.actual}/${day.steps.goal}`, done: day.steps.actual>=day.steps.goal, action:'saude'},
     {icon:'💧', label:`Água ${day.water.ml}/${s.waterGoal}ml`, done: day.water.ml>=s.waterGoal, action:'saude'},
     {icon:'🍽️', label:'Alimentação registrada', done: hasAnyMeal(day), action:'saude'},
     {icon:'😴', label:`Sono ${day.sleep.hours||0}h`, done: day.sleep.hours>=s.sleepGoalMin, action:'saude'},
-    {icon:'🇪🇸', label:`Espanhol ${day.spanish.minutes}/${s.spanishGoal}min`, done: day.spanish.minutes>=s.spanishGoal, action:'mente'},
-    {icon:'🤖', label:'Aprender/praticar IA', done: hasAiToday(), action:'ia'},
+    {icon:'📚', label:`Espanhol ${day.spanish.minutes}/${s.spanishGoal}min`, done: day.spanish.minutes>=s.spanishGoal, action:'aprendizado'},
+    {icon:'📚', label:'Aprender/praticar algo', done: hasAiToday(), action:'aprendizado'},
     {icon:'❤️', label:'Tempo de qualidade', done: day.qualityTime.done, action:'vida'},
   ];
+  const xpToday = day.xpEarned || 0;
 
-  const saudeComposite = Math.round((
-    (day.exercise.done?100:0) + pct(day.water.ml,s.waterGoal) + pct(day.steps.actual,day.steps.goal) + pct(day.sleep.hours, s.sleepGoalMin)
-  )/4);
-  const espanholComposite = pct(day.spanish.minutes, s.spanishGoal);
-  const iaCount7 = data.aiLog.filter(l=> new Date(l.date) >= addDays(new Date(),-7)).length;
   const financePct = pct(data.finance.current, s.financeGoal);
+  const espanholComposite = pct(day.spanish.minutes, s.spanishGoal);
   const missionsDone = data.career.missions.filter(m=>m.status==='concluido').length;
   const missionsPct = data.career.missions.length ? Math.round(missionsDone/data.career.missions.length*100) : 0;
+  const objectiveLabel = data.career.objective==='espanha' ? '🇪🇸 Espanha 2026' : '📈 Evolução profissional';
+
+  const next = findNextEvent();
+  const recentMem = getRecentMemory();
 
   document.getElementById('view-dashboard').innerHTML = `
-    ${heroHeader()}
-    <div class="section-title">Missão de hoje</div>
-    <div class="grid">
-      ${todayItems.map(it=>`
-        <div class="check-item ${it.done?'done':''}" style="cursor:pointer" data-action="nav" data-view="${it.action}">
-          <div class="cbox">${it.done?'✓':''}</div>
-          <div class="body"><div class="title"><span class="ic-badge">${it.icon}</span> ${esc(it.label)}</div></div>
-        </div>`).join('')}
+    ${heroHeader('Construindo a vida que quero viver.')}
+
+    <div class="grid-2">
+      ${lifeScoreCard()}
+      <div class="card">
+        <div class="card-head"><div class="card-title">HOJE</div>${xpToday>0?`<span class="badge primary">+${xpToday} XP hoje</span>`:''}</div>
+        <div class="stack">
+          ${todayItems.map(it=>`
+            <div class="check-item ${it.done?'done':''}" style="padding:10px 12px;">
+              <div class="cbox" style="cursor:pointer;" data-action="nav" data-view="${it.action}">${it.done?'✓':''}</div>
+              <div class="body"><div class="title" style="font-size:13px;"><span class="ic-badge">${it.icon}</span> ${esc(it.label)}</div></div>
+            </div>`).join('')}
+        </div>
+      </div>
     </div>
 
-    <div class="section-title">Progresso</div>
-    <div class="grid">
-      ${progressCard('📈 Saúde', saudeComposite)}
-      ${progressCard('🇪🇸 Espanhol', espanholComposite)}
-      ${progressCard('🤖 IA (7 dias)', Math.min(100,iaCount7*20), iaCount7+' registros')}
-      ${progressCard('💰 Patrimônio', financePct, '€'+fmt2(data.finance.current)+' / €'+fmt2(s.financeGoal))}
-      ${progressCard('💼 Carreira', missionsPct, missionsDone+'/'+data.career.missions.length+' missões')}
+    <div class="section-title">Missões ativas<span class="link" data-action="nav" data-view="objetivos">ver todas →</span></div>
+    <div class="grid-3">
+      <div class="card tight hoverable" style="cursor:pointer;" data-action="nav" data-view="objetivos">
+        <div class="card-title">${objectiveLabel}</div>
+        <div class="bar" style="margin:10px 0 6px;"><span style="width:${missionsPct}%"></span></div>
+        <div class="muted">${missionsPct}% · ${missionsDone}/${data.career.missions.length} etapas</div>
+      </div>
+      <div class="card tight hoverable" style="cursor:pointer;" data-action="nav" data-view="financas">
+        <div class="card-title">💰 Patrimônio</div>
+        <div class="bar" style="margin:10px 0 6px;"><span style="width:${financePct}%"></span></div>
+        <div class="muted">${financePct}% · €${fmt2(data.finance.current)} / €${fmt2(s.financeGoal)}</div>
+      </div>
+      <div class="card tight hoverable" style="cursor:pointer;" data-action="nav" data-view="aprendizado">
+        <div class="card-title">📚 Espanhol</div>
+        <div class="bar" style="margin:10px 0 6px;"><span style="width:${espanholComposite}%"></span></div>
+        <div class="muted">${espanholComposite}% da meta de hoje</div>
+      </div>
     </div>
 
-    <div class="section-title">Conquistas recentes</div>
-    <div class="card">
-      ${data.achievements.length ? data.achievements.slice(-5).reverse().map(a=>`<div class="row" style="padding:6px 0;">🏆 <b>${esc(a.title)}</b> <span class="muted" style="margin-left:auto">${fmtBR(fmtKey(new Date(a.unlockedAt)))}</span></div>`).join('') : '<div class="empty-state">Suas conquistas vão aparecer aqui conforme você evolui. 🎯</div>'}
+    <div class="grid-2">
+      <div>
+        <div class="section-title">Próximo</div>
+        <div class="card">
+          ${next ? `<div class="row between"><b>${esc(next.label)}</b><span class="badge primary">${next.days===0?'hoje':(next.days+' dia'+(next.days===1?'':'s'))}</span></div>` : `<div class="empty-state"><span class="ic">🗺️</span>Nenhum evento futuro definido ainda.</div>`}
+        </div>
+      </div>
+      <div>
+        <div class="section-title">Memória recente<span class="link" data-action="nav" data-view="vida">álbum →</span></div>
+        <div class="card">
+          ${recentMem ? `
+            <div class="row" style="align-items:flex-start;">
+              ${recentMem.photos && recentMem.photos.length ? `<img src="${recentMem.photos[0]}" style="width:56px;height:56px;border-radius:12px;object-fit:cover;flex:0 0 56px;">` : `<div style="width:56px;height:56px;border-radius:12px;background:var(--card2);display:flex;align-items:center;justify-content:center;flex:0 0 56px;font-size:22px;">📸</div>`}
+              <div style="min-width:0;">
+                <b>${esc(recentMem.title)}</b>
+                <div class="muted">📍 ${esc(recentMem.location)} · ${fmtBR(recentMem.date)}</div>
+              </div>
+            </div>` : `<div class="empty-state"><span class="ic">📸</span>Você ainda não registrou nenhuma memória.<br>Quando uma nova experiência acontecer, ela pode começar aqui.<br><button class="btn primary xs" style="margin-top:10px;" data-action="open-memory-modal">Registrar memória</button></div>`}
+        </div>
+      </div>
     </div>
   `;
 }
@@ -896,6 +1098,12 @@ function progressCard(title, value, extra){
     <div class="big-num">${value}%</div>
     <div class="bar sm" style="margin-top:8px;"><span style="width:${clamp(value,0,100)}%"></span></div>
     ${extra?`<div class="muted" style="margin-top:6px;">${esc(extra)}</div>`:''}
+  </div>`;
+}
+function statDisplay(label, value){
+  return `<div class="card tight">
+    <div class="card-title">${label}</div>
+    <div class="big-num accent" style="margin-top:8px;">${value}</div>
   </div>`;
 }
 function fmt2(n){ return (n||0).toLocaleString('pt-BR', {minimumFractionDigits:0, maximumFractionDigits:0}); }
@@ -913,8 +1121,8 @@ function renderCheckin(){
     {key:'steps', icon:'👣', label:`Meta de passos: ${day.steps.goal}`, done: day.steps.actual>=day.steps.goal, action:'goto-saude'},
     {key:'food', icon:'🍽️', label:'Registrar alimentação do dia', done: hasAnyMeal(day), action:'goto-saude'},
     {key:'sleep', icon:'😴', label:`Dormir ${s.sleepGoalMin}–${s.sleepGoalMax}h (registre a noite anterior)`, done: day.sleep.hours>=s.sleepGoalMin, action:'goto-saude'},
-    {key:'spanish', icon:'🇪🇸', label:`Espanhol ${s.spanishGoal} minutos`, done: day.spanish.minutes>=s.spanishGoal, action:'goto-mente'},
-    {key:'ai', icon:'🤖', label:'Aprender ou praticar algo novo', done: hasAiToday(), action:'goto-ia'},
+    {key:'spanish', icon:'📚', label:`Espanhol ${s.spanishGoal} minutos`, done: day.spanish.minutes>=s.spanishGoal, action:'goto-aprendizado'},
+    {key:'ai', icon:'📚', label:'Aprender ou praticar algo novo', done: hasAiToday(), action:'goto-aprendizado'},
     {key:'love', icon:'❤️', label:'Tempo de qualidade (quando possível)', done: day.qualityTime.done, action:'quick-love'},
   ];
   document.getElementById('view-checkin').innerHTML = `
@@ -1050,16 +1258,18 @@ function weeklyAverage(getter){
   return n? sum/n : null;
 }
 
-/* ---------- MENTE & ESPANHOL ---------- */
-function renderMente(){
+/* ---------- APRENDIZADO (Espanhol + Build Mode) ---------- */
+function renderAprendizado(){
   const key = todayKey();
   const day = getDay(key);
   const s = data.settings;
   const streak = computeStreak(STREAK_DEFS.espanhol.predicate);
   const skillsAll = ['listening','speaking','reading','writing','vocabulario','conversa','aula'];
-  document.getElementById('view-mente').innerHTML = `
+  const grouped = groupBy(data.aiLog.slice().reverse(), l=>l.date.slice(0,10));
+
+  document.getElementById('view-aprendizado').innerHTML = `
     ${heroHeader()}
-    <div class="section-title">🇪🇸 Espanhol — hoje</div>
+    <div class="section-title">📚 Espanhol — hoje<span class="link" data-action="nav" data-view="coach">🧭 falar com o coach →</span></div>
     <div class="card">
       <div class="row between"><b>${day.spanish.minutes} / ${s.spanishGoal} min</b><span class="badge ${day.spanish.minutes>=s.spanishGoal?'success':''}">🔥 streak: ${streak} dias</span></div>
       <div class="bar" style="margin:10px 0;"><span style="width:${pct(day.spanish.minutes,s.spanishGoal)}%"></span></div>
@@ -1077,21 +1287,7 @@ function renderMente(){
       <button class="btn primary" data-action="save-spanish-note">Salvar</button>
     </div>
 
-    <div class="section-title">🧠 Desenvolvimento pessoal</div>
-    <div class="card">
-      <div class="muted">Use o módulo 🤖 IA & Build Mode para registrar estudos, leituras e práticas de aprendizado — inclusive fora de espanhol e tecnologia.</div>
-      <button class="btn" style="margin-top:10px;" data-action="nav" data-view="ia">Ir para Build Mode →</button>
-    </div>
-  `;
-}
-
-/* ---------- IA & BUILD MODE ---------- */
-function renderIA(){
-  const s = data.settings;
-  const grouped = groupBy(data.aiLog.slice().reverse(), l=>l.date.slice(0,10));
-  document.getElementById('view-ia').innerHTML = `
-    ${heroHeader()}
-    <div class="section-title">🤖 BUILD MODE — Aprender → Praticar → Criar</div>
+    <div class="section-title">Build Mode — aprender → praticar → criar</div>
     <div class="card">
       <div class="two-col">
         <div class="field"><label>Tipo</label>
@@ -1224,13 +1420,27 @@ async function sendCoachMessage(text){
 }
 
 /* ---------- CARREIRA ---------- */
+const MISSION_STATUS_ICON = {nao_iniciado:'⚪', em_andamento:'🔵', concluido:'🟢'};
+const MISSION_STATUS_LABEL = {nao_iniciado:'Não iniciado', em_andamento:'Em andamento', concluido:'Concluído'};
+function missionsListHtml(missions){
+  return missions.length ? missions.map(m=>`
+    <div class="mission-row">
+      <div class="stat-dot" data-action="cycle-mission-status" data-id="${m.id}" title="Clique para avançar status">${MISSION_STATUS_ICON[m.status]}</div>
+      <div class="m-body">
+        <div class="m-title">${m.icon||'📌'} ${esc(m.title)}</div>
+        <div class="m-meta">${MISSION_STATUS_LABEL[m.status]} · prioridade ${m.priority} ${m.deadline?(' · prazo '+fmtBR(m.deadline)):''} ${m.note?(' · '+esc(m.note)):''}</div>
+      </div>
+      <button class="btn xs ghost" data-action="delete-mission" data-id="${m.id}">✕</button>
+    </div>`).join('') : '<div class="empty-state">Nenhuma missão cadastrada.</div>';
+}
+
 function renderCarreira(){
   const c = data.career;
-  const statusIcon = {nao_iniciado:'⚪', em_andamento:'🔵', concluido:'🟢'};
-  const statusLabel = {nao_iniciado:'Não iniciado', em_andamento:'Em andamento', concluido:'Concluído'};
+  const missionsDone = c.missions.filter(m=>m.status==='concluido').length;
+  const missionsPct = c.missions.length ? Math.round(missionsDone/c.missions.length*100) : 0;
   document.getElementById('view-carreira').innerHTML = `
     ${heroHeader()}
-    <div class="section-title">💼 ${c.objective==='espanha' ? 'MISSÃO: ESTABELECER-ME NA ESPANHA' : 'EVOLUÇÃO PROFISSIONAL'}</div>
+    <div class="section-title">💼 Carreira</div>
     <div class="card row between">
       <div class="muted">Objetivo atual</div>
       <select id="careerObjective" data-action="change-objective">
@@ -1239,25 +1449,18 @@ function renderCarreira(){
       </select>
     </div>
 
-    <div class="grid" style="margin-top:14px;">
+    <div class="section-title">Busca ativa</div>
+    <div class="grid">
       ${statCounter('💼 Vagas encontradas','vagas',c.stats.vagas)}
       ${statCounter('📨 Candidaturas','candidaturas',c.stats.candidaturas)}
       ${statCounter('🎤 Entrevistas','entrevistas',c.stats.entrevistas)}
       ${statCounter('🤝 Networking','networking',c.stats.networking)}
     </div>
 
-    <div class="section-title">Missões</div>
-    <button class="btn primary" data-action="open-mission-modal">+ Nova missão</button>
-    <div style="margin-top:12px;">
-      ${c.missions.length ? c.missions.map(m=>`
-        <div class="mission-row">
-          <div class="stat-dot" data-action="cycle-mission-status" data-id="${m.id}" title="Clique para avançar status">${statusIcon[m.status]}</div>
-          <div class="m-body">
-            <div class="m-title">${m.icon||'📌'} ${esc(m.title)}</div>
-            <div class="m-meta">${statusLabel[m.status]} · prioridade ${m.priority} ${m.deadline?(' · prazo '+fmtBR(m.deadline)):''} ${m.note?(' · '+esc(m.note)):''}</div>
-          </div>
-          <button class="btn xs ghost" data-action="delete-mission" data-id="${m.id}">✕</button>
-        </div>`).join('') : '<div class="empty-state">Nenhuma missão cadastrada.</div>'}
+    <div class="section-title">Missão &amp; etapas<span class="link" data-action="nav" data-view="objetivos">ver em Objetivos →</span></div>
+    <div class="card hoverable" style="cursor:pointer;" data-action="nav" data-view="objetivos">
+      <div class="row between"><b>${missionsPct}% concluído</b><span class="muted">${missionsDone}/${c.missions.length} etapas</span></div>
+      <div class="bar" style="margin-top:8px;"><span style="width:${missionsPct}%"></span></div>
     </div>
   `;
 }
@@ -1272,7 +1475,7 @@ function statCounter(label, key, value){
   </div>`;
 }
 
-/* ---------- VIDA A DOIS (ÁLBUM) ---------- */
+/* ---------- MEMÓRIAS (LIFE JOURNAL) ---------- */
 function renderVida(){
   const mems = data.relationship.memories.slice().sort((a,b)=> b.date.localeCompare(a.date));
   const years = [...new Set(mems.map(m=>m.date.slice(0,4)))];
@@ -1283,9 +1486,9 @@ function renderVida(){
 
   document.getElementById('view-vida').innerHTML = `
     ${heroHeader()}
-    <div class="section-title">❤️ NOSSA HISTÓRIA</div>
+    <div class="section-title">📸 Memórias — Life Journal</div>
     <div class="card row between">
-      <div class="muted">Registre momentos especiais com a Marcelly — cada memória é um pouco de tempo de qualidade.</div>
+      <div class="muted">Sua memória visual da vida — momentos com a Marcelly, viagens e experiências.</div>
       <button class="btn primary" data-action="open-memory-modal">+ Adicionar memória</button>
     </div>
 
@@ -1305,35 +1508,51 @@ function renderVida(){
             <p style="margin-top:6px;">${esc(m.description)}</p>
             ${m.photos && m.photos.length? `<div class="photo-grid">${m.photos.map(p=>`<img src="${p}">`).join('')}</div>`:''}
           </div>
-        </div>`).join('') : '<div class="empty-state">Nenhuma memória ainda. Comece registrando o primeiro momento especial. ❤️</div>'}
+        </div>`).join('') : '<div class="empty-state"><span class="ic">📸</span>Você ainda não registrou nenhuma memória.<br>Quando uma nova experiência acontecer, ela pode começar aqui.</div>'}
     </div>
   `;
 }
 
-/* ---------- EXPERIÊNCIAS / LIFE QUESTS ---------- */
-function renderExperiencias(){
+/* ---------- OBJETIVOS (missão ativa + Life Quests) ---------- */
+function renderObjetivos(){
+  const c = data.career;
+  const missionsDone = c.missions.filter(m=>m.status==='concluido').length;
+  const missionsPct = c.missions.length ? Math.round(missionsDone/c.missions.length*100) : 0;
+  const objectiveLabel = c.objective==='espanha' ? '🇪🇸 Espanha 2026' : '📈 Evolução profissional';
   const done = data.quests.filter(q=>q.status==='done');
   const pending = data.quests.filter(q=>q.status!=='done');
-  document.getElementById('view-experiencias').innerHTML = `
+
+  document.getElementById('view-objetivos').innerHTML = `
     ${heroHeader()}
-    <div class="section-title">🌎 LIFE QUESTS</div>
-    <div class="card row between">
-      <div class="muted">Missões da vida — cada uma concluída gera XP e entra no seu histórico.</div>
-      <button class="btn primary" data-action="open-quest-modal">+ Nova quest</button>
+    <div class="section-title">🎯 Missão ativa</div>
+    <div class="card">
+      <div class="row between"><h3 style="margin:0;">${objectiveLabel}</h3><span class="badge primary">${missionsPct}%</span></div>
+      <div class="bar" style="margin:10px 0 14px;"><span style="width:${missionsPct}%"></span></div>
+      <button class="btn primary xs" data-action="open-mission-modal">+ Nova etapa</button>
+      <div style="margin-top:12px;">${missionsListHtml(c.missions)}</div>
     </div>
-    <div class="grid" style="margin-top:14px;">
-      ${pending.map(q=>`
+
+    <div class="section-title">🌎 Life Quests<span class="link" data-action="open-quest-modal">+ nova quest</span></div>
+    <div class="grid">
+      ${pending.length ? pending.map(q=>`
         <div class="card tight">
           <div class="row" style="align-items:flex-start; flex-wrap:nowrap;">
             <b style="flex:1; min-width:0;">🎯 ${esc(q.title)}</b>
             <button class="btn xs ghost" style="flex:0 0 auto;" data-action="delete-quest" data-id="${q.id}">✕</button>
           </div>
           <button class="btn success xs" style="margin-top:10px;" data-action="complete-quest" data-id="${q.id}">Concluir (+${data.settings.xpValues.experiencia} xp)</button>
-        </div>`).join('')}
+        </div>`).join('') : `<div class="empty-state"><span class="ic">🎯</span>Nenhuma quest pendente. Adicione uma nova missão da vida.</div>`}
     </div>
-    <div class="section-title">🏆 Quests concluídas (${done.length})</div>
+    ${done.length ? `
+    <div class="section-title">🏆 Concluídas (${done.length})</div>
     <div class="card">
-      ${done.length? done.slice().reverse().map(q=>`<div class="list-item row between"><span>🏆 ${esc(q.title)}</span><span class="muted">${q.dateCompleted?fmtBR(q.dateCompleted.slice(0,10)):''}</span></div>`).join('') : '<div class="empty-state">Nenhuma quest concluída ainda.</div>'}
+      ${done.slice().reverse().map(q=>`<div class="list-item row between"><span>🏆 ${esc(q.title)}</span><span class="muted">${q.dateCompleted?fmtBR(q.dateCompleted.slice(0,10)):''}</span></div>`).join('')}
+    </div>` : ''}
+
+    <div class="section-title">Visão de longo prazo</div>
+    <div class="card row between">
+      <div class="muted">🔮 Onde você quer estar em 3 meses, 1 ano, 2 anos e além.</div>
+      <button class="btn" data-action="nav" data-view="future">Ver Future Me →</button>
     </div>
   `;
 }
@@ -1380,11 +1599,25 @@ function computeProjection(){
   return `📈 No ritmo atual (~€${fmt2(avg)}/mês), você atinge a meta em ~${monthsLeft} meses (${target.toLocaleDateString('pt-BR',{month:'long',year:'numeric'})}).`;
 }
 
-/* ---------- SEMANA ---------- */
-function renderSemana(){
+/* ---------- PROGRESSO (Semana / Mês / Gráficos) ---------- */
+const PROGRESSO_TABS = [['semana','Semana'],['mes','Mês'],['graficos','Gráficos']];
+function renderProgresso(){
+  document.getElementById('view-progresso').innerHTML = `
+    ${heroHeader()}
+    <div class="tabs">
+      ${PROGRESSO_TABS.map(([id,label])=>`<div class="tab ${state.progressoTab===id?'active':''}" data-action="progresso-tab" data-tab="${id}">${label}</div>`).join('')}
+    </div>
+    <div id="progressoBody"></div>
+  `;
+  if(state.progressoTab==='semana') renderSemanaTab();
+  else if(state.progressoTab==='mes') renderMesTab();
+  else renderGraficosTab();
+}
+
+function renderSemanaTab(){
   const start = addDays(startOfWeek(new Date()), state.weekOffset*7);
   const s = data.settings;
-  let html = `${heroHeader()}<div class="section-title">📅 Visão semanal</div>
+  let html = `
   <div class="row between" style="margin-bottom:10px;">
     <button class="btn" data-action="week-nav" data-delta="-1">← anterior</button>
     <b>${fmtBR(fmtKey(start))} — ${fmtBR(fmtKey(addDays(start,6)))}</b>
@@ -1412,11 +1645,10 @@ function renderSemana(){
     </div>`;
   }
   html += `</div>`;
-  document.getElementById('view-semana').innerHTML = html;
+  document.getElementById('progressoBody').innerHTML = html;
 }
 
-/* ---------- MÊS ---------- */
-function renderMes(){
+function renderMesTab(){
   const y = state.calYear, m = state.calMonth;
   const first = new Date(y,m,1);
   const startOffset = (first.getDay()+6)%7; // monday-first
@@ -1431,7 +1663,7 @@ function renderMes(){
     const day = peekDay(key);
     const dots = [];
     if(day){
-      if(day.exercise.done && day.exercise.type!=='descanso') dots.push('<span class="dot" style="background:var(--primary)"></span>');
+      if(day.exercise.done && day.exercise.type!=='descanso') dots.push('<span class="dot" style="background:var(--accent)"></span>');
       if(day.xpEarned>0) dots.push('<span class="dot" style="background:var(--accent)"></span>');
       if(day.mood.score>0) dots.push('<span class="dot" style="background:var(--warning)"></span>');
     }
@@ -1439,9 +1671,7 @@ function renderMes(){
       <div class="dnum">${d}</div><div class="dots">${dots.join('')}</div>
     </div>`;
   }
-  document.getElementById('view-mes').innerHTML = `
-    ${heroHeader()}
-    <div class="section-title">🗓️ Visão mensal</div>
+  document.getElementById('progressoBody').innerHTML = `
     <div class="row between" style="margin-bottom:10px;">
       <button class="btn" data-action="month-nav" data-delta="-1">← anterior</button>
       <b style="text-transform:capitalize;">${monthName}</b>
@@ -1484,10 +1714,8 @@ function mkChart(canvasId, type, labels, datasets, opts){
 function lastNDaysLabels(n){ const out=[]; for(let i=n-1;i>=0;i--){ const d=addDays(new Date(),-i); out.push(pad(d.getDate())+'/'+pad(d.getMonth()+1)); } return out; }
 function lastNDaysValues(n, getter){ const out=[]; for(let i=n-1;i>=0;i--){ const d=addDays(new Date(),-i); const day=peekDay(fmtKey(d)); out.push(getter(day)||0); } return out; }
 
-function renderGraficos(){
-  document.getElementById('view-graficos').innerHTML = `
-    ${heroHeader()}
-    <div class="section-title">📈 Evolução</div>
+function renderGraficosTab(){
+  document.getElementById('progressoBody').innerHTML = `
     <div class="grid-2">
       <div class="card"><div class="card-title">🏃 Minutos de corrida (14 dias)</div><div class="chart-box"><canvas id="chartCorrida"></canvas></div></div>
       <div class="card"><div class="card-title">👣 Passos (14 dias)</div><div class="chart-box"><canvas id="chartPassos"></canvas></div></div>
@@ -1501,27 +1729,154 @@ function renderGraficos(){
     </div>
   `;
   const labels14 = lastNDaysLabels(14);
-  mkChart('chartCorrida','bar',labels14,[{label:'min', data:lastNDaysValues(14,d=>d&&d.exercise.type==='corrida'?d.exercise.durationMin:0), backgroundColor:'#7c6cf0'}]);
-  mkChart('chartPassos','bar',labels14,[{label:'passos', data:lastNDaysValues(14,d=>d?d.steps.actual:0), backgroundColor:'#00d3b0'}]);
-  mkChart('chartAgua','bar',labels14,[{label:'ml', data:lastNDaysValues(14,d=>d?d.water.ml:0), backgroundColor:'#3fa7ff'}]);
-  mkChart('chartSono','bar',labels14,[{label:'horas', data:lastNDaysValues(14,d=>d?d.sleep.hours:0), backgroundColor:'#a89bff'}]);
-  mkChart('chartEspanhol','bar',labels14,[{label:'min', data:lastNDaysValues(14,d=>d?d.spanish.minutes:0), backgroundColor:'#f5a623'}]);
+  mkChart('chartCorrida','bar',labels14,[{label:'min', data:lastNDaysValues(14,d=>d&&d.exercise.type==='corrida'?d.exercise.durationMin:0), backgroundColor:'#2dd4bf'}]);
+  mkChart('chartPassos','bar',labels14,[{label:'passos', data:lastNDaysValues(14,d=>d?d.steps.actual:0), backgroundColor:'#2dd4bf'}]);
+  mkChart('chartAgua','bar',labels14,[{label:'ml', data:lastNDaysValues(14,d=>d?d.water.ml:0), backgroundColor:'#2dd4bf'}]);
+  mkChart('chartSono','bar',labels14,[{label:'horas', data:lastNDaysValues(14,d=>d?d.sleep.hours:0), backgroundColor:'#2dd4bf'}]);
+  mkChart('chartEspanhol','bar',labels14,[{label:'min', data:lastNDaysValues(14,d=>d?d.spanish.minutes:0), backgroundColor:'#2dd4bf'}]);
   const iaCounts = lastNDaysLabels(14).map((_,idx)=>{ const d=addDays(new Date(),-(13-idx)); const key=fmtKey(d); return data.aiLog.filter(l=>l.date.slice(0,10)===key).length; });
-  mkChart('chartIA','bar',labels14,[{label:'registros', data:iaCounts, backgroundColor:'#2ecc71'}]);
+  mkChart('chartIA','bar',labels14,[{label:'registros', data:iaCounts, backgroundColor:'#2dd4bf'}]);
 
   const histSorted = data.finance.history.slice().sort((a,b)=>a.date.localeCompare(b.date));
   let running=0; const finLabels=[]; const finData=[];
   histSorted.forEach(h=>{ running += ['aporte','investimento','reserva','renda'].includes(h.type)? h.amount : -h.amount; finLabels.push(fmtBR(h.date)); finData.push(running); });
-  mkChart('chartPatrimonio','line', finLabels.length?finLabels:['início'], [{label:'€', data:finData.length?finData:[data.finance.current], borderColor:'#00d3b0', backgroundColor:'rgba(0,211,176,.15)', fill:true, tension:.3}]);
+  mkChart('chartPatrimonio','line', finLabels.length?finLabels:['início'], [{label:'€', data:finData.length?finData:[data.finance.current], borderColor:'#2dd4bf', backgroundColor:'rgba(45,212,191,.15)', fill:true, tension:.3}]);
 
   const xpLabels = lastNDaysLabels(30);
-  let cum=0; const xpNow = data.profile.xp;
+  const xpNow = data.profile.xp;
   const xpByDay = lastNDaysValues(30, d=>d?d.xpEarned:0);
   let base = xpNow - xpByDay.reduce((a,b)=>a+b,0);
   const xpCumData = xpByDay.map(v=>{ base+=v; return base; });
-  mkChart('chartXP','line', xpLabels, [{label:'XP', data:xpCumData, borderColor:'#7c6cf0', backgroundColor:'rgba(124,108,240,.15)', fill:true, tension:.3}]);
+  mkChart('chartXP','line', xpLabels, [{label:'XP', data:xpCumData, borderColor:'#2dd4bf', backgroundColor:'rgba(45,212,191,.15)', fill:true, tension:.3}]);
 
-  mkChart('chartHumor','line', labels14, [{label:'humor (1-5)', data:lastNDaysValues(14,d=>d?d.mood.score:0), borderColor:'#f5a623', backgroundColor:'rgba(245,166,35,.15)', fill:true, tension:.3}], {scales:{y:{min:0,max:5, ticks:{color:'#8b9ab0'}, grid:{color:'rgba(255,255,255,.06)'}}, x:{ticks:{color:'#8b9ab0'}}}});
+  mkChart('chartHumor','line', labels14, [{label:'humor (1-5)', data:lastNDaysValues(14,d=>d?d.mood.score:0), borderColor:'#f0b34d', backgroundColor:'rgba(240,179,77,.15)', fill:true, tension:.3}], {scales:{y:{min:0,max:5, ticks:{color:'#8b95a7'}, grid:{color:'rgba(255,255,255,.06)'}}, x:{ticks:{color:'#8b95a7'}}}});
+}
+
+/* ---------- VIAGENS ---------- */
+const TRIP_STATUS = {
+  visited:{label:'Visitado', color:'#2dd4bf'},
+  planned:{label:'Planejado', color:'#f0b34d'},
+  lived:{label:'Morou', color:'#5b8def'},
+};
+function renderViagens(){
+  const trips = data.trips.slice().sort((a,b)=> (b.startDate||'').localeCompare(a.startDate||''));
+  const countries = {};
+  trips.forEach(t=>{ if(t.country){ countries[t.country] = countries[t.country] || {flag:t.flag||'🌎', status:t.status}; if(t.status==='lived') countries[t.country].status='lived'; else if(t.status==='visited' && countries[t.country].status!=='lived') countries[t.country].status='visited'; } });
+  const countryList = Object.keys(countries).map(name=>({name, ...countries[name]}));
+
+  document.getElementById('view-viagens').innerHTML = `
+    ${heroHeader()}
+    <div class="section-title">🌎 My Travels</div>
+    <div class="grid">
+      ${statDisplay('🌎 Países visitados', trips.filter(t=>t.status==='visited'||t.status==='lived').length)}
+      ${statDisplay('✈️ Viagens registradas', trips.length)}
+      ${statDisplay('📸 Fotos guardadas', trips.reduce((a,t)=>a+(t.photos?t.photos.length:0),0))}
+    </div>
+
+    <div class="section-title">Mapa (países)<span class="link" data-action="open-trip-modal">+ nova viagem</span></div>
+    <div class="card">
+      <div class="legend-row">
+        ${Object.keys(TRIP_STATUS).map(k=>`<span class="li"><span class="country-dot" style="background:${TRIP_STATUS[k].color}"></span>${TRIP_STATUS[k].label}</span>`).join('')}
+      </div>
+      ${countryList.length ? `<div class="row">${countryList.map(c=>`<span class="country-chip"><span class="country-dot" style="background:${TRIP_STATUS[c.status].color}"></span>${c.flag} ${esc(c.name)}</span>`).join('')}</div>` : `<div class="empty-state"><span class="ic">🗺️</span>Nenhum país registrado ainda. Adicione sua primeira viagem.</div>`}
+    </div>
+
+    <div class="section-title">Viagens</div>
+    <div class="grid-3">
+      ${trips.length ? trips.map(t=>`
+        <div class="trip-card hoverable" style="cursor:pointer;" data-action="open-trip-detail" data-id="${t.id}">
+          <div class="trip-cover">
+            ${t.cover ? `<img src="${t.cover}">` : (t.flag||'🌎')}
+            <span class="trip-status badge" style="background:${TRIP_STATUS[t.status].color}22; color:${TRIP_STATUS[t.status].color}; border:none;">${TRIP_STATUS[t.status].label}</span>
+          </div>
+          <div class="trip-body">
+            <div class="trip-title">${t.flag||'🌎'} ${esc(t.title)}</div>
+            <div class="trip-meta">${t.startDate?fmtBR(t.startDate):'—'}${t.endDate?(' — '+fmtBR(t.endDate)):''}</div>
+            <div class="trip-stats">
+              <span>📸 ${t.photos?t.photos.length:0} fotos</span>
+              <span>📍 ${t.places?t.places.length:0} lugares</span>
+            </div>
+          </div>
+        </div>`).join('') : `<div class="empty-state" style="grid-column:1/-1;"><span class="ic">🌎</span>Nenhuma viagem registrada ainda.<br>Quando uma nova experiência acontecer, ela pode começar aqui.<br><button class="btn primary xs" style="margin-top:10px;" data-action="open-trip-modal">Registrar viagem</button></div>`}
+    </div>
+  `;
+}
+function openTripModal(){
+  openModal(`
+    <h3>Nova viagem</h3>
+    <div class="two-col">
+      <div class="field"><label>Título</label><input type="text" id="tripTitle" placeholder="Ex: Valencia"></div>
+      <div class="field"><label>Bandeira (emoji)</label><input type="text" id="tripFlag" placeholder="🇪🇸" value="🌎"></div>
+    </div>
+    <div class="field"><label>País</label><input type="text" id="tripCountry" placeholder="Espanha"></div>
+    <div class="field"><label>Status</label>
+      <select id="tripStatus">
+        <option value="planned">🟡 Planejado</option>
+        <option value="visited">🟢 Visitado</option>
+        <option value="lived">🔵 Morou</option>
+      </select>
+    </div>
+    <div class="two-col">
+      <div class="field"><label>Início</label><input type="date" id="tripStart"></div>
+      <div class="field"><label>Fim</label><input type="date" id="tripEnd"></div>
+    </div>
+    <div class="field"><label>Foto de capa</label><input type="file" id="tripCover" accept="image/*"></div>
+    <div class="modal-actions"><button class="btn ghost" data-action="close-modal">Cancelar</button><button class="btn primary" data-action="save-trip">Salvar</button></div>
+  `);
+}
+function openTripDetailModal(id){
+  const t = data.trips.find(x=>x.id===id);
+  if(!t) return;
+  openModal(`
+    <h3>${t.flag||'🌎'} ${esc(t.title)}</h3>
+    <div class="muted" style="margin-bottom:10px;">${esc(t.country||'')} · ${TRIP_STATUS[t.status].label} · ${t.startDate?fmtBR(t.startDate):'—'}${t.endDate?(' — '+fmtBR(t.endDate)):''}</div>
+    ${t.photos && t.photos.length ? `<div class="photo-grid">${t.photos.map(p=>`<img src="${p}">`).join('')}</div>` : ''}
+    <div class="field" style="margin-top:12px;"><label>Adicionar fotos</label><input type="file" id="tripPhotoInput" accept="image/*" multiple></div>
+    <div class="field"><label>Lugares visitados</label>
+      ${t.places && t.places.length ? t.places.map((p,idx)=>`<div class="list-item row between"><span>📍 ${esc(p.name)}</span><button class="btn xs ghost" data-action="remove-trip-place" data-id="${t.id}" data-idx="${idx}">✕</button></div>`).join('') : '<div class="muted">Nenhum lugar ainda.</div>'}
+      <div class="row" style="margin-top:6px;"><input type="text" id="tripPlaceInput" placeholder="Ex: Cidade das Artes"><button class="btn xs primary" data-action="add-trip-place" data-id="${t.id}">+ Adicionar</button></div>
+    </div>
+    <div class="field"><label>Notas</label><textarea id="tripNotes" rows="3">${esc(t.notes||'')}</textarea></div>
+    <div class="modal-actions">
+      <button class="btn danger xs" data-action="delete-trip" data-id="${t.id}">Excluir viagem</button>
+      <button class="btn ghost" data-action="close-modal">Fechar</button>
+      <button class="btn primary" data-action="save-trip-notes" data-id="${t.id}">Salvar notas</button>
+    </div>
+  `);
+}
+
+/* ---------- REFLEXÕES ---------- */
+function renderReflexoes(){
+  const key = todayKey();
+  const day = getDay(key);
+  const entries = [];
+  Object.keys(data.days).sort().reverse().forEach(k=>{
+    const d = data.days[k];
+    if((d.journal && d.journal.trim()) || (d.mood && d.mood.note && d.mood.note.trim())){
+      entries.push({key:k, mood:d.mood, journal:d.journal});
+    }
+  });
+  document.getElementById('view-reflexoes').innerHTML = `
+    ${heroHeader()}
+    <div class="section-title">🧠 Reflexão de hoje</div>
+    <div class="card">
+      <div class="emoji-row">
+        ${MOOD_EMOJI.map((e,i)=>`<div class="emoji-btn ${day.mood.score===i+1?'sel':''}" data-action="set-mood" data-value="${i+1}">${e}</div>`).join('')}
+      </div>
+      <div class="field" style="margin-top:12px;"><label>Uma reflexão livre sobre hoje</label>
+        <textarea id="journalText" rows="4" placeholder="O que você quer lembrar sobre hoje?">${esc(day.journal)}</textarea>
+      </div>
+      <button class="btn primary" data-action="save-journal">Salvar reflexão</button>
+    </div>
+
+    <div class="section-title">Histórico</div>
+    ${entries.length ? entries.slice(0,60).map(e=>`
+      <div class="journal-entry">
+        <div class="je-head"><span class="je-date">${fmtBR(e.key)}</span>${e.mood.score?`<span class="je-mood">${MOOD_EMOJI[e.mood.score-1]}</span>`:''}</div>
+        ${e.mood.note?`<div class="je-text">${esc(e.mood.note)}</div>`:''}
+        ${e.journal?`<div class="je-text" style="margin-top:6px;">${esc(e.journal)}</div>`:''}
+      </div>`).join('') : `<div class="empty-state"><span class="ic">🧠</span>Nenhuma reflexão registrada ainda. Comece escrevendo sobre hoje.</div>`}
+  `;
 }
 
 /* ---------- FUTURE ME ---------- */
@@ -1717,9 +2072,9 @@ document.addEventListener('click', (e)=>{
 
   switch(action){
     case 'nav': setView(t.dataset.view); return;
+    case 'open-mobile-menu': openSidebarMobile(); return;
     case 'goto-saude': setView('saude'); return;
-    case 'goto-mente': setView('mente'); return;
-    case 'goto-ia': setView('ia'); return;
+    case 'goto-aprendizado': setView('aprendizado'); return;
     case 'coach-quick': {
       const inp = document.getElementById('coachInput');
       if(inp){ inp.value = t.dataset.value; inp.focus(); }
@@ -1749,6 +2104,8 @@ document.addEventListener('click', (e)=>{
       day.mood.score = Number(t.dataset.value); save(); renderCurrentView(); return;
     case 'save-mood-note':
       day.mood.note = document.getElementById('moodNote').value; save(); toast('😊 Observação salva.'); return;
+    case 'save-journal':
+      day.journal = document.getElementById('journalText').value; save(); renderCurrentView(); toast('🧠 Reflexão salva.', 'ok'); return;
 
     case 'save-exercise': {
       const type = document.getElementById('exType').value;
@@ -1904,10 +2261,51 @@ document.addEventListener('click', (e)=>{
     }
     case 'delete-memory': data.relationship.memories = data.relationship.memories.filter(m=>m.id!==t.dataset.id); save(); renderCurrentView(); return;
 
+    case 'open-trip-modal': openTripModal(); return;
+    case 'save-trip': {
+      const title = document.getElementById('tripTitle').value.trim();
+      if(!title){ toast('Digite um título.', 'warn'); return; }
+      const trip = {
+        id:uid(), title, flag:document.getElementById('tripFlag').value||'🌎', country:document.getElementById('tripCountry').value.trim(),
+        status:document.getElementById('tripStatus').value, startDate:document.getElementById('tripStart').value, endDate:document.getElementById('tripEnd').value,
+        cover:null, photos:[], places:[], notes:'',
+      };
+      const files = document.getElementById('tripCover').files;
+      const finishSave = ()=>{ data.trips.push(trip); checkAchievements(); save(); closeModal(); renderCurrentView(); toast('🌎 Viagem adicionada!', 'ok'); };
+      if(files && files.length){ resizeImage(files[0], 900, .75, (dataUrl)=>{ trip.cover = dataUrl; finishSave(); }); }
+      else finishSave();
+      return;
+    }
+    case 'open-trip-detail': openTripDetailModal(t.dataset.id); return;
+    case 'add-trip-place': {
+      const trip = data.trips.find(x=>x.id===t.dataset.id);
+      const input = document.getElementById('tripPlaceInput');
+      const val = input.value.trim(); if(!val) return;
+      trip.places.push({name:val}); save(); openTripDetailModal(trip.id); return;
+    }
+    case 'remove-trip-place': {
+      const trip = data.trips.find(x=>x.id===t.dataset.id);
+      trip.places.splice(Number(t.dataset.idx),1); save(); openTripDetailModal(trip.id); return;
+    }
+    case 'save-trip-notes': {
+      const trip = data.trips.find(x=>x.id===t.dataset.id);
+      trip.notes = document.getElementById('tripNotes').value;
+      const photoInput = document.getElementById('tripPhotoInput');
+      const files = photoInput ? photoInput.files : null;
+      const finish = ()=>{ save(); closeModal(); renderCurrentView(); toast('🌎 Viagem atualizada.', 'ok'); };
+      if(files && files.length){
+        let pending = files.length;
+        Array.from(files).forEach(file=>{ resizeImage(file, 800, .72, (dataUrl)=>{ trip.photos.push(dataUrl); pending--; if(pending===0) finish(); }); });
+      }else finish();
+      return;
+    }
+    case 'delete-trip': data.trips = data.trips.filter(x=>x.id!==t.dataset.id); save(); closeModal(); renderCurrentView(); return;
+
     case 'filter-memories': {
       const f = t.dataset.filter; state.memFilters[f] = t.value; renderCurrentView(); return;
     }
 
+    case 'progresso-tab': state.progressoTab = t.dataset.tab; renderCurrentView(); return;
     case 'week-nav': state.weekOffset += Number(t.dataset.delta); renderCurrentView(); return;
     case 'month-nav': {
       state.calMonth += Number(t.dataset.delta);
@@ -1983,6 +2381,8 @@ document.getElementById('hamburgerBtn').addEventListener('click', ()=>{
   const sb = document.getElementById('sidebar');
   sb.classList.contains('open') ? closeSidebarMobile() : openSidebarMobile();
 });
+
+document.getElementById('sidebarCollapseBtn').addEventListener('click', toggleSidebar);
 
 document.addEventListener('keydown', (e)=>{
   if(e.target && e.target.id==='coachInput' && e.key==='Enter' && !e.shiftKey){
