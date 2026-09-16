@@ -1,0 +1,16 @@
+{
+  "name": "life-os-coach",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Backend mínimo do Coach IA do LIFE OS — guarda a ANTHROPIC_API_KEY no servidor e expõe POST /api/coach.",
+  "type": "commonjs",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "cors": "^2.8.5",
+    "express": "^4.21.1"
+  }
+}
