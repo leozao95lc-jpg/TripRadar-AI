@@ -383,6 +383,13 @@ function defaultXpValues(){
   return { corrida:50, caminhada:25, agua:20, sono:20, espanhol:40, aprendizado:30, pratica:50, projeto:100, vidaDois:50, experiencia:100, aportePer100:5, missao:20, registro:15 };
 }
 
+const XP_LABELS = {
+  corrida:'🏃 Corrida', caminhada:'🚶 Caminhada', agua:'💧 Meta de água', sono:'😴 Sono adequado',
+  espanhol:'🇪🇸 Meta de espanhol', aprendizado:'📚 Aprendizado (IA)', pratica:'🧪 Prática (IA)',
+  projeto:'🚀 Projeto criado (IA)', vidaDois:'❤️ Tempo de qualidade', experiencia:'🌎 Life Quest concluída',
+  aportePer100:'💰 Aporte (por €100)', missao:'💼 Missão concluída', registro:'📝 Check-in diário',
+};
+
 function defaultReminders(){
   return {
     morning:{enabled:true, time:'07:00', label:'☀️ Bom dia, Léo. Hoje é dia de treino.'},
@@ -1060,7 +1067,7 @@ function renderMente(){
         <button class="btn" data-action="add-spanish" data-value="15">+15min</button>
         <button class="btn" data-action="add-spanish" data-value="30">+30min</button>
         <button class="btn" data-action="add-spanish" data-value="45">+45min</button>
-        <input type="number" id="spanishManual" placeholder="min manual" style="width:100px;">
+        <input type="number" id="spanishManual" placeholder="min" style="width:70px;">
         <button class="btn ghost" data-action="add-spanish-manual">Adicionar</button>
       </div>
       <div class="field" style="margin-top:12px;"><label>Habilidades praticadas hoje</label>
@@ -1317,8 +1324,11 @@ function renderExperiencias(){
     <div class="grid" style="margin-top:14px;">
       ${pending.map(q=>`
         <div class="card tight">
-          <div class="row between"><b>🎯 ${esc(q.title)}</b><button class="btn xs ghost" data-action="delete-quest" data-id="${q.id}">✕</button></div>
-          <button class="btn success xs" style="margin-top:8px;" data-action="complete-quest" data-id="${q.id}">Concluir (+${data.settings.xpValues.experiencia} xp)</button>
+          <div class="row" style="align-items:flex-start; flex-wrap:nowrap;">
+            <b style="flex:1; min-width:0;">🎯 ${esc(q.title)}</b>
+            <button class="btn xs ghost" style="flex:0 0 auto;" data-action="delete-quest" data-id="${q.id}">✕</button>
+          </div>
+          <button class="btn success xs" style="margin-top:10px;" data-action="complete-quest" data-id="${q.id}">Concluir (+${data.settings.xpValues.experiencia} xp)</button>
         </div>`).join('')}
     </div>
     <div class="section-title">🏆 Quests concluídas (${done.length})</div>
@@ -1574,7 +1584,7 @@ function renderConfig(){
     <div class="section-title">⭐ Valores de XP</div>
     <div class="card">
       <div class="grid">
-        ${Object.keys(s.xpValues).map(k=>`<div class="field"><label>${k}</label><input type="number" id="xp_${k}" value="${s.xpValues[k]}"></div>`).join('')}
+        ${Object.keys(s.xpValues).map(k=>`<div class="field"><label>${XP_LABELS[k]||k}</label><input type="number" id="xp_${k}" value="${s.xpValues[k]}"></div>`).join('')}
       </div>
       <button class="btn primary" data-action="save-xp">Salvar valores de XP</button>
     </div>
