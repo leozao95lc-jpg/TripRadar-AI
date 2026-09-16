@@ -60,3 +60,48 @@ jobs:
       - name: Build
         if: steps.detect.outputs.exists == 'true'
         run: npm run build
+
+  ios-changes:
+    name: Detect iOS changes
+    runs-on: ubuntu-latest
+    outputs:
+      ios: ${{ steps.filter.outputs.ios }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            ios:
+              - 'apps/ios-espanhol-keyboard/**'
+
+  ios:
+    name: iOS (xcodegen + build)
+    needs: ios-changes
+    if: needs.ios-changes.outputs.ios == 'true'
+    runs-on: macos-14
+    defaults:
+      run:
+        working-directory: apps/ios-espanhol-keyboard
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build for simulator (unsigned)
+        run: |
+          xcodebuild build \
+            -project EspanholIAKeyboard.xcodeproj \
+            -scheme EspanholIAKeyboard \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO

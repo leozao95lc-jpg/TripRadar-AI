@@ -31,3 +31,12 @@ out/
 # Frontend
 apps/web/.next/
 apps/web/out/
+
+# iOS / Xcode (apps/ios-espanhol-keyboard) — project is generated via XcodeGen
+apps/ios-espanhol-keyboard/*.xcodeproj/
+apps/ios-espanhol-keyboard/**/*.xcworkspace/
+apps/ios-espanhol-keyboard/**/*.entitlements
+!apps/ios-espanhol-keyboard/project.yml
+apps/ios-espanhol-keyboard/DerivedData/
+apps/ios-espanhol-keyboard/.build/
+apps/ios-espanhol-keyboard/BackendProxyExample/node_modules/
