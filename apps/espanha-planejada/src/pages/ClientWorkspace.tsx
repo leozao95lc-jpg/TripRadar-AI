@@ -82,14 +82,14 @@ export default function ClientWorkspace() {
           </label>
           <Link
             to={`/plano/${client.id}`}
-            target="_blank"
+           
             className="inline-flex items-center gap-1.5 rounded-lg border border-areia-300 bg-white px-3.5 py-2 text-sm font-medium text-navy-800 hover:bg-areia-50"
           >
             <Eye className="h-4 w-4" /> Visão do cliente
           </Link>
           <Link
             to={`/clientes/${client.id}/relatorio`}
-            target="_blank"
+           
             className="inline-flex items-center gap-1.5 rounded-lg bg-navy-800 px-3.5 py-2 text-sm font-medium text-white hover:bg-navy-700"
           >
             <FileText className="h-4 w-4" /> Relatório

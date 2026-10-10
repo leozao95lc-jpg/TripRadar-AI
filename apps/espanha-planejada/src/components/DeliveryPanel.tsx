@@ -47,7 +47,7 @@ export default function DeliveryPanel({ client, mutate, analysis }: { client: Cl
           <div className="flex flex-col gap-2">
             <Link
               to={`/clientes/${client.id}/relatorio`}
-              target="_blank"
+             
               className="flex items-center justify-between gap-2 rounded-xl border border-areia-200 px-4 py-3 text-sm hover:bg-areia-50"
             >
               <span className="flex items-center gap-2 font-medium text-navy-900">
@@ -79,7 +79,7 @@ export default function DeliveryPanel({ client, mutate, analysis }: { client: Cl
             </div>
             <Link
               to={`/clientes/${client.id}/relatorio?modo=checklist`}
-              target="_blank"
+             
               className="inline-flex items-center gap-1.5 self-start text-sm font-medium text-verde-700 hover:underline"
             >
               <ExternalLink className="h-3.5 w-3.5" /> Checklist para imprimir / PDF
@@ -140,7 +140,7 @@ export default function DeliveryPanel({ client, mutate, analysis }: { client: Cl
                 <div className="flex gap-2">
                   <Link
                     to={`/clientes/${client.id}/relatorio?versao=${d.id}`}
-                    target="_blank"
+                   
                     className="inline-flex items-center gap-1 rounded-lg border border-areia-300 px-2.5 py-1.5 text-xs font-medium hover:bg-areia-50"
                   >
                     <FileText className="h-3.5 w-3.5" /> Relatório
