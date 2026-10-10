@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  @apply bg-areia-50 font-sans text-navy-900 antialiased;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tabelas de dados */
+.data-table {
+  @apply w-full border-collapse text-sm;
+}
+.data-table th {
+  @apply border-b border-areia-200 bg-areia-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-navy-500;
+}
+.data-table td {
+  @apply border-b border-areia-100 px-3 py-2 align-top;
+}
+.data-table td.r,
+.data-table th.r {
+  @apply text-right tabular-nums;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm 12mm;
+  }
+  body {
+    background: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-break {
+    break-before: page;
+  }
+  .avoid-break {
+    break-inside: avoid;
+  }
+}
