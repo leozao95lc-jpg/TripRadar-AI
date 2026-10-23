@@ -1,0 +1,2319 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Política de segurança: a página não carrega nada de fora nem faz
+     requisições de rede. É isso que sustenta a frase "seus dados não
+     saem deste navegador" exibida ao usuário. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<title>Espanha Organizada — planejador de mudança para estudar na Espanha</title>
+<meta name="description" content="Painel pessoal para organizar a mudança à Espanha por estudos: tarefas, documentos, orçamento, cronograma e primeiros dias.">
+<meta name="theme-color" content="#1d5c58">
+<meta name="apple-mobile-web-app-title" content="Espanha Organizada">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231d5c58'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11.5' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+/* =========================================================
+   TOKENS
+   ========================================================= */
+:root{
+  color-scheme:light;
+  --bg:#f6f5f1;
+  --surface:#ffffff;
+  --surface-2:#fafaf7;
+  --ink:#1c2422;
+  --ink-2:#47524f;
+  --ink-3:#66716e;
+  --line:#e3e1d9;
+  --line-2:#cdcabf;
+  --pri:#1d5c58;
+  --pri-2:#154542;
+  --pri-soft:#e4efed;
+  --warn:#835500;
+  --warn-soft:#fbf0d9;
+  --bad:#9e2e26;
+  --bad-soft:#f9e4e1;
+  --ok:#2a6842;
+  --ok-soft:#e3f1e7;
+  --radius:12px;
+  --radius-sm:8px;
+  --shadow:0 1px 2px rgba(28,36,34,.05), 0 4px 14px -8px rgba(28,36,34,.18);
+  --font:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* =========================================================
+   BASE
+   ========================================================= */
+*,*::before,*::after{ box-sizing:border-box; }
+html{ -webkit-text-size-adjust:100%; }
+body{
+  margin:0; background:var(--bg); color:var(--ink); font-family:var(--font);
+  font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{ margin:0; line-height:1.25; letter-spacing:-.01em; }
+h1{ font-size:1.6rem; font-weight:700; }
+h2{ font-size:1.15rem; font-weight:700; }
+h3{ font-size:1rem; font-weight:650; }
+p{ margin:0; }
+a{ color:var(--pri); }
+button, input, select, textarea{ font:inherit; color:inherit; }
+.num{ font-variant-numeric:tabular-nums; }
+.muted{ color:var(--ink-3); }
+.small{ font-size:.84rem; }
+.sr-only{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+:focus-visible{ outline:2px solid var(--pri); outline-offset:2px; }
+.ic{ width:20px; height:20px; flex:0 0 auto; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.ic-sm{ width:16px; height:16px; }
+
+/* =========================================================
+   LAYOUT
+   ========================================================= */
+.app{ min-height:100vh; }
+.sidebar{ display:none; }
+.mobile-top{
+  position:sticky; top:0; z-index:30; background:rgba(246,245,241,.95); backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line); padding:10px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.brand{ display:flex; align-items:center; gap:9px; font-weight:750; letter-spacing:-.01em; color:var(--ink); text-decoration:none; }
+.brand-mark{ width:28px; height:28px; border-radius:8px; background:var(--pri); color:#fff; display:grid; place-items:center; }
+.brand-mark .ic{ width:17px; height:17px; stroke-width:2.6; }
+.save-state{ font-size:.75rem; color:var(--ink-3); white-space:nowrap; }
+.save-state.is-error{ color:var(--bad); font-weight:700; }
+.main{ padding:20px 16px 110px; max-width:1040px; margin:0 auto; }
+
+.bottom-nav{
+  position:fixed; left:0; right:0; bottom:0; z-index:30; background:var(--surface); border-top:1px solid var(--line);
+  display:grid; grid-template-columns:repeat(6,1fr); padding-bottom:env(safe-area-inset-bottom);
+}
+.bottom-nav a, .bottom-nav button{
+  display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 2px 7px; font-size:.68rem; font-weight:650;
+  color:var(--ink-3); text-decoration:none; background:none; border:0; cursor:pointer; min-height:56px; justify-content:center;
+}
+.bottom-nav [aria-current="page"]{ color:var(--pri); }
+
+@media (min-width:960px){
+  .app{ display:grid; grid-template-columns:240px 1fr; }
+  .mobile-top, .bottom-nav{ display:none; }
+  .sidebar{
+    display:flex; flex-direction:column; gap:20px; position:sticky; top:0; height:100vh; padding:22px 14px;
+    border-right:1px solid var(--line); background:var(--surface-2);
+  }
+  .sidebar nav{ display:flex; flex-direction:column; gap:2px; }
+  .sidebar nav a{
+    display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--radius-sm); text-decoration:none;
+    color:var(--ink-2); font-weight:600; font-size:.92rem;
+  }
+  .sidebar nav a:hover{ background:var(--pri-soft); color:var(--pri-2); }
+  .sidebar nav a[aria-current="page"]{ background:var(--pri); color:#fff; }
+  .sidebar-foot{ margin-top:auto; font-size:.75rem; color:var(--ink-3); display:flex; flex-direction:column; gap:6px; padding:0 8px; }
+  .main{ padding:32px 36px 60px; }
+}
+
+/* =========================================================
+   COMPONENTES
+   ========================================================= */
+.page-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:12px 20px; flex-wrap:wrap; margin-bottom:18px; }
+.page-head p{ color:var(--ink-2); margin-top:4px; max-width:65ch; }
+.section{ margin-top:28px; }
+.section > h2{ margin-bottom:12px; }
+.card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; }
+.grid{ display:grid; gap:12px; }
+.grid-kpi{ grid-template-columns:repeat(auto-fit, minmax(190px,1fr)); }
+.grid-2{ grid-template-columns:repeat(auto-fit, minmax(300px,1fr)); }
+.kpi-label{ font-size:.74rem; text-transform:uppercase; letter-spacing:.05em; font-weight:700; color:var(--ink-3); }
+.kpi-value{ font-size:1.45rem; font-weight:750; margin-top:4px; font-variant-numeric:tabular-nums; }
+.kpi-note{ font-size:.82rem; color:var(--ink-2); margin-top:2px; }
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:7px; border:1px solid var(--line-2);
+  background:var(--surface); color:var(--ink); border-radius:999px; padding:9px 16px; font-weight:650; font-size:.88rem;
+  cursor:pointer; min-height:40px; text-decoration:none; white-space:nowrap;
+}
+.btn:hover{ border-color:var(--ink-3); }
+.btn-primary{ background:var(--pri); border-color:var(--pri); color:#fff; }
+.btn-primary:hover{ background:var(--pri-2); border-color:var(--pri-2); }
+.btn-danger{ background:var(--bad); border-color:var(--bad); color:#fff; }
+.btn-danger-ghost{ color:var(--bad); border-color:color-mix(in srgb, var(--bad) 35%, white); }
+.btn-danger-ghost:hover{ background:var(--bad-soft); border-color:var(--bad); }
+.btn-sm{ padding:6px 12px; min-height:34px; font-size:.82rem; }
+.btn[disabled]{ opacity:.5; cursor:not-allowed; }
+.btn-row{ display:flex; gap:8px; flex-wrap:wrap; }
+.icon-btn{
+  display:inline-grid; place-items:center; width:36px; height:36px; border-radius:var(--radius-sm); border:0; background:transparent;
+  color:var(--ink-3); cursor:pointer;
+}
+.icon-btn:hover{ background:var(--pri-soft); color:var(--pri-2); }
+.icon-btn[disabled]{ opacity:.3; cursor:default; background:none; }
+
+.pill{ display:inline-flex; align-items:center; gap:4px; border-radius:999px; padding:2px 9px; font-size:.74rem; font-weight:700; white-space:nowrap; background:var(--surface-2); color:var(--ink-2); border:1px solid var(--line); }
+.pill-pri{ background:var(--pri-soft); color:var(--pri-2); border-color:transparent; }
+.pill-ok{ background:var(--ok-soft); color:var(--ok); border-color:transparent; }
+.pill-warn{ background:var(--warn-soft); color:var(--warn); border-color:transparent; }
+.pill-bad{ background:var(--bad-soft); color:var(--bad); border-color:transparent; }
+
+.callout{ border-radius:var(--radius-sm); padding:12px 14px; font-size:.88rem; border:1px solid; display:flex; gap:10px; align-items:flex-start; }
+.callout .ic{ margin-top:1px; }
+.callout-info{ background:var(--pri-soft); border-color:color-mix(in srgb, var(--pri) 25%, white); color:var(--pri-2); }
+.callout-warn{ background:var(--warn-soft); border-color:color-mix(in srgb, var(--warn) 30%, white); color:#5e3e00; }
+.callout-bad{ background:var(--bad-soft); border-color:color-mix(in srgb, var(--bad) 30%, white); color:#6f1f19; }
+.callout + .callout{ margin-top:10px; }
+
+.progress{ height:8px; background:#ebe9e1; border-radius:999px; overflow:hidden; }
+.progress > span{ display:block; height:100%; background:var(--pri); border-radius:999px; transition:width .2s; }
+.progress-lg{ height:12px; }
+
+.empty{ text-align:center; padding:28px 16px; color:var(--ink-2); border:1px dashed var(--line-2); border-radius:var(--radius); background:var(--surface-2); }
+.empty strong{ display:block; color:var(--ink); margin-bottom:4px; }
+.empty .btn{ margin-top:12px; }
+
+/* Filtros */
+.toolbar{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:16px; }
+.toolbar select, .field input, .field select, .field textarea, .inline-input{
+  border:1px solid var(--line-2); border-radius:var(--radius-sm); background:var(--surface); padding:8px 10px; min-height:40px; font-size:.9rem;
+}
+.toolbar select{ max-width:100%; }
+.toolbar .spacer{ flex:1; }
+
+/* Lista de tarefas */
+.stage{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:12px; overflow:hidden; }
+.stage > summary{
+  list-style:none; cursor:pointer; padding:14px 16px; display:grid; grid-template-columns:auto 1fr auto; gap:4px 12px; align-items:center;
+}
+.stage > summary::-webkit-details-marker{ display:none; }
+.stage-num{ width:28px; height:28px; border-radius:50%; background:var(--pri-soft); color:var(--pri-2); display:grid; place-items:center; font-weight:750; font-size:.85rem; }
+.stage-done .stage-num{ background:var(--pri); color:#fff; }
+.stage-meta{ font-size:.8rem; color:var(--ink-3); white-space:nowrap; }
+.stage .progress{ grid-column:2 / 4; height:5px; }
+.stage-current{ border-color:var(--pri); }
+.task-list{ list-style:none; margin:0; padding:0; border-top:1px solid var(--line); }
+.task{ display:grid; grid-template-columns:auto 1fr auto; gap:4px 10px; padding:12px 12px 12px 16px; border-bottom:1px solid var(--line); align-items:start; }
+.task:last-child{ border-bottom:0; }
+.task-check{ width:22px; height:22px; margin:2px 0 0; accent-color:var(--pri); cursor:pointer; }
+.task-title{ font-weight:650; background:none; border:0; padding:0; text-align:left; cursor:pointer; color:var(--ink); }
+.task-title:hover{ color:var(--pri); text-decoration:underline; }
+.task.is-done .task-title{ color:var(--ink-3); text-decoration:line-through; }
+.task-desc{ font-size:.85rem; color:var(--ink-2); margin-top:2px; }
+.task-meta{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; align-items:center; }
+.task-actions{ display:flex; gap:0; align-items:center; }
+.stage-foot{ padding:10px 16px; border-top:1px solid var(--line); background:var(--surface-2); }
+
+/* Documentos */
+.doc-list{ display:grid; gap:10px; }
+.doc{ display:grid; grid-template-columns:1fr auto; gap:6px 12px; }
+.doc-head{ display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center; }
+.doc-name{ font-weight:700; background:none; border:0; padding:0; cursor:pointer; text-align:left; }
+.doc-name:hover{ color:var(--pri); text-decoration:underline; }
+.doc-facts{ display:flex; flex-wrap:wrap; gap:4px 16px; font-size:.84rem; color:var(--ink-2); margin-top:4px; }
+.doc-facts b{ color:var(--ink); font-weight:650; }
+
+/* Tabelas */
+.table-wrap{ overflow-x:auto; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); }
+table{ width:100%; border-collapse:collapse; }
+th{ text-align:left; font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-3); padding:10px 12px; border-bottom:1px solid var(--line); white-space:nowrap; }
+td{ padding:8px 12px; border-bottom:1px solid var(--line); font-size:.9rem; vertical-align:middle; }
+tbody tr:last-child td{ border-bottom:0; }
+tfoot td{ border-top:2px solid var(--line-2); border-bottom:0; font-weight:750; }
+td.r, th.r{ text-align:right; }
+.pos{ color:var(--ok); }
+.neg{ color:var(--bad); }
+.inline-input{ width:110px; text-align:right; font-variant-numeric:tabular-nums; min-height:36px; padding:6px 8px; }
+.inline-input.is-invalid{ border-color:var(--bad); background:var(--bad-soft); }
+.bud-table{ min-width:720px; }
+.bars{ display:grid; gap:10px; }
+.bar-row{ display:grid; grid-template-columns:minmax(110px,180px) 1fr auto; gap:10px; align-items:center; font-size:.85rem; }
+.bar-track{ position:relative; height:14px; background:#ebe9e1; border-radius:4px; overflow:hidden; }
+.bar-track .plan{ position:absolute; inset:0 auto 0 0; background:color-mix(in srgb, var(--pri) 30%, white); }
+.bar-track .act{ position:absolute; left:0; top:4px; bottom:4px; background:var(--pri-2); border-radius:2px; }
+.legend{ display:flex; gap:16px; font-size:.78rem; color:var(--ink-2); margin-bottom:10px; flex-wrap:wrap; }
+.legend i{ display:inline-block; width:12px; height:10px; border-radius:2px; margin-right:5px; vertical-align:middle; }
+
+/* Configuração financeira */
+.fin-settings{ display:flex; flex-wrap:wrap; gap:12px 20px; align-items:flex-end; }
+.fin-settings label{ display:flex; flex-direction:column; gap:4px; font-size:.8rem; font-weight:650; color:var(--ink-2); }
+.seg{ display:inline-flex; border:1px solid var(--line-2); border-radius:999px; overflow:hidden; }
+.seg button{ border:0; background:var(--surface); padding:8px 16px; font-weight:700; font-size:.85rem; cursor:pointer; min-height:40px; }
+.seg button[aria-pressed="true"]{ background:var(--pri); color:#fff; }
+
+/* Linha do tempo */
+.timeline{ list-style:none; margin:0; padding:0; display:grid; gap:8px; }
+.tl-item{ display:grid; grid-template-columns:74px 1fr auto; gap:12px; align-items:start; }
+.tl-date{ text-align:center; border-radius:var(--radius-sm); background:var(--surface-2); border:1px solid var(--line); padding:6px 4px; }
+.tl-date strong{ display:block; font-size:1.05rem; font-variant-numeric:tabular-nums; }
+.tl-date span{ font-size:.72rem; color:var(--ink-3); text-transform:capitalize; }
+.tl-item.is-overdue .tl-date{ background:var(--bad-soft); border-color:transparent; color:var(--bad); }
+.tl-item.is-soon .tl-date{ background:var(--warn-soft); border-color:transparent; }
+.tl-item.is-arrival .tl-date{ background:var(--pri); color:#fff; border-color:transparent; }
+.tl-item.is-arrival .tl-date span{ color:#d9ecea; }
+.tl-title{ font-weight:650; }
+.tl-sub{ font-size:.84rem; color:var(--ink-2); margin-top:2px; display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+
+/* Início */
+.hello{ display:flex; flex-direction:column; gap:4px; }
+.hello-sub{ color:var(--ink-2); display:flex; flex-wrap:wrap; gap:4px 14px; }
+.big-progress{ display:flex; align-items:baseline; gap:10px; margin:6px 0 10px; }
+.big-progress strong{ font-size:2.2rem; font-weight:800; font-variant-numeric:tabular-nums; }
+.stat-row{ display:flex; flex-wrap:wrap; gap:6px 18px; font-size:.86rem; color:var(--ink-2); margin-top:10px; }
+.stat-row b{ color:var(--ink); font-variant-numeric:tabular-nums; }
+.mini-list{ list-style:none; margin:0; padding:0; }
+.mini-list li{ display:flex; gap:10px; align-items:flex-start; padding:10px 0; border-bottom:1px solid var(--line); }
+.mini-list li:last-child{ border-bottom:0; }
+.mini-list .grow{ flex:1; min-width:0; }
+.shortcuts{ display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:10px; }
+.shortcut{
+  display:flex; align-items:center; gap:10px; padding:14px; border-radius:var(--radius); background:var(--surface);
+  border:1px solid var(--line); text-decoration:none; color:var(--ink); font-weight:650; font-size:.9rem;
+}
+.shortcut:hover{ border-color:var(--pri); color:var(--pri-2); }
+.shortcut .ic{ color:var(--pri); }
+
+/* Fontes */
+.src{ display:grid; gap:4px; }
+.src-org{ font-size:.75rem; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-3); font-weight:700; }
+.src a{ font-weight:700; word-break:break-word; }
+.src-check{ font-size:.78rem; color:var(--ink-3); }
+
+/* Onboarding */
+.ob{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px 16px; }
+.ob-card{ width:100%; max-width:560px; background:var(--surface); border:1px solid var(--line); border-radius:18px; box-shadow:var(--shadow); padding:28px 24px; }
+.ob-steps{ display:flex; gap:5px; margin-bottom:22px; }
+.ob-steps span{ flex:1; height:4px; border-radius:2px; background:var(--line); }
+.ob-steps span.on{ background:var(--pri); }
+.ob h1{ font-size:1.5rem; margin-bottom:8px; }
+.ob-lead{ color:var(--ink-2); margin-bottom:18px; }
+.ob-foot{ display:flex; justify-content:space-between; gap:10px; margin-top:24px; flex-wrap:wrap; }
+.ob-foot .btn-row{ margin-left:auto; }
+.choices{ display:grid; gap:8px; }
+.choice{ display:flex; align-items:center; gap:10px; border:1px solid var(--line-2); border-radius:var(--radius-sm); padding:12px 14px; cursor:pointer; }
+.choice:has(input:checked){ border-color:var(--pri); background:var(--pri-soft); }
+.choice input{ accent-color:var(--pri); width:18px; height:18px; }
+.ob-welcome-list{ margin:0 0 20px; padding-left:1.1em; color:var(--ink-2); }
+.ob-welcome-list li{ margin:4px 0; }
+
+/* Formulários */
+.form{ display:grid; gap:14px; }
+.form-row{ display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:14px; }
+.field{ display:flex; flex-direction:column; gap:5px; font-size:.84rem; font-weight:650; color:var(--ink-2); }
+.field input, .field select, .field textarea{ width:100%; color:var(--ink); font-weight:400; }
+.field textarea{ min-height:84px; resize:vertical; }
+.field .hint{ font-weight:400; font-size:.78rem; color:var(--ink-3); }
+.field.is-invalid input, .field.is-invalid select{ border-color:var(--bad); }
+.field-check{ flex-direction:row; align-items:center; gap:8px; }
+.form-error{ color:var(--bad); font-weight:650; font-size:.88rem; }
+
+/* Diálogo */
+dialog{
+  border:0; padding:0; border-radius:16px; width:min(600px, calc(100vw - 24px)); max-height:calc(100vh - 32px);
+  box-shadow:0 20px 60px -20px rgba(0,0,0,.4); color:var(--ink); background:var(--surface);
+}
+dialog::backdrop{ background:rgba(20,28,26,.45); }
+.dlg{ display:flex; flex-direction:column; max-height:calc(100vh - 32px); }
+.dlg-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:16px 18px; border-bottom:1px solid var(--line); }
+.dlg-body{ padding:18px; overflow-y:auto; }
+.dlg-body p + p{ margin-top:10px; }
+.dlg-foot{ display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; padding:14px 18px; border-top:1px solid var(--line); background:var(--surface-2); }
+.dlg-foot .left{ margin-right:auto; }
+.more-list{ display:grid; gap:6px; }
+.more-list a{ display:flex; gap:10px; align-items:center; padding:12px; border-radius:var(--radius-sm); text-decoration:none; color:var(--ink); font-weight:650; border:1px solid var(--line); }
+
+/* Toasts */
+.toasts{ position:fixed; left:50%; transform:translateX(-50%); bottom:84px; z-index:100; display:grid; gap:8px; width:min(420px, calc(100vw - 32px)); }
+.toast{ background:var(--ink); color:#fff; border-radius:var(--radius-sm); padding:11px 14px; font-size:.88rem; box-shadow:var(--shadow); }
+.toast.is-error{ background:var(--bad); }
+@media (min-width:960px){ .toasts{ bottom:24px; } }
+
+.banner{ margin-bottom:16px; }
+.footer-legal{ margin-top:40px; padding-top:16px; border-top:1px solid var(--line); font-size:.78rem; color:var(--ink-3); }
+
+@media (max-width:520px){
+  h1{ font-size:1.35rem; }
+  .tl-item{ grid-template-columns:62px 1fr auto; gap:10px; }
+  .bar-row{ grid-template-columns:1fr auto; }
+  .bar-row .bar-track{ grid-column:1 / 3; grid-row:2; }
+  .task{ padding-left:12px; }
+  .ob-card{ padding:22px 18px; }
+  .toolbar select{ flex:1 1 calc(50% - 4px); min-width:0; }
+  .page-head > .btn, .page-head > .btn-row{ width:100%; }
+  .page-head > .btn-row .btn{ flex:1; }
+}
+
+/* =========================================================
+   IMPRESSÃO — imprime apenas o resumo gerado
+   ========================================================= */
+#print-root{ display:none; }
+@media print{
+  body{ background:#fff; font-size:11pt; }
+  body > *:not(#print-root){ display:none !important; }
+  #print-root{ display:block; color:#000; }
+  #print-root h1{ font-size:18pt; }
+  #print-root h2{ font-size:13pt; margin:18px 0 6px; border-bottom:1px solid #999; padding-bottom:3px; }
+  #print-root table{ font-size:9.5pt; }
+  #print-root th, #print-root td{ padding:4px 6px; border-bottom:1px solid #ccc; }
+  #print-root tr{ break-inside:avoid; }
+  #print-root .p-note{ font-size:8.5pt; color:#444; margin-top:18px; }
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-tasks" viewBox="0 0 24 24"><path d="M10 6h10M10 12h10M10 18h10"/><path d="m3.5 6 1.5 1.5L7.5 5M3.5 12l1.5 1.5 2.5-2.5M3.5 18l1.5 1.5 2.5-2.5"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h12v4"/><path d="M3 7v11a2 2 0 0 0 2 2h15V9H5a2 2 0 0 1-2-2z"/><circle cx="16" cy="14.5" r="1.2"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.2v.3"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8v.2"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+</svg>
+
+<div id="app" class="app"></div>
+<div id="toasts" class="toasts" aria-live="polite" aria-atomic="false"></div>
+<dialog id="dlg" aria-labelledby="dlg-title"></dialog>
+<div id="print-root" aria-hidden="true"></div>
+
+<noscript><p style="padding:24px">O Espanha Organizada precisa de JavaScript habilitado para funcionar.</p></noscript>
+
+<script>
+(function(){
+  'use strict';
+
+  /* =========================================================
+     CONSTANTES DO PRODUTO
+     ========================================================= */
+  var APP_ID = 'espanha-organizada';
+  var APP_VERSION = '1.0.0';
+  var STORAGE_KEY = 'espanhaOrganizada.v1';
+  var SCHEMA = 1;
+  var MAX_IMPORT_BYTES = 5 * 1024 * 1024;
+
+  var STAGES = [
+    { n:1, t:'Planejamento inicial' },
+    { n:2, t:'Pesquisa e matrícula no curso' },
+    { n:3, t:'Organização financeira' },
+    { n:4, t:'Preparação documental' },
+    { n:5, t:'Solicitação e acompanhamento da autorização' },
+    { n:6, t:'Preparação da viagem' },
+    { n:7, t:'Organização da chegada' },
+    { n:8, t:'Primeiros dias na Espanha' }
+  ];
+  var ARRIVAL_CATS = ['Moradia','Empadronamiento','Telefone e internet','Conta bancária','Documentação','Transporte','Saúde e seguro','Estudos','Organização financeira','Outros'];
+  var SITUACOES = {
+    pesquisando:  { t:'Pesquisando', stage:1 },
+    documentacao: { t:'Preparando documentação', stage:4 },
+    aguardando:   { t:'Aguardando decisão', stage:5 },
+    viagem:       { t:'Preparando viagem', stage:6 },
+    espanha:      { t:'Já na Espanha', stage:8 }
+  };
+  var ESTUDOS = { superior:'Ensino superior', 'nao-superior':'Ensino não superior', outro:'Outra modalidade', 'nao-sei':'Ainda não sei' };
+  var ACOMP = { individual:'Individual', acompanhado:'Acompanhada', 'nao-sei':'Ainda não sei' };
+  var PRIORITIES = { alta:'Alta', media:'Média', baixa:'Baixa' };
+  var PRIO_WEIGHT = { alta:0, media:1, baixa:2 };
+  var TSTATUS = { pendente:'Pendente', andamento:'Em andamento', concluida:'Concluída' };
+  var DSTATUS = { 'nao-iniciado':'Não iniciado', solicitado:'Solicitado', 'em-maos':'Em mãos', pronto:'Pronto', 'nao-se-aplica':'Não se aplica' };
+  var CHECKOPTS = { '':'Não avaliado', verificar:'Verificar', necessario:'Necessário', feito:'Feito', 'nao-necessario':'Não necessário' };
+  var PERSONS = { titular:'Titular', acompanhante:'Acompanhante', outro:'Outra pessoa' };
+  var DEFAULT_DOC_CATS = ['Identificação','Formulários','Estudos','Finanças','Saúde','Certidões','Outros'];
+  var CITIES = ['Madri','Barcelona','Valência','Sevilha','Málaga','Granada','Salamanca','Bilbao','Saragoça','Alicante','Santiago de Compostela','Valladolid','Múrcia','Palma'];
+
+  /* Fontes oficiais. Os endereços foram localizados em pesquisa
+     nos próprios sites oficiais na data abaixo. Não há texto de
+     requisito copiado aqui — o usuário é sempre levado à página. */
+  var SOURCES_CHECKED = '2026-10-23';
+  var SOURCES = [
+    { id:'migraciones-estudiar', org:'Ministerio de Inclusión, Seguridad Social y Migraciones', title:'Portal de Inmigración — Estudiar',
+      url:'https://inclusion.gob.es/web/migraciones/estudiar',
+      use:'Índice das fichas informativas (hojas) sobre autorização de estada por estudos, prorrogação e familiares.' },
+    { id:'cita-previa', org:'Sede Electrónica de las Administraciones Públicas', title:'Cita previa de extranjería',
+      url:'https://sede.administracionespublicas.gob.es/pagina/index/directorio/icpplus',
+      use:'Agendamento de atendimento em Oficinas de Extranjería e na Polícia, por província.' },
+    { id:'policia-tie', org:'Policía Nacional', title:'Tarjeta de estudiante extranjero (inicial e renovação)',
+      url:'https://sede.policia.gob.es/portalciudadano/_es/tramites_extranjeria_tramite_tarjetaestudiantesextranjeros_inicial_renovacion.php',
+      use:'Requisitos do cartão de estrangeiro (TIE) para estudantes, quando aplicável à autorização concedida.' },
+    { id:'exteriores', org:'Ministerio de Asuntos Exteriores', title:'Embaixadas e consulados da Espanha',
+      url:'https://www.exteriores.gob.es/',
+      use:'Portal do Ministério. Localize o consulado competente para o lugar onde você reside.' },
+    { id:'consulado-sp', org:'Ministerio de Asuntos Exteriores', title:'Consulado-Geral da Espanha em São Paulo (exemplo)',
+      url:'https://exteriores.gob.es/Consulados/saopaulo/es/Consulado/Paginas/Consulado.aspx',
+      use:'Exemplo de página consular. Cada consulado atende uma jurisdição e publica as próprias instruções.' },
+    { id:'traductores', org:'Ministerio de Asuntos Exteriores — Oficina de Interpretación de Lenguas', title:'Tradução e interpretação juramentada',
+      url:'https://exteriores.gob.es/es/ServiciosAlCiudadano/Oficina-de-Interpretacion-de-Lenguas/Paginas/Traduccion-e-interpretacion-jurada.aspx',
+      use:'Informações e lista oficial de tradutores-intérpretes jurados habilitados na Espanha.' },
+    { id:'homologacion', org:'Ministério responsável pelas universidades (Espanha)', title:'Homologação e equivalência de títulos estrangeiros',
+      url:'https://universidades.sede.gob.es/procedimientos/portada/idp/1029/language/es_ES',
+      use:'Somente se o seu caso exigir reconhecimento de diploma estrangeiro.' },
+    { id:'pf-antecedentes', org:'Polícia Federal (Brasil)', title:'Certidão de antecedentes criminais',
+      url:'https://servicos.pf.gov.br/epol-sinic-publico/',
+      use:'Emissão online da certidão federal. Verifique se o seu procedimento também exige outras certidões, apostila e tradução.' }
+  ];
+  var SOURCE_BY_ID = {};
+  SOURCES.forEach(function(s){ SOURCE_BY_ID[s.id] = s; });
+
+  /* Modelo inicial de tarefas: [etapa, categoria, prioridade, título, descrição, fonte] */
+  var TASK_TEMPLATE = [
+    [1,'Planejamento','alta','Definir cidade, instituição-alvo e período da mudança','Essa decisão orienta custos, prazos e qual órgão será competente para o seu pedido.'],
+    [1,'Autorização','alta','Identificar a modalidade de autorização aplicável ao seu caso','Depende do tipo de curso, da duração e da sua situação pessoal. Leia a ficha oficial e, em caso de dúvida, consulte um profissional habilitado.','migraciones-estudiar'],
+    [1,'Autorização','alta','Descobrir qual consulado ou órgão é competente para o seu pedido','A competência costuma depender de onde você reside e de onde o pedido será apresentado. Confirme na página do consulado.','exteriores'],
+    [1,'Finanças','media','Fazer a primeira estimativa de custos','Preencha os valores previstos no módulo Financeiro, mesmo que aproximados.'],
+    [1,'Planejamento','media','Definir se a mudança será individual ou acompanhada','Acompanhantes podem ter procedimento e documentos próprios. Verifique a ficha oficial aplicável.','migraciones-estudiar'],
+    [2,'Estudos','alta','Pesquisar cursos e instituições','Compare custo, localização, calendário e se o curso atende às condições do procedimento.'],
+    [2,'Estudos','alta','Confirmar se o curso atende às condições exigidas','Por exemplo: dedicação, duração e tipo de certificado obtido. As condições variam por modalidade — confira na fonte oficial.','migraciones-estudiar'],
+    [2,'Estudos','alta','Concluir a matrícula e obter a carta de aceitação','Confira se o documento traz as informações normalmente pedidas (curso, datas, carga horária).'],
+    [2,'Estudos','media','Guardar os comprovantes de pagamento do curso','Alguns procedimentos pedem comprovante de pagamento. Verifique se é o seu caso.'],
+    [3,'Finanças','alta','Verificar o valor de meios econômicos exigido no seu caso','O valor e a forma de comprovação seguem a regra vigente e podem mudar. Confirme na fonte oficial.','migraciones-estudiar'],
+    [3,'Finanças','alta','Organizar a comprovação financeira','Extratos, declarações ou outros documentos aceitos. Verifique se precisam de tradução.'],
+    [3,'Finanças','media','Definir conta e cartões para usar no exterior','Tenha ao menos duas formas de pagamento e conheça as tarifas de conversão.'],
+    [3,'Finanças','media','Separar a reserva de emergência','Registre o valor separado no módulo Financeiro.'],
+    [4,'Documentos','alta','Montar a lista de documentos do seu procedimento','Use o módulo Documentos. A lista inicial é só um modelo — ajuste conforme o que o seu consulado ou órgão exigir.'],
+    [4,'Documentos','alta','Solicitar as certidões com antecedência','Certidões costumam ter validade curta. Anote emissão e validade no módulo Documentos.'],
+    [4,'Documentos','media','Verificar quais documentos precisam de apostila','Depende do documento e do procedimento. Não presuma que todos precisam.'],
+    [4,'Documentos','media','Verificar quais documentos precisam de tradução juramentada','Se for necessária, use tradutor habilitado. Confirme também a ordem correta entre apostila e tradução.','traductores'],
+    [4,'Saúde','alta','Contratar seguro saúde compatível com as exigências','Confirme as coberturas exigidas no seu caso (por exemplo, carências, copagamento e repatriação).','migraciones-estudiar'],
+    [5,'Autorização','alta','Agendar atendimento ou protocolo no órgão competente','A espera por agendamento pode ser longa. Reserve margem no Cronograma.'],
+    [5,'Autorização','alta','Preencher os formulários e pagar as taxas aplicáveis','Use o formulário e a taxa indicados pela fonte oficial do seu procedimento.'],
+    [5,'Autorização','alta','Protocolar o pedido e guardar o comprovante','Anote a data e o número do protocolo nas observações da tarefa.'],
+    [5,'Autorização','media','Acompanhar o andamento e responder a exigências','Registre no Cronograma a data do protocolo e eventuais prazos de resposta.'],
+    [6,'Viagem','media','Comprar a passagem','Avalie o risco de comprar antes da decisão do pedido; tarifas remarcáveis podem compensar.'],
+    [6,'Viagem','alta','Reservar a hospedagem inicial','Algumas semanas de hospedagem dão tempo para procurar moradia com calma.'],
+    [6,'Viagem','alta','Separar cópias físicas e digitais dos documentos','Guarde as cópias em local seguro, fora deste painel — aqui ficam apenas os dados de controle.'],
+    [6,'Viagem','media','Organizar a bagagem e os itens essenciais','Confira os limites de bagagem da companhia aérea.'],
+    [7,'Chegada','media','Planejar o trajeto do aeroporto até a hospedagem','Deixe o endereço anotado também offline.'],
+    [7,'Moradia','media','Pesquisar bairros e opções de moradia','Compare preço, transporte e distância até a instituição.'],
+    [7,'Documentação','alta','Verificar os procedimentos pós-chegada da sua autorização','Por exemplo, o cartão de estrangeiro (TIE), quando aplicável, e seus prazos. Dependem da autorização concedida e da duração.','policia-tie'],
+    [7,'Empadronamiento','media','Entender como funciona o empadronamiento na sua cidade','Requisitos e agendamento são definidos pelo ayuntamiento (prefeitura). Adicione o link oficial da sua cidade em Fontes.'],
+    [8,'Moradia','alta','Garantir moradia de médio prazo','Leia o contrato, o valor da caução (fianza) e as condições antes de assinar ou pagar.'],
+    [8,'Empadronamiento','media','Fazer o empadronamiento, se aplicável','Confira requisitos e forma de agendamento no site do ayuntamiento.'],
+    [8,'Telefone e internet','media','Contratar chip ou eSIM espanhol','Compare operadoras; algumas pedem documento de identificação.'],
+    [8,'Conta bancária','media','Avaliar a abertura de conta bancária','Confirme com o banco quais documentos ele aceita de estrangeiros.'],
+    [8,'Documentação','alta','Agendar a cita previa necessária, se aplicável','Por exemplo, a coleta de impressão digital para o TIE. Aplicabilidade e prazo dependem da sua autorização.','cita-previa'],
+    [8,'Transporte','baixa','Entender o transporte público local','Pesquise passes mensais e descontos para estudantes.'],
+    [8,'Saúde e seguro','media','Guardar os dados do seguro e localizar atendimento','Anote o telefone da seguradora e clínicas credenciadas próximas.'],
+    [8,'Estudos','alta','Apresentar-se na instituição e confirmar a matrícula','Guarde comprovantes de matrícula e frequência; podem ser pedidos em renovações.'],
+    [8,'Organização financeira','media','Registrar os gastos reais da chegada','Atualize os valores realizados no módulo Financeiro.']
+  ];
+
+  /* Modelo de documentos: tpl, nome, categoria, pessoa, apostila, tradução, observação, fonte, condição */
+  var DOC_TEMPLATE = [
+    { tpl:'tit-passaporte', name:'Passaporte', cat:'Identificação', person:'titular', notes:'Confira a validade mínima exigida no seu procedimento.' },
+    { tpl:'tit-formulario', name:'Formulário de solicitação', cat:'Formulários', person:'titular', notes:'Use o modelo indicado pela fonte oficial do seu procedimento.', src:'migraciones-estudiar' },
+    { tpl:'tit-aceitacao', name:'Carta de aceitação / matrícula', cat:'Estudos', person:'titular', trad:'verificar' },
+    { tpl:'tit-meios', name:'Comprovação de meios econômicos', cat:'Finanças', person:'titular', trad:'verificar', notes:'O valor e a forma aceita dependem da regra vigente.' },
+    { tpl:'tit-seguro', name:'Seguro saúde', cat:'Saúde', person:'titular', notes:'Confira as coberturas exigidas.' },
+    { tpl:'tit-antecedentes', name:'Certidão de antecedentes criminais', cat:'Certidões', person:'titular', apost:'verificar', trad:'verificar', notes:'Pode ser exigida conforme a duração e a idade. Verifique validade e se outros países onde morou também entram.', src:'pf-antecedentes' },
+    { tpl:'tit-medico', name:'Atestado médico', cat:'Saúde', person:'titular', apost:'verificar', trad:'verificar', notes:'Quando exigido pelo procedimento.' },
+    { tpl:'tit-taxa', name:'Comprovante de pagamento da taxa', cat:'Formulários', person:'titular' },
+    { tpl:'tit-historico', name:'Histórico escolar / diploma', cat:'Estudos', person:'titular', apost:'verificar', trad:'verificar', notes:'Somente se exigido no seu caso.', src:'homologacion', when:function(p){ return p.estudo === 'superior'; } },
+    { tpl:'aco-passaporte', name:'Passaporte', cat:'Identificação', person:'acompanhante', when:isAccompanied },
+    { tpl:'aco-vinculo', name:'Documento de vínculo familiar', cat:'Certidões', person:'acompanhante', apost:'verificar', trad:'verificar', notes:'Por exemplo, certidão de casamento ou de união. Verifique se o acompanhante tem procedimento próprio.', src:'migraciones-estudiar', when:isAccompanied },
+    { tpl:'aco-antecedentes', name:'Certidão de antecedentes criminais', cat:'Certidões', person:'acompanhante', apost:'verificar', trad:'verificar', notes:'Se aplicável ao acompanhante.', when:isAccompanied }
+  ];
+  function isAccompanied(p){ return p.acompanhado === 'acompanhado'; }
+
+  var BUDGET_TEMPLATE = ['Curso e matrícula','Documentação','Traduções e apostilamentos','Passagens','Bagagem e transporte','Hospedagem inicial','Caução e aluguel','Alimentação','Transporte público','Telefone e internet','Seguro','Reserva de emergência','Outras despesas'];
+
+  /* =========================================================
+     UTILITÁRIOS
+     ========================================================= */
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+
+  function esc(str){
+    return String(str == null ? '' : str).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+
+  function safeUrl(url){
+    if(!url) return null;
+    var t = String(url).trim();
+    return /^https?:\/\/[^\s]+$/i.test(t) ? t : null;
+  }
+
+  function icon(name, cls){ return '<svg class="ic ' + (cls || '') + '" aria-hidden="true"><use href="#i-' + name + '"/></svg>'; }
+
+  function pad(n){ return (n < 10 ? '0' : '') + n; }
+  function isoOf(d){ return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function todayISO(){ return isoOf(new Date()); }
+  function addDays(n){ var d = new Date(); d.setDate(d.getDate() + n); return isoOf(d); }
+
+  function validISO(s){
+    if(typeof s !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+    var p = s.split('-').map(Number);
+    var d = new Date(p[0], p[1] - 1, p[2]);
+    return p[0] >= 1900 && p[0] <= 2100 && d.getFullYear() === p[0] && d.getMonth() === p[1] - 1 && d.getDate() === p[2];
+  }
+
+  function daysFromToday(s){
+    if(!validISO(s)) return null;
+    var p = s.split('-').map(Number);
+    var t = new Date();
+    return Math.round((Date.UTC(p[0], p[1] - 1, p[2]) - Date.UTC(t.getFullYear(), t.getMonth(), t.getDate())) / 86400000);
+  }
+
+  function fmtDate(s){
+    if(!validISO(s)) return '—';
+    var p = s.split('-');
+    return p[2] + '/' + p[1] + '/' + p[0];
+  }
+  function weekday(s){
+    if(!validISO(s)) return '';
+    var p = s.split('-').map(Number);
+    return new Date(p[0], p[1] - 1, p[2]).toLocaleDateString('pt-BR', { weekday:'short' }).replace('.', '');
+  }
+  function relDays(n){
+    if(n === null) return '';
+    if(n === 0) return 'hoje';
+    if(n === 1) return 'amanhã';
+    if(n === -1) return 'ontem';
+    return n > 0 ? 'em ' + n + ' dias' : 'há ' + (-n) + ' dias';
+  }
+
+  /* Aceita "1.234,56", "1234,56", "1234.56" e "1.500" (milhar). Retorna
+     null para vazio e NaN para texto inválido. */
+  function parseNum(v){
+    if(typeof v === 'number') return isFinite(v) ? v : NaN;
+    var s = String(v == null ? '' : v).trim().replace(/\s|€|R\$/g, '');
+    if(s === '') return null;
+    var neg = s.charAt(0) === '-';
+    if(neg) s = s.slice(1);
+    if(s.indexOf(',') > -1) s = s.replace(/\./g, '').replace(',', '.');
+    else if(/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
+    if(!/^(\d+\.?\d*|\.\d+)$/.test(s)) return NaN;
+    var n = parseFloat(s);
+    return neg ? -n : n;
+  }
+  function round2(n){ return Math.round(n * 100) / 100; }
+  function fmtMoney(v, cur){
+    if(v === null || v === undefined || isNaN(v)) return '—';
+    return Number(v).toLocaleString('pt-BR', { style:'currency', currency:cur || 'EUR' });
+  }
+  function fmtPlain(v){
+    if(v === null || v === undefined || isNaN(v)) return '';
+    return Number(v).toLocaleString('pt-BR', { minimumFractionDigits:2, maximumFractionDigits:2 });
+  }
+
+  function str(v, max){ return typeof v === 'string' ? v.slice(0, max || 500) : ''; }
+  function oneOf(v, map, fallback){ return Object.prototype.hasOwnProperty.call(map, v) ? v : fallback; }
+  function numOrNull(v){ return (typeof v === 'number' && isFinite(v)) ? v : null; }
+  function isoOrEmpty(v){ return validISO(v) ? v : ''; }
+
+  /* =========================================================
+     ESTADO
+     ========================================================= */
+  function blankState(){
+    var now = new Date().toISOString();
+    return {
+      app:APP_ID, schema:SCHEMA, demo:false, createdAt:now, updatedAt:now, lastExportAt:null,
+      profile:{ nome:'', origem:'Brasil', cidade:'', chegada:'', estudo:'', situacao:'', orcamento:null, orcamentoMoeda:'EUR', acompanhado:'', onboarded:false },
+      tasks:[], docs:[], docCategories:DEFAULT_DOC_CATS.slice(),
+      budget:{ display:'EUR', rate:null, rateDate:'', reserve:null, reserveCurrency:'EUR', items:[] },
+      events:[], sources:[]
+    };
+  }
+
+  function buildTasks(){
+    var orderByStage = {};
+    return TASK_TEMPLATE.map(function(r){
+      orderByStage[r[0]] = (orderByStage[r[0]] || 0) + 1;
+      return { id:uid(), stage:r[0], category:r[1], priority:r[2], title:r[3], desc:r[4], src:r[5] || '', link:r[5] && SOURCE_BY_ID[r[5]] ? SOURCE_BY_ID[r[5]].url : '',
+               status:'pendente', due:'', notes:'', order:orderByStage[r[0]] };
+    });
+  }
+
+  function docFromTemplate(t){
+    return { id:uid(), tpl:t.tpl, name:t.name, category:t.cat, person:t.person, status:'nao-iniciado', issued:'', expires:'',
+             apostila:t.apost || '', traducao:t.trad || '', notes:t.notes || '', src:t.src || '',
+             link:t.src && SOURCE_BY_ID[t.src] ? SOURCE_BY_ID[t.src].url : '' };
+  }
+  function buildDocs(profile){
+    return DOC_TEMPLATE.filter(function(t){ return !t.when || t.when(profile); }).map(docFromTemplate);
+  }
+  function buildBudget(){
+    return BUDGET_TEMPLATE.map(function(c){ return { id:uid(), category:c, desc:'', currency:'EUR', planned:null, actual:null }; });
+  }
+  function applyTemplate(st){
+    st.tasks = buildTasks();
+    st.docs = buildDocs(st.profile);
+    st.docCategories = DEFAULT_DOC_CATS.slice();
+    st.budget.items = buildBudget();
+    st.events = [];
+  }
+
+  /* Valida e saneia um estado vindo do localStorage ou de um backup.
+     Nunca confia no formato: campos desconhecidos são descartados,
+     tipos errados viram o valor padrão. */
+  function normalizeState(raw){
+    if(!raw || typeof raw !== 'object' || Array.isArray(raw)) throw new Error('O conteúdo não é um planejamento válido.');
+    if(raw.app && raw.app !== APP_ID) throw new Error('O arquivo não pertence ao Espanha Organizada.');
+    if(typeof raw.schema === 'number' && raw.schema > SCHEMA) throw new Error('O backup foi criado por uma versão mais nova do aplicativo.');
+    if(!raw.profile || typeof raw.profile !== 'object' || !Array.isArray(raw.tasks)) throw new Error('Faltam partes essenciais do planejamento (perfil ou tarefas).');
+
+    var b = blankState();
+    var p = raw.profile;
+    b.demo = raw.demo === true;
+    b.createdAt = str(raw.createdAt, 40) || b.createdAt;
+    b.updatedAt = str(raw.updatedAt, 40) || b.updatedAt;
+    b.lastExportAt = str(raw.lastExportAt, 40) || null;
+    b.profile = {
+      nome:str(p.nome, 60), origem:str(p.origem, 60), cidade:str(p.cidade, 80), chegada:isoOrEmpty(p.chegada),
+      estudo:oneOf(p.estudo, ESTUDOS, ''), situacao:oneOf(p.situacao, SITUACOES, ''),
+      orcamento:numOrNull(p.orcamento), orcamentoMoeda:oneOf(p.orcamentoMoeda, { EUR:1, BRL:1 }, 'EUR'),
+      acompanhado:oneOf(p.acompanhado, ACOMP, ''), onboarded:p.onboarded === true
+    };
+    b.tasks = raw.tasks.filter(function(t){ return t && typeof t === 'object' && str(t.title); }).slice(0, 2000).map(function(t, i){
+      var stage = Number(t.stage);
+      return { id:str(t.id, 40) || uid(), stage:(stage >= 1 && stage <= 8) ? Math.floor(stage) : 1, category:str(t.category, 60),
+               priority:oneOf(t.priority, PRIORITIES, 'media'), title:str(t.title, 200), desc:str(t.desc, 2000), src:str(t.src, 60),
+               link:safeUrl(t.link) || '', status:oneOf(t.status, TSTATUS, 'pendente'), due:isoOrEmpty(t.due), notes:str(t.notes, 4000),
+               order:typeof t.order === 'number' && isFinite(t.order) ? t.order : i };
+    });
+    b.docs = (Array.isArray(raw.docs) ? raw.docs : []).filter(function(d){ return d && typeof d === 'object' && str(d.name); }).slice(0, 1000).map(function(d){
+      return { id:str(d.id, 40) || uid(), tpl:str(d.tpl, 40), name:str(d.name, 200), category:str(d.category, 60) || 'Outros',
+               person:oneOf(d.person, PERSONS, 'titular'), status:oneOf(d.status, DSTATUS, 'nao-iniciado'),
+               issued:isoOrEmpty(d.issued), expires:isoOrEmpty(d.expires), apostila:oneOf(d.apostila, CHECKOPTS, ''),
+               traducao:oneOf(d.traducao, CHECKOPTS, ''), notes:str(d.notes, 4000), src:str(d.src, 60), link:safeUrl(d.link) || '' };
+    });
+    if(Array.isArray(raw.docCategories)){
+      var cats = raw.docCategories.map(function(c){ return str(c, 60).trim(); }).filter(Boolean);
+      b.docCategories = cats.filter(function(c, i){ return cats.indexOf(c) === i; }).slice(0, 60);
+    }
+    b.docs.forEach(function(d){ if(b.docCategories.indexOf(d.category) === -1) b.docCategories.push(d.category); });
+    if(b.docCategories.indexOf('Outros') === -1) b.docCategories.push('Outros');
+
+    var rb = raw.budget && typeof raw.budget === 'object' ? raw.budget : {};
+    b.budget = {
+      display:oneOf(rb.display, { EUR:1, BRL:1 }, 'EUR'),
+      rate:(numOrNull(rb.rate) !== null && rb.rate > 0) ? rb.rate : null,
+      rateDate:isoOrEmpty(rb.rateDate),
+      reserve:numOrNull(rb.reserve), reserveCurrency:oneOf(rb.reserveCurrency, { EUR:1, BRL:1 }, 'EUR'),
+      items:(Array.isArray(rb.items) ? rb.items : []).filter(function(it){ return it && typeof it === 'object'; }).slice(0, 1000).map(function(it){
+        return { id:str(it.id, 40) || uid(), category:str(it.category, 80) || 'Outras despesas', desc:str(it.desc, 200),
+                 currency:oneOf(it.currency, { EUR:1, BRL:1 }, 'EUR'), planned:numOrNull(it.planned), actual:numOrNull(it.actual) };
+      })
+    };
+    b.events = (Array.isArray(raw.events) ? raw.events : []).filter(function(e){ return e && typeof e === 'object' && str(e.title) && validISO(e.date); }).slice(0, 2000).map(function(e){
+      return { id:str(e.id, 40) || uid(), title:str(e.title, 200), date:e.date, taskId:str(e.taskId, 40), notes:str(e.notes, 4000) };
+    });
+    b.sources = (Array.isArray(raw.sources) ? raw.sources : []).filter(function(s){ return s && typeof s === 'object' && str(s.title) && safeUrl(s.url); }).slice(0, 200).map(function(s){
+      return { id:str(s.id, 40) || uid(), title:str(s.title, 200), url:safeUrl(s.url), notes:str(s.notes, 2000), checked:isoOrEmpty(s.checked) };
+    });
+    return b;
+  }
+
+  /* =========================================================
+     PERSISTÊNCIA
+     ========================================================= */
+  var storage = { ok:true, error:null, lastSaved:null, corruptRaw:null, persisted:null };
+
+  function storageAvailable(){
+    try{
+      var k = STORAGE_KEY + '.teste';
+      localStorage.setItem(k, '1');
+      localStorage.removeItem(k);
+      return true;
+    }catch(e){ return false; }
+  }
+
+  function loadState(){
+    if(!storageAvailable()){ storage.ok = false; return null; }
+    var raw;
+    try{ raw = localStorage.getItem(STORAGE_KEY); }catch(e){ storage.ok = false; return null; }
+    if(!raw) return null;
+    try{
+      return normalizeState(JSON.parse(raw));
+    }catch(e){
+      // Nunca sobrescrever silenciosamente: guarda uma cópia do conteúdo ilegível.
+      storage.corruptRaw = raw;
+      try{ localStorage.setItem(STORAGE_KEY + '.ilegivel.' + Date.now(), raw); }catch(_){}
+      return null;
+    }
+  }
+
+  function saveState(){
+    if(!state) return false;
+    state.updatedAt = new Date().toISOString();
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      storage.ok = true; storage.error = null; storage.lastSaved = new Date();
+      updateSaveIndicator();
+      return true;
+    }catch(e){
+      storage.error = e;
+      updateSaveIndicator();
+      toast('Não foi possível salvar neste navegador. Exporte um backup para não perder as alterações.', true);
+      return false;
+    }
+  }
+
+  function requestPersistence(){
+    if(!navigator.storage || !navigator.storage.persist) return;
+    navigator.storage.persisted().then(function(p){
+      if(p){ storage.persisted = true; return; }
+      return navigator.storage.persist().then(function(granted){ storage.persisted = !!granted; });
+    }).catch(function(){});
+  }
+
+  function updateSaveIndicator(){
+    document.querySelectorAll('.save-state').forEach(function(el){
+      if(!storage.ok || storage.error){
+        el.textContent = 'Não salvo — veja Dados';
+        el.classList.add('is-error');
+      } else if(storage.lastSaved){
+        el.textContent = 'Salvo às ' + pad(storage.lastSaved.getHours()) + ':' + pad(storage.lastSaved.getMinutes());
+        el.classList.remove('is-error');
+      } else {
+        el.textContent = 'Salvo neste navegador';
+        el.classList.remove('is-error');
+      }
+    });
+  }
+
+  /* Outra aba alterou os dados: adota a versão mais nova em vez de
+     sobrescrevê-la no próximo salvamento. */
+  window.addEventListener('storage', function(e){
+    if(e.key !== STORAGE_KEY) return;
+    if(e.newValue === null){ state = null; render(); toast('Os dados foram apagados em outra aba.'); return; }
+    try{
+      state = normalizeState(JSON.parse(e.newValue));
+      closeModal();
+      render();
+      toast('Dados atualizados a partir de outra aba.');
+    }catch(_){}
+  });
+
+  var state = loadState();
+  var ui = {
+    task:{ status:'', stage:'', cat:'', prio:'' },
+    doc:{ status:'', person:'', cat:'' },
+    tl:{ showDone:false },
+    openStages:{},
+    ob:{ step:0, draft:null }
+  };
+
+  /* =========================================================
+     CÁLCULOS
+     ========================================================= */
+  function sortedTasks(list){
+    return list.slice().sort(function(a, b){ return a.stage - b.stage || a.order - b.order; });
+  }
+  function isOverdue(t){ return t.status !== 'concluida' && t.due && daysFromToday(t.due) < 0; }
+  function taskStats(list){
+    var s = { total:list.length, done:0, doing:0, todo:0, overdue:0 };
+    list.forEach(function(t){
+      if(t.status === 'concluida') s.done++; else if(t.status === 'andamento') s.doing++; else s.todo++;
+      if(isOverdue(t)) s.overdue++;
+    });
+    s.pct = s.total ? Math.round(s.done / s.total * 100) : 0;
+    return s;
+  }
+  function currentStage(){
+    var sit = SITUACOES[state.profile.situacao];
+    return sit ? sit.stage : null;
+  }
+
+  function priorityTasks(limit){
+    var focus = currentStage() || 1;
+    /* Ordem: atrasadas → prazo nos próximos 14 dias → etapas anteriores à
+       fase atual (já deveriam ter passado) → prioridade → proximidade da fase. */
+    function key(t){
+      var d = t.due ? daysFromToday(t.due) : null;
+      return [isOverdue(t) ? 0 : 1, (d !== null && d <= 14) ? d : 9999, t.stage < focus ? 0 : 1,
+              PRIO_WEIGHT[t.priority], Math.abs(t.stage - focus), t.stage, t.order];
+    }
+    return state.tasks.filter(function(t){ return t.status !== 'concluida'; }).map(function(t){ return { t:t, k:key(t) }; }).sort(function(a, b){
+      for(var i = 0; i < a.k.length; i++){ if(a.k[i] !== b.k[i]) return a.k[i] - b.k[i]; }
+      return 0;
+    }).map(function(x){ return x.t; }).slice(0, limit);
+  }
+
+  function docReady(d){ return d.status === 'pronto' || d.status === 'nao-se-aplica'; }
+  function docAlerts(d){
+    var out = [];
+    if(d.status === 'nao-se-aplica') return out;
+    if(d.expires){
+      var n = daysFromToday(d.expires);
+      if(n < 0) out.push({ kind:'bad', t:'Vencido' });
+      else if(n <= 60) out.push({ kind:'warn', t:'Vence ' + relDays(n) });
+      if(n >= 0 && state.profile.chegada && d.expires < state.profile.chegada) out.push({ kind:'warn', t:'Vence antes da chegada' });
+    }
+    if(d.apostila === 'verificar' || d.traducao === 'verificar') out.push({ kind:'pri', t:'Verificar apostila/tradução' });
+    return out;
+  }
+  function docStats(){
+    var s = { total:state.docs.length, ready:0, alerts:0 };
+    state.docs.forEach(function(d){
+      if(docReady(d)) s.ready++;
+      if(docAlerts(d).some(function(a){ return a.kind !== 'pri'; })) s.alerts++;
+    });
+    return s;
+  }
+
+  /* Conversão de moeda — só com a taxa informada pelo usuário.
+     Retorna null quando não dá para converter. */
+  function conv(amount, from, to){
+    if(amount === null || amount === undefined) return 0;
+    if(from === to) return amount;
+    var r = state.budget.rate;
+    if(!r) return null;
+    return from === 'EUR' ? amount * r : amount / r;
+  }
+  function budgetSummary(){
+    var cur = state.budget.display;
+    var s = { cur:cur, planned:0, actual:0, unconverted:0, byCat:{}, filledPlanned:0 };
+    state.budget.items.forEach(function(it){
+      var p = conv(it.planned, it.currency, cur), a = conv(it.actual, it.currency, cur);
+      if((it.planned !== null || it.actual !== null) && (p === null || a === null)){ s.unconverted++; return; }
+      if(it.planned !== null) s.filledPlanned++;
+      s.planned += p; s.actual += a;
+      var c = s.byCat[it.category] || (s.byCat[it.category] = { planned:0, actual:0 });
+      c.planned += p; c.actual += a;
+    });
+    s.planned = round2(s.planned); s.actual = round2(s.actual);
+    s.remaining = round2(s.planned - s.actual);
+    s.available = state.profile.orcamento !== null ? conv(state.profile.orcamento, state.profile.orcamentoMoeda, cur) : null;
+    s.reserve = state.budget.reserve !== null ? conv(state.budget.reserve, state.budget.reserveCurrency, cur) : null;
+    return s;
+  }
+
+  /* Linha do tempo: chegada (do perfil) + eventos + tarefas com prazo. */
+  function timelineItems(includeDone){
+    var items = [];
+    if(state.profile.chegada) items.push({ kind:'arrival', date:state.profile.chegada, title:'Chegada prevista' + (state.profile.cidade ? ' em ' + state.profile.cidade : '') });
+    state.events.forEach(function(e){
+      var t = e.taskId ? findTask(e.taskId) : null;
+      items.push({ kind:'event', id:e.id, date:e.date, title:e.title, task:t, notes:e.notes });
+    });
+    state.tasks.forEach(function(t){
+      if(!t.due) return;
+      if(!includeDone && t.status === 'concluida') return;
+      items.push({ kind:'task', id:t.id, date:t.due, title:t.title, task:t });
+    });
+    return items.sort(function(a, b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+  }
+
+  function findTask(id){ for(var i = 0; i < state.tasks.length; i++){ if(state.tasks[i].id === id) return state.tasks[i]; } return null; }
+  function findIn(list, id){ for(var i = 0; i < list.length; i++){ if(list[i].id === id) return list[i]; } return null; }
+  function removeFrom(list, id){ for(var i = 0; i < list.length; i++){ if(list[i].id === id){ list.splice(i, 1); return true; } } return false; }
+
+  /* =========================================================
+     TOAST & DIÁLOGOS
+     ========================================================= */
+  function toast(msg, isError){
+    var box = document.getElementById('toasts');
+    var el = document.createElement('div');
+    el.className = 'toast' + (isError ? ' is-error' : '');
+    el.setAttribute('role', isError ? 'alert' : 'status');
+    el.textContent = msg;
+    box.appendChild(el);
+    setTimeout(function(){ el.remove(); }, isError ? 7000 : 3200);
+  }
+
+  var dlg = document.getElementById('dlg');
+  var dlgReturnFocus = null;
+  var dlgOnClose = null;
+  var dlgFinished = true;
+
+  function openModal(o){
+    if(dlg.open) closeModal();
+    dlgReturnFocus = document.activeElement;
+    var actions = (o.actions || []).map(function(a, i){
+      return '<button type="' + (a.submit ? 'submit' : 'button') + '" ' + (a.submit ? 'form="dlg-form"' : '') +
+        ' class="btn ' + (a.kind ? 'btn-' + a.kind : '') + (a.left ? ' left' : '') + '" data-dlg-action="' + i + '"' + (a.disabled ? ' disabled' : '') + '>' + esc(a.label) + '</button>';
+    }).join('');
+    dlg.innerHTML = '<div class="dlg"><div class="dlg-head"><h2 id="dlg-title">' + esc(o.title) + '</h2>' +
+      '<button type="button" class="icon-btn" data-dlg-close aria-label="Fechar">' + icon('x') + '</button></div>' +
+      '<div class="dlg-body">' + o.body + '</div>' + (actions ? '<div class="dlg-foot">' + actions + '</div>' : '') + '</div>';
+    dlgOnClose = o.onClose || null;
+    dlgFinished = false;
+    dlg.querySelectorAll('[data-dlg-action]').forEach(function(btn){
+      var a = o.actions[Number(btn.dataset.dlgAction)];
+      if(a.submit) return;
+      btn.addEventListener('click', function(){
+        var keep = a.onClick ? a.onClick() : false;
+        if(keep !== true) closeModal();
+      });
+    });
+    dlg.querySelector('[data-dlg-close]').addEventListener('click', closeModal);
+    dlg.showModal();
+    if(o.onOpen) o.onOpen(dlg);
+    var first = dlg.querySelector('.dlg-body input, .dlg-body select, .dlg-body textarea');
+    if(first && o.autofocus !== false) first.focus();
+  }
+  /* O fechamento é finalizado de forma síncrona. O evento "close" do
+     <dialog> chega depois (assíncrono) e só é usado quando o usuário
+     fecha com Esc — se outro diálogo já foi aberto em sequência, ele é
+     ignorado para não apagar o diálogo novo. */
+  function finishClose(){
+    if(dlgFinished) return;
+    dlgFinished = true;
+    var cb = dlgOnClose; dlgOnClose = null;
+    dlg.innerHTML = '';
+    if(cb) cb();
+    if(dlgReturnFocus && document.contains(dlgReturnFocus)) dlgReturnFocus.focus();
+  }
+  function closeModal(){
+    if(dlg.open) dlg.close();
+    finishClose();
+  }
+  dlg.addEventListener('close', function(){ if(!dlg.open) finishClose(); });
+
+  function confirmAction(o){
+    return new Promise(function(resolve){
+      var done = false;
+      var body = '<p>' + o.message + '</p>' + (o.requireText ?
+        '<label class="field" style="margin-top:14px">Para confirmar, digite <strong>' + esc(o.requireText) + '</strong><input type="text" id="confirm-text" autocomplete="off" autocapitalize="characters"></label>' : '');
+      openModal({
+        title:o.title, body:body, autofocus:!!o.requireText,
+        actions:[
+          { label:'Cancelar', kind:'' },
+          { label:o.confirmLabel || 'Confirmar', kind:o.danger ? 'danger' : 'primary', disabled:!!o.requireText, onClick:function(){ done = true; resolve(true); } }
+        ],
+        onOpen:function(d){
+          if(!o.requireText) return;
+          var input = d.querySelector('#confirm-text');
+          var btn = d.querySelector('[data-dlg-action="1"]');
+          input.addEventListener('input', function(){ btn.disabled = input.value.trim().toUpperCase() !== o.requireText; });
+        },
+        onClose:function(){ if(!done) resolve(false); }
+      });
+    });
+  }
+
+  /* Formulário genérico em diálogo.
+     fields: [{name,label,type,options,required,placeholder,hint,value,row}] */
+  function fieldHtml(f){
+    var id = 'f-' + f.name;
+    var v = f.value == null ? '' : f.value;
+    var req = f.required ? ' required aria-required="true"' : '';
+    var control;
+    if(f.type === 'select'){
+      control = '<select id="' + id + '" name="' + f.name + '"' + req + '>' + Object.keys(f.options).map(function(k){
+        return '<option value="' + esc(k) + '"' + (String(v) === k ? ' selected' : '') + '>' + esc(f.options[k]) + '</option>';
+      }).join('') + '</select>';
+    } else if(f.type === 'textarea'){
+      control = '<textarea id="' + id + '" name="' + f.name + '" maxlength="' + (f.max || 4000) + '" placeholder="' + esc(f.placeholder || '') + '">' + esc(v) + '</textarea>';
+    } else if(f.type === 'checkbox'){
+      return '<label class="field field-check"><input type="checkbox" id="' + id + '" name="' + f.name + '"' + (v ? ' checked' : '') + '> ' + esc(f.label) + '</label>';
+    } else {
+      var type = f.type === 'money' ? 'text' : (f.type || 'text');
+      var extra = f.type === 'money' ? ' inputmode="decimal" autocomplete="off"' : '';
+      if(f.list) extra += ' list="' + id + '-list"';
+      control = '<input id="' + id + '" name="' + f.name + '" type="' + type + '" value="' + esc(v) + '" maxlength="' + (f.max || 300) + '" placeholder="' + esc(f.placeholder || '') + '"' + req + extra + '>';
+      if(f.list) control += '<datalist id="' + id + '-list">' + f.list.map(function(o){ return '<option value="' + esc(o) + '">'; }).join('') + '</datalist>';
+    }
+    return '<label class="field" for="' + id + '">' + esc(f.label) + (f.required ? ' *' : '') + control +
+      (f.hint ? '<span class="hint">' + f.hint + '</span>' : '') + '</label>';
+  }
+  function formHtml(fields){
+    var out = '', row = [];
+    fields.forEach(function(f){
+      if(f.row){ row.push(fieldHtml(f)); }
+      else {
+        if(row.length){ out += '<div class="form-row">' + row.join('') + '</div>'; row = []; }
+        out += fieldHtml(f);
+      }
+    });
+    if(row.length) out += '<div class="form-row">' + row.join('') + '</div>';
+    return out;
+  }
+  function openForm(o){
+    var body = (o.intro || '') + '<form id="dlg-form" class="form" novalidate>' + formHtml(o.fields) + '<p class="form-error" role="alert" hidden></p></form>';
+    var actions = [];
+    if(o.onDelete) actions.push({ label:o.deleteLabel || 'Excluir', kind:'danger-ghost', left:true, onClick:function(){
+      var del = o.onDelete;
+      setTimeout(del, 0);
+    } });
+    actions.push({ label:'Cancelar', kind:'' });
+    actions.push({ label:o.submitLabel || 'Salvar', kind:'primary', submit:true });
+    openModal({
+      title:o.title, body:body, actions:actions,
+      onOpen:function(d){
+        var form = d.querySelector('#dlg-form');
+        form.addEventListener('submit', function(ev){
+          ev.preventDefault();
+          var vals = {};
+          o.fields.forEach(function(f){
+            var el = form.elements[f.name];
+            vals[f.name] = f.type === 'checkbox' ? el.checked : el.value.trim();
+          });
+          form.querySelectorAll('.field.is-invalid').forEach(function(el){ el.classList.remove('is-invalid'); });
+          var missing = o.fields.filter(function(f){ return f.required && !vals[f.name]; });
+          var err = missing.length ? 'Preencha: ' + missing.map(function(f){ return f.label; }).join(', ') + '.' : o.onSubmit(vals);
+          if(err){
+            var bad = typeof err === 'object' ? err : { msg:err, field:missing.length ? missing[0].name : null };
+            var p = form.querySelector('.form-error');
+            p.textContent = bad.msg; p.hidden = false;
+            if(bad.field && form.elements[bad.field]){
+              form.elements[bad.field].closest('.field').classList.add('is-invalid');
+              form.elements[bad.field].focus();
+            }
+            return;
+          }
+          closeModal();
+        });
+      }
+    });
+  }
+
+  function validateDateField(vals, name, label){
+    if(vals[name] && !validISO(vals[name])) return { msg:label + ': data inválida.', field:name };
+    return null;
+  }
+  function validateUrlField(vals, name){
+    if(vals[name] && !safeUrl(vals[name])) return { msg:'O link deve começar com http:// ou https://.', field:name };
+    return null;
+  }
+  function validateMoneyField(vals, name, label){
+    var n = parseNum(vals[name]);
+    if(n !== null && (isNaN(n) || n < 0)) return { msg:label + ': informe um valor numérico positivo (ex.: 1.250,00).', field:name };
+    return null;
+  }
+
+  /* =========================================================
+     ROTEAMENTO & CASCA
+     ========================================================= */
+  var VIEWS = [
+    { id:'inicio', t:'Visão geral', short:'Início', icon:'home' },
+    { id:'checklist', t:'Checklist da mudança', short:'Tarefas', icon:'tasks' },
+    { id:'documentos', t:'Documentos', short:'Docs', icon:'doc' },
+    { id:'cronograma', t:'Cronograma', short:'Datas', icon:'cal' },
+    { id:'financeiro', t:'Financeiro', short:'Finanças', icon:'wallet' },
+    { id:'chegada', t:'Primeiros dias', short:'Chegada', icon:'pin' },
+    { id:'fontes', t:'Fontes oficiais', short:'Fontes', icon:'link' },
+    { id:'dados', t:'Dados e privacidade', short:'Dados', icon:'shield' }
+  ];
+  var MOBILE_MAIN = ['inicio','checklist','documentos','cronograma','financeiro'];
+
+  function currentView(){
+    var h = (location.hash || '').replace(/^#\/?/, '');
+    return VIEWS.some(function(v){ return v.id === h; }) ? h : 'inicio';
+  }
+
+  function shellHtml(view, content){
+    var nav = VIEWS.map(function(v){
+      return '<a href="#/' + v.id + '"' + (v.id === view ? ' aria-current="page"' : '') + '>' + icon(v.icon) + esc(v.t) + '</a>';
+    }).join('');
+    var mob = MOBILE_MAIN.map(function(id){
+      var v = VIEWS.filter(function(x){ return x.id === id; })[0];
+      return '<a href="#/' + v.id + '"' + (v.id === view ? ' aria-current="page"' : '') + '>' + icon(v.icon) + esc(v.short) + '</a>';
+    }).join('') + '<button type="button" data-act="more-menu"' + (MOBILE_MAIN.indexOf(view) === -1 ? ' aria-current="page"' : '') + '>' + icon('more') + 'Mais</button>';
+    var brand = '<a class="brand" href="#/inicio"><span class="brand-mark">' + icon('check') + '</span>Espanha Organizada</a>';
+    return '<aside class="sidebar">' + brand + '<nav aria-label="Módulos">' + nav + '</nav>' +
+      '<div class="sidebar-foot"><span class="save-state"></span><span>Dados guardados só neste navegador.</span></div></aside>' +
+      '<header class="mobile-top">' + brand + '<span class="save-state"></span></header>' +
+      '<main class="main" id="main" tabindex="-1">' + content + legalFooter() + '</main>' +
+      '<nav class="bottom-nav" aria-label="Módulos">' + mob + '</nav>';
+  }
+
+  function legalFooter(){
+    return '<p class="footer-legal">Espanha Organizada é uma ferramenta de organização pessoal. Não é assessoria jurídica nem serviço de imigração e não garante a aprovação de nenhum visto ou autorização. Requisitos, taxas e prazos mudam e dependem do seu caso: confirme sempre nas fontes oficiais ou com um profissional habilitado. · v' + APP_VERSION + '</p>';
+  }
+
+  function banners(){
+    var out = '';
+    if(!storage.ok) out += '<div class="callout callout-bad banner">' + icon('alert') + '<div><strong>Este navegador está bloqueando o armazenamento local.</strong> Suas alterações não serão salvas ao fechar a página (comum em janelas anônimas ou com cookies bloqueados). Exporte um backup em <a href="#/dados">Dados</a> antes de sair.</div></div>';
+    if(state && state.demo) out += '<div class="callout callout-warn banner">' + icon('info') + '<div><strong>Modo exemplo:</strong> todos os dados exibidos são fictícios, só para você conhecer a ferramenta. <button type="button" class="btn btn-sm" data-act="exit-demo" style="margin-left:6px">Começar meu planejamento</button></div></div>';
+    return out;
+  }
+
+  var lastView = null;
+  function render(){
+    var app = document.getElementById('app');
+    if(!state || !state.profile.onboarded){
+      app.className = '';
+      app.innerHTML = renderOnboarding();
+      bindOnboarding();
+      lastView = null;
+      return;
+    }
+    var view = currentView();
+    var html = banners() + (RENDERERS[view] || renderInicio)();
+    var scrollY = window.scrollY;
+    var focusKey = focusKeyOf(document.activeElement);
+    app.className = 'app';
+    app.innerHTML = shellHtml(view, html);
+    document.title = (VIEWS.filter(function(v){ return v.id === view; })[0].t) + ' — Espanha Organizada';
+    updateSaveIndicator();
+    if(view !== lastView){ window.scrollTo(0, 0); }
+    else {
+      window.scrollTo(0, scrollY);
+      if(focusKey){ var f = app.querySelector(focusKey); if(f) f.focus({ preventScroll:true }); }
+    }
+    lastView = view;
+  }
+  /* Identifica o controle focado para devolver o foco a ele depois de
+     redesenhar a tela (teclado e leitores de tela não perdem a posição). */
+  function focusKeyOf(el){
+    if(!el || !el.closest || !el.closest('#app')) return null;
+    var d = el.dataset || {};
+    var id = d.id ? '[data-id="' + d.id + '"]' : '';
+    if(d.chg) return '[data-chg="' + d.chg + '"]' + id + (d.cur ? '[data-cur="' + d.cur + '"]' : '');
+    if(d.act) return '[data-act="' + d.act + '"]' + id + (d.cur ? '[data-cur="' + d.cur + '"]' : '') + (d.stage ? '[data-stage="' + d.stage + '"]' : '');
+    if(el.id) return '#' + el.id;
+    return null;
+  }
+  /* Campos editados direto na tela: o redesenho espera o foco ir para o
+     próximo campo (Tab), para não interromper a digitação em sequência. */
+  function deferRender(){ setTimeout(render, 0); }
+  window.addEventListener('hashchange', function(){ closeModal(); render(); var m = document.getElementById('main'); if(m) m.focus({ preventScroll:true }); });
+
+  /* =========================================================
+     ONBOARDING
+     ========================================================= */
+  var OB_STEPS = ['welcome','nome','origem','cidade','chegada','estudo','situacao','orcamento','acompanhado','resumo'];
+
+  function obDraft(){
+    if(!ui.ob.draft) ui.ob.draft = state && state.profile ? JSON.parse(JSON.stringify(state.profile)) : blankState().profile;
+    return ui.ob.draft;
+  }
+
+  function radioChoices(name, map, value){
+    return '<div class="choices" role="radiogroup">' + Object.keys(map).map(function(k){
+      var label = typeof map[k] === 'string' ? map[k] : map[k].t;
+      return '<label class="choice"><input type="radio" name="' + name + '" value="' + esc(k) + '"' + (value === k ? ' checked' : '') + '> ' + esc(label) + '</label>';
+    }).join('') + '</div>';
+  }
+
+  function estudoNote(v){
+    if(v === 'superior') return 'Cursos superiores podem envolver exigências específicas (por exemplo, histórico ou reconhecimento de diploma), conforme o caso.';
+    if(v === 'nao-superior') return 'Cursos não superiores (como idiomas ou formação profissional) podem ter condições próprias de dedicação, duração e reconhecimento da instituição. Verifique na fonte oficial.';
+    if(v === 'outro' || v === 'nao-sei') return 'Com essa resposta não é possível indicar requisitos. Verifique na fonte oficial ou consulte um profissional habilitado antes de assumir prazos e documentos.';
+    return '';
+  }
+
+  function renderOnboarding(){
+    var step = OB_STEPS[ui.ob.step];
+    var d = obDraft();
+    var total = OB_STEPS.length - 1;
+    var dots = ui.ob.step === 0 ? '' : '<div class="ob-steps" aria-hidden="true">' + OB_STEPS.slice(1).map(function(_, i){ return '<span class="' + (i < ui.ob.step ? 'on' : '') + '"></span>'; }).join('') + '</div>';
+    var q = '', body = '', optional = true;
+    var stepLabel = ui.ob.step ? '<p class="small muted" style="margin-bottom:6px">Passo ' + ui.ob.step + ' de ' + total + '</p>' : '';
+
+    if(step === 'welcome'){
+      var recovered = storage.corruptRaw ? '<div class="callout callout-bad" style="margin-bottom:16px">' + icon('alert') + '<div><strong>Não foi possível ler os dados salvos anteriormente.</strong> Uma cópia foi preservada no navegador. Se você tem um backup, use “Importar backup”. <button type="button" class="btn btn-sm" data-act="download-corrupt" style="margin-top:8px">Baixar cópia dos dados ilegíveis</button></div></div>' : '';
+      var noStore = !storage.ok ? '<div class="callout callout-bad" style="margin-bottom:16px">' + icon('alert') + '<div>Este navegador está bloqueando o armazenamento local. Você pode usar a ferramenta, mas os dados se perdem ao fechar a página, a menos que exporte um backup.</div></div>' : '';
+      return '<div class="ob"><div class="ob-card">' + recovered + noStore +
+        '<div class="brand" style="margin-bottom:18px"><span class="brand-mark">' + icon('check') + '</span>Espanha Organizada</div>' +
+        '<h1>Organize sua mudança para estudar na Espanha</h1>' +
+        '<p class="ob-lead">Um painel pessoal para acompanhar tarefas, documentos, orçamento e datas — do planejamento aos primeiros dias no país.</p>' +
+        '<ul class="ob-welcome-list"><li>Leva cerca de 2 minutos para configurar; você pode pular perguntas.</li><li>Seus dados ficam <strong>apenas neste navegador</strong>. Não há cadastro nem servidor.</li><li>As listas iniciais são modelos editáveis, não exigências legais.</li></ul>' +
+        '<div class="btn-row"><button type="button" class="btn btn-primary" data-ob="next">Configurar meu planejamento</button>' +
+        '<button type="button" class="btn" data-ob="demo">Ver um exemplo</button>' +
+        '<label class="btn" style="cursor:pointer">Importar backup<input type="file" accept="application/json,.json" data-ob-import hidden></label></div>' +
+        '<p class="footer-legal" style="margin-top:22px">Não é assessoria jurídica nem serviço de imigração e não garante aprovação de visto ou autorização.</p>' +
+        '</div></div>';
+    }
+
+    if(step === 'nome'){
+      q = 'Como podemos te chamar?';
+      body = '<label class="field">Nome ou apelido<input type="text" name="nome" maxlength="60" value="' + esc(d.nome) + '" autocomplete="nickname" placeholder="Opcional"></label>';
+    } else if(step === 'origem'){
+      q = 'De qual país você está saindo?';
+      body = '<label class="field">País de origem<input type="text" name="origem" maxlength="60" value="' + esc(d.origem) + '" placeholder="Ex.: Brasil"></label>' +
+        '<p class="small muted" style="margin-top:8px">O consulado competente e alguns documentos (como certidões) dependem do país e da cidade onde você reside.</p>';
+    } else if(step === 'cidade'){
+      q = 'Para qual cidade da Espanha você vai?';
+      body = '<label class="field">Cidade de destino<input type="text" name="cidade" maxlength="80" value="' + esc(d.cidade) + '" list="ob-cities" placeholder="Ainda não sei"><datalist id="ob-cities">' + CITIES.map(function(c){ return '<option value="' + esc(c) + '">'; }).join('') + '</datalist></label>';
+    } else if(step === 'chegada'){
+      q = 'Quando você pretende chegar?';
+      body = '<label class="field">Data prevista de chegada<input type="date" name="chegada" value="' + esc(d.chegada) + '" min="2000-01-01" max="2100-12-31"></label><p class="form-error" data-ob-error hidden></p>';
+    } else if(step === 'estudo'){
+      q = 'Que tipo de estudo você vai fazer?';
+      body = radioChoices('estudo', ESTUDOS, d.estudo) + '<p class="small muted" data-ob-note style="margin-top:10px">' + esc(estudoNote(d.estudo)) + '</p>';
+    } else if(step === 'situacao'){
+      q = 'Em que ponto você está hoje?';
+      body = radioChoices('situacao', SITUACOES, d.situacao);
+    } else if(step === 'orcamento'){
+      q = 'Quanto você estima ter para a mudança?';
+      body = '<div class="form-row"><label class="field">Orçamento estimado<input type="text" inputmode="decimal" name="orcamento" value="' + esc(d.orcamento !== null ? fmtPlain(d.orcamento) : '') + '" placeholder="Ex.: 12.000,00"></label>' +
+        '<label class="field">Moeda<select name="orcamentoMoeda"><option value="EUR"' + (d.orcamentoMoeda === 'EUR' ? ' selected' : '') + '>Euro (€)</option><option value="BRL"' + (d.orcamentoMoeda === 'BRL' ? ' selected' : '') + '>Real (R$)</option></select></label></div>' +
+        '<p class="form-error" data-ob-error hidden></p><p class="small muted" style="margin-top:8px">Serve só para comparar com os custos previstos. Você detalha tudo depois no módulo Financeiro.</p>';
+    } else if(step === 'acompanhado'){
+      q = 'A mudança será individual ou acompanhada?';
+      body = radioChoices('acompanhado', ACOMP, d.acompanhado) + '<p class="small muted" style="margin-top:10px">Se for acompanhada, incluímos itens de exemplo para o acompanhante. Familiares podem ter procedimento próprio — verifique na fonte oficial.</p>';
+    } else if(step === 'resumo'){
+      optional = false;
+      q = 'Tudo pronto';
+      var rows = [
+        ['Nome', d.nome || '—'], ['Origem', d.origem || '—'], ['Destino', d.cidade || 'A definir'], ['Chegada prevista', d.chegada ? fmtDate(d.chegada) : 'A definir'],
+        ['Tipo de estudo', ESTUDOS[d.estudo] || '—'], ['Situação', SITUACOES[d.situacao] ? SITUACOES[d.situacao].t : '—'],
+        ['Orçamento', d.orcamento !== null ? fmtMoney(d.orcamento, d.orcamentoMoeda) : '—'], ['Mudança', ACOMP[d.acompanhado] || '—']
+      ];
+      var note = estudoNote(d.estudo);
+      body = '<div class="table-wrap" style="box-shadow:none"><table><tbody>' + rows.map(function(r){ return '<tr><td class="muted">' + esc(r[0]) + '</td><td><strong>' + esc(r[1]) + '</strong></td></tr>'; }).join('') + '</tbody></table></div>' +
+        '<div class="callout callout-info" style="margin-top:14px">' + icon('info') + '<div>Vamos criar um planejamento inicial com tarefas, documentos e categorias de custo <strong>de exemplo</strong>. Tudo é editável. ' + (note ? esc(note) : '') + '</div></div>' +
+        '<p class="small muted" style="margin-top:10px">Você pode alterar essas respostas depois em Dados → Perfil.</p>';
+    }
+
+    var foot = '<div class="ob-foot"><button type="button" class="btn" data-ob="back">Voltar</button><div class="btn-row">' +
+      (optional ? '<button type="button" class="btn" data-ob="skip">Pular</button>' : '') +
+      '<button type="button" class="btn btn-primary" data-ob="' + (step === 'resumo' ? 'finish' : 'next') + '">' + (step === 'resumo' ? 'Criar meu planejamento' : 'Continuar') + '</button></div></div>';
+
+    return '<div class="ob"><form class="ob-card" data-ob-form novalidate>' + dots + stepLabel + '<h1>' + esc(q) + '</h1><div style="margin-top:16px">' + body + '</div>' + foot + '</form></div>';
+  }
+
+  function readObStep(skip){
+    var step = OB_STEPS[ui.ob.step];
+    var d = obDraft();
+    var form = document.querySelector('[data-ob-form]');
+    if(!form) return true;
+    var err = form.querySelector('[data-ob-error]');
+    function fail(msg){ if(err){ err.textContent = msg; err.hidden = false; } return false; }
+    if(skip){
+      if(step === 'chegada') d.chegada = '';
+      if(step === 'orcamento') d.orcamento = null;
+      return true;
+    }
+    if(step === 'nome') d.nome = form.elements.nome.value.trim();
+    if(step === 'origem') d.origem = form.elements.origem.value.trim();
+    if(step === 'cidade') d.cidade = form.elements.cidade.value.trim();
+    if(step === 'chegada'){
+      var v = form.elements.chegada.value;
+      if(v && !validISO(v)) return fail('Data inválida. Use o seletor de data ou deixe em branco.');
+      if(!v && form.elements.chegada.validity && form.elements.chegada.validity.badInput) return fail('Data incompleta ou inválida.');
+      d.chegada = v;
+    }
+    if(step === 'estudo' || step === 'situacao' || step === 'acompanhado'){
+      var r = form.querySelector('input[name="' + step + '"]:checked');
+      d[step] = r ? r.value : '';
+    }
+    if(step === 'orcamento'){
+      var n = parseNum(form.elements.orcamento.value);
+      if(n !== null && (isNaN(n) || n < 0)) return fail('Informe um valor numérico positivo (ex.: 12.000,00) ou deixe em branco.');
+      d.orcamento = n === null ? null : round2(n);
+      d.orcamentoMoeda = form.elements.orcamentoMoeda.value === 'BRL' ? 'BRL' : 'EUR';
+    }
+    return true;
+  }
+
+  function bindOnboarding(){
+    var app = document.getElementById('app');
+    app.querySelectorAll('[data-ob]').forEach(function(btn){
+      btn.addEventListener('click', function(){ obAction(btn.dataset.ob); });
+    });
+    var form = app.querySelector('[data-ob-form]');
+    if(form){
+      form.addEventListener('submit', function(e){ e.preventDefault(); obAction(OB_STEPS[ui.ob.step] === 'resumo' ? 'finish' : 'next'); });
+      form.querySelectorAll('input[name="estudo"]').forEach(function(r){
+        r.addEventListener('change', function(){ var n = form.querySelector('[data-ob-note]'); if(n) n.textContent = estudoNote(r.value); });
+      });
+      var first = form.querySelector('input:not([type="radio"]), input[type="radio"]:checked, input[type="radio"]');
+      if(first) first.focus();
+    }
+    var imp = app.querySelector('[data-ob-import]');
+    if(imp) imp.addEventListener('change', function(){ if(imp.files[0]) importFile(imp.files[0]); imp.value = ''; });
+    var dc = app.querySelector('[data-act="download-corrupt"]');
+    if(dc) dc.addEventListener('click', function(){ downloadText(storage.corruptRaw, 'espanha-organizada-dados-ilegiveis.txt', 'text/plain'); });
+  }
+
+  function obAction(a){
+    if(a === 'demo'){ startDemo(); return; }
+    if(a === 'back'){ ui.ob.step = Math.max(0, ui.ob.step - 1); render(); return; }
+    if(a === 'next' || a === 'skip'){
+      if(!readObStep(a === 'skip')) return;
+      ui.ob.step = Math.min(OB_STEPS.length - 1, ui.ob.step + 1);
+      render();
+      return;
+    }
+    if(a === 'finish'){
+      var st = blankState();
+      st.profile = obDraft();
+      st.profile.onboarded = true;
+      applyTemplate(st);
+      state = st;
+      ui.ob = { step:0, draft:null };
+      saveState();
+      requestPersistence();
+      location.hash = '#/inicio';
+      render();
+      toast('Planejamento criado. Tudo é salvo automaticamente neste navegador.');
+    }
+  }
+
+  function startDemo(){
+    state = buildDemo();
+    ui.ob = { step:0, draft:null };
+    saveState();
+    location.hash = '#/inicio';
+    render();
+  }
+
+  function buildDemo(){
+    var st = blankState();
+    st.demo = true;
+    st.profile = { nome:'Exemplo', origem:'Brasil', cidade:'Salamanca', chegada:addDays(110), estudo:'superior', situacao:'documentacao',
+                   orcamento:9000, orcamentoMoeda:'EUR', acompanhado:'individual', onboarded:true };
+    applyTemplate(st);
+    var dueOffsets = [-3, 6, 12, 20, 25];
+    var k = 0;
+    st.tasks.forEach(function(t){
+      if(t.stage <= 2) t.status = 'concluida';
+      else if(t.stage === 3) t.status = t.order <= 2 ? 'concluida' : 'andamento';
+      else if(t.stage === 4 && k < dueOffsets.length){ t.due = addDays(dueOffsets[k]); t.status = k === 1 ? 'andamento' : 'pendente'; k++; }
+      else if(t.stage === 5 && t.order === 3) t.due = addDays(45);
+    });
+    st.docs.forEach(function(d){
+      if(d.tpl === 'tit-passaporte'){ d.status = 'em-maos'; d.issued = addDays(-700); d.expires = addDays(2900); d.apostila = 'nao-necessario'; d.traducao = 'nao-necessario'; }
+      if(d.tpl === 'tit-aceitacao'){ d.status = 'pronto'; d.issued = addDays(-20); }
+      if(d.tpl === 'tit-antecedentes'){ d.status = 'solicitado'; d.notes = 'Exemplo: verificar com o consulado se a certidão precisa de apostila e tradução.'; }
+      if(d.tpl === 'tit-seguro'){ d.status = 'nao-iniciado'; }
+    });
+    var plan = { 'Curso e matrícula':[3200,3200], 'Documentação':[250,80], 'Traduções e apostilamentos':[2400,1100,'BRL'], 'Passagens':[900,null], 'Bagagem e transporte':[120,null],
+                 'Hospedagem inicial':[700,null], 'Caução e aluguel':[1300,null], 'Alimentação':[900,null], 'Transporte público':[120,null], 'Telefone e internet':[60,null],
+                 'Seguro':[450,null], 'Reserva de emergência':[1500,null], 'Outras despesas':[200,null] };
+    st.budget.items.forEach(function(it){
+      var p = plan[it.category];
+      if(!p) return;
+      it.planned = p[0]; it.actual = p[1]; it.currency = p[2] || 'EUR';
+      if(it.category === 'Traduções e apostilamentos') it.desc = 'Exemplo em reais';
+    });
+    st.budget.rate = 6.2;
+    st.budget.rateDate = addDays(-2);
+    st.budget.reserve = 1500;
+    var protocolo = st.tasks.filter(function(t){ return t.stage === 5 && t.order === 3; })[0];
+    st.events = [
+      { id:uid(), title:'Agendamento no consulado (exemplo)', date:addDays(30), taskId:protocolo ? protocolo.id : '', notes:'Data fictícia.' },
+      { id:uid(), title:'Início das aulas (exemplo)', date:addDays(140), taskId:'', notes:'' }
+    ];
+    return st;
+  }
+
+  /* =========================================================
+     VIEW — VISÃO GERAL
+     ========================================================= */
+  function renderInicio(){
+    var p = state.profile;
+    var ts = taskStats(state.tasks);
+    var ds = docStats();
+    var bs = budgetSummary();
+    var n = p.chegada ? daysFromToday(p.chegada) : null;
+    var stage = currentStage();
+
+    var hello = '<div class="page-head"><div class="hello"><h1>' + (p.nome ? 'Olá, ' + esc(p.nome) : 'Olá') + '</h1>' +
+      '<div class="hello-sub"><span>' + icon('pin', 'ic-sm') + ' ' + (p.cidade ? esc(p.cidade) : '<span class="muted">Cidade a definir</span>') + '</span>' +
+      '<span>' + icon('cal', 'ic-sm') + ' ' + (p.chegada ? 'Chegada prevista em <strong>' + fmtDate(p.chegada) + '</strong> (' + relDays(n) + ')' : '<a href="#/dados" data-act="profile-edit">Definir data de chegada</a>') + '</span></div></div></div>';
+
+    var nudge = '';
+    var hasChanges = state.updatedAt && (!state.lastExportAt || state.updatedAt > state.lastExportAt);
+    var stale = !state.lastExportAt || (Date.now() - Date.parse(state.lastExportAt)) > 14 * 86400000;
+    if(!state.demo && hasChanges && stale){
+      nudge = '<div class="callout callout-warn banner">' + icon('alert') + '<div><strong>' + (state.lastExportAt ? 'Seu último backup tem mais de 14 dias.' : 'Você ainda não fez nenhum backup.') + '</strong> Os dados ficam só neste navegador; limpar o histórico pode apagá-los. <button type="button" class="btn btn-sm" data-act="export" style="margin-left:6px">Baixar backup agora</button></div></div>';
+    }
+
+    var progressCard = '<div class="card"><div class="kpi-label">Progresso geral</div>' +
+      (ts.total ? '<div class="big-progress"><strong>' + ts.pct + '%</strong><span class="muted">' + ts.done + ' de ' + ts.total + ' tarefas concluídas</span></div>' +
+        '<div class="progress progress-lg" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + ts.pct + '" aria-label="Progresso geral"><span style="width:' + ts.pct + '%"></span></div>' +
+        '<div class="stat-row"><span>Pendentes <b>' + ts.todo + '</b></span><span>Em andamento <b>' + ts.doing + '</b></span><span' + (ts.overdue ? ' class="neg"' : '') + '>Atrasadas <b' + (ts.overdue ? ' class="neg"' : '') + '>' + ts.overdue + '</b></span></div>'
+        : '<p class="kpi-note" style="margin-top:8px">Nenhuma tarefa cadastrada. <a href="#/checklist">Adicionar tarefas</a></p>') +
+      '</div>';
+
+    var docCard = '<div class="card"><div class="kpi-label">Documentos prontos</div>' +
+      (ds.total ? '<div class="kpi-value">' + ds.ready + ' <span class="muted" style="font-size:1rem">de ' + ds.total + '</span></div>' +
+        '<div class="progress" style="margin-top:8px"><span style="width:' + Math.round(ds.ready / ds.total * 100) + '%"></span></div>' +
+        '<p class="kpi-note" style="margin-top:8px">' + (ds.alerts ? '<span class="neg">' + ds.alerts + ' com validade a revisar</span>' : 'Nenhum alerta de validade') + '</p>'
+        : '<p class="kpi-note" style="margin-top:8px">Nenhum documento. <a href="#/documentos">Adicionar</a></p>') + '</div>';
+
+    var budCard = '<div class="card"><div class="kpi-label">Orçamento (' + bs.cur + ')</div>' +
+      (bs.filledPlanned || bs.actual ? '<div class="kpi-value">' + fmtMoney(bs.planned, bs.cur) + '</div><p class="kpi-note">previsto · gasto ' + fmtMoney(bs.actual, bs.cur) + '</p>' +
+        '<p class="kpi-note">' + (p.orcamento !== null && bs.available === null ? 'Disponível declarado: sem taxa de câmbio para converter' : bs.available !== null ? 'Disponível declarado: ' + fmtMoney(bs.available, bs.cur) + (bs.planned > bs.available ? ' <span class="neg">(abaixo do previsto)</span>' : '') : 'Orçamento disponível não informado') + '</p>' +
+        (bs.unconverted ? '<p class="kpi-note neg">' + bs.unconverted + ' linha(s) sem taxa de câmbio</p>' : '')
+        : '<p class="kpi-note" style="margin-top:8px">Nenhum valor preenchido. <a href="#/financeiro">Preencher custos</a></p>') + '</div>';
+
+    var phaseCard = '<div class="card"><div class="kpi-label">Fase atual</div><div class="kpi-value" style="font-size:1.1rem">' +
+      (stage ? esc(SITUACOES[p.situacao].t) : 'Não informada') + '</div>' +
+      (stage ? '<p class="kpi-note">Etapa sugerida: ' + stage + '. ' + esc(STAGES[stage - 1].t) + '</p>' : '<p class="kpi-note"><a href="#/dados" data-act="profile-edit">Informar situação</a></p>') + '</div>';
+
+    var prio = priorityTasks(5);
+    var prioHtml = prio.length ? '<ul class="mini-list">' + prio.map(function(t){
+      return '<li><input type="checkbox" class="task-check" data-chg="task-done" data-id="' + t.id + '" aria-label="Concluir: ' + esc(t.title) + '">' +
+        '<div class="grow"><button type="button" class="task-title" data-act="task-edit" data-id="' + t.id + '">' + esc(t.title) + '</button>' +
+        '<div class="task-meta">' + taskMetaPills(t, true) + '</div></div></li>';
+    }).join('') + '</ul>' : (state.tasks.length ? '<div class="empty"><strong>Tudo concluído</strong>Nenhuma tarefa pendente no momento.</div>' :
+      '<div class="empty"><strong>Sem tarefas ainda</strong>Adicione suas tarefas ou restaure o modelo inicial em Dados.<br><a class="btn btn-primary" href="#/checklist">Ir para o checklist</a></div>');
+
+    var today = todayISO();
+    var upcoming = timelineItems(false).filter(function(i){ return i.date >= today; }).slice(0, 5);
+    var datesHtml = upcoming.length ? '<ul class="mini-list">' + upcoming.map(function(i){
+      var d = daysFromToday(i.date);
+      return '<li><span class="pill ' + (i.kind === 'arrival' ? 'pill-pri' : d <= 7 ? 'pill-warn' : '') + ' num">' + fmtDate(i.date) + '</span><div class="grow">' + esc(i.title) +
+        '<div class="small muted">' + (i.kind === 'task' ? 'Prazo de tarefa' : i.kind === 'event' ? 'Evento' : 'Perfil') + ' · ' + relDays(d) + '</div></div></li>';
+    }).join('') + '</ul>' : '<div class="empty"><strong>Nenhuma data futura</strong>Defina prazos nas tarefas ou crie eventos no Cronograma.<br><a class="btn" href="#/cronograma">Abrir cronograma</a></div>';
+
+    var shortcuts = '<div class="shortcuts">' + VIEWS.slice(1).map(function(v){ return '<a class="shortcut" href="#/' + v.id + '">' + icon(v.icon) + esc(v.t) + '</a>'; }).join('') + '</div>';
+
+    return hello + nudge +
+      '<div class="grid grid-kpi">' + progressCard + docCard + budCard + phaseCard + '</div>' +
+      '<div class="grid grid-2 section">' +
+        '<div class="card"><h2 style="margin-bottom:6px">Próximas tarefas prioritárias</h2>' + prioHtml + '</div>' +
+        '<div class="card"><h2 style="margin-bottom:6px">Datas importantes</h2>' + datesHtml + '</div>' +
+      '</div>' +
+      '<div class="section"><h2>Atalhos</h2>' + shortcuts + '</div>';
+  }
+
+  function taskMetaPills(t, withStage, hideCat){
+    var out = [];
+    if(withStage) out.push('<span class="pill">Etapa ' + t.stage + '</span>');
+    if(t.status === 'andamento') out.push('<span class="pill pill-pri">Em andamento</span>');
+    if(t.status === 'concluida') out.push('<span class="pill pill-ok">Concluída</span>');
+    if(t.priority === 'alta') out.push('<span class="pill pill-warn">Prioridade alta</span>');
+    else if(t.priority === 'baixa') out.push('<span class="pill">Prioridade baixa</span>');
+    if(t.due){
+      var n = daysFromToday(t.due);
+      var cls = t.status === 'concluida' ? '' : n < 0 ? 'pill-bad' : n <= 7 ? 'pill-warn' : '';
+      out.push('<span class="pill num ' + cls + '">' + (t.status !== 'concluida' && n < 0 ? 'Atrasada · ' : 'Prazo ') + fmtDate(t.due) + '</span>');
+    }
+    if(t.category && !withStage && !hideCat) out.push('<span class="pill">' + esc(t.category) + '</span>');
+    var link = safeUrl(t.link);
+    if(link) out.push('<a class="pill pill-pri" href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">' + icon('ext', 'ic-sm') + (t.src && SOURCE_BY_ID[t.src] ? 'Fonte oficial' : 'Link') + '</a>');
+    if(t.notes) out.push('<span class="pill" title="' + esc(t.notes) + '">Com observações</span>');
+    return out.join('');
+  }
+
+  /* =========================================================
+     VIEW — CHECKLIST
+     ========================================================= */
+  function taskCategories(){
+    var cats = [];
+    state.tasks.forEach(function(t){ if(t.category && cats.indexOf(t.category) === -1) cats.push(t.category); });
+    return cats.sort(function(a, b){ return a.localeCompare(b, 'pt-BR'); });
+  }
+  function selectHtml(key, scope, label, options, value){
+    return '<label class="sr-only" for="flt-' + scope + '-' + key + '">' + esc(label) + '</label><select id="flt-' + scope + '-' + key + '" data-chg="filter" data-scope="' + scope + '" data-key="' + key + '">' +
+      '<option value="">' + esc(label) + ': todos</option>' + Object.keys(options).map(function(k){
+        return '<option value="' + esc(k) + '"' + (value === k ? ' selected' : '') + '>' + esc(options[k]) + '</option>';
+      }).join('') + '</select>';
+  }
+  function filterTasks(list){
+    var f = ui.task;
+    return list.filter(function(t){
+      if(f.status === 'atrasada'){ if(!isOverdue(t)) return false; }
+      else if(f.status === 'abertas'){ if(t.status === 'concluida') return false; }
+      else if(f.status && t.status !== f.status) return false;
+      if(f.cat && t.category !== f.cat) return false;
+      if(f.prio && t.priority !== f.prio) return false;
+      return true;
+    });
+  }
+
+  function taskRow(t, siblings){
+    var idx = siblings.indexOf(t);
+    return '<li class="task' + (t.status === 'concluida' ? ' is-done' : '') + '">' +
+      '<input type="checkbox" class="task-check" data-chg="task-done" data-id="' + t.id + '"' + (t.status === 'concluida' ? ' checked' : '') + ' aria-label="Concluir: ' + esc(t.title) + '">' +
+      '<div><button type="button" class="task-title" data-act="task-edit" data-id="' + t.id + '">' + esc(t.title) + '</button>' +
+      (t.desc ? '<p class="task-desc">' + esc(t.desc) + '</p>' : '') +
+      '<div class="task-meta">' + taskMetaPills(t, false) + '</div></div>' +
+      '<div class="task-actions">' +
+        '<button type="button" class="icon-btn" data-act="task-up" data-id="' + t.id + '" aria-label="Mover para cima"' + (idx <= 0 ? ' disabled' : '') + '>' + icon('up') + '</button>' +
+        '<button type="button" class="icon-btn" data-act="task-down" data-id="' + t.id + '" aria-label="Mover para baixo"' + (idx === siblings.length - 1 ? ' disabled' : '') + '>' + icon('down') + '</button>' +
+        '<button type="button" class="icon-btn" data-act="task-edit" data-id="' + t.id + '" aria-label="Editar">' + icon('edit') + '</button>' +
+      '</div></li>';
+  }
+
+  function stageBlock(st, open, opts){
+    var all = sortedTasks(state.tasks.filter(function(t){ return t.stage === st.n; }));
+    var shown = filterTasks(all);
+    if(opts.hideEmpty && !shown.length) return '';
+    var s = taskStats(all);
+    var cur = currentStage() === st.n;
+    return '<details class="stage' + (s.total && s.done === s.total ? ' stage-done' : '') + (cur ? ' stage-current' : '') + '"' + (open ? ' open' : '') + ' data-stage="' + st.n + '">' +
+      '<summary><span class="stage-num">' + st.n + '</span><h3>' + esc(st.t) + (cur ? ' <span class="pill pill-pri">Fase atual</span>' : '') + '</h3>' +
+      '<span class="stage-meta num">' + s.done + '/' + s.total + (s.overdue ? ' · <span class="neg">' + s.overdue + ' atrasada' + (s.overdue > 1 ? 's' : '') + '</span>' : '') + '</span>' +
+      '<div class="progress"><span style="width:' + s.pct + '%"></span></div></summary>' +
+      (shown.length ? '<ul class="task-list">' + shown.map(function(t){ return taskRow(t, all); }).join('') + '</ul>' :
+        '<p class="stage-foot muted small">' + (all.length ? 'Nenhuma tarefa desta etapa corresponde aos filtros.' : 'Nenhuma tarefa nesta etapa.') + '</p>') +
+      '<div class="stage-foot"><button type="button" class="btn btn-sm" data-act="task-new" data-stage="' + st.n + '">' + icon('plus', 'ic-sm') + 'Adicionar tarefa</button></div>' +
+      '</details>';
+  }
+
+  function renderChecklist(){
+    var ts = taskStats(state.tasks);
+    var f = ui.task;
+    var stOpts = {}; STAGES.forEach(function(s){ stOpts[s.n] = s.n + '. ' + s.t; });
+    var catOpts = {}; taskCategories().forEach(function(c){ catOpts[c] = c; });
+    var statusOpts = { abertas:'Não concluídas', pendente:'Pendente', andamento:'Em andamento', concluida:'Concluída', atrasada:'Atrasadas' };
+    var filtering = f.status || f.stage || f.cat || f.prio;
+    var focus = currentStage();
+    var stages = STAGES.filter(function(s){ return !f.stage || String(s.n) === f.stage; });
+    var blocks = stages.map(function(s){
+      var hasOverdue = state.tasks.some(function(t){ return t.stage === s.n && isOverdue(t); });
+      var open = filtering ? true : (s.n in ui.openStages) ? ui.openStages[s.n] : (hasOverdue || (focus ? Math.abs(s.n - focus) <= 1 : s.n <= 2));
+      return stageBlock(s, open, { hideEmpty:!!(f.status || f.cat || f.prio) });
+    }).join('');
+    if(!blocks) blocks = '<div class="empty"><strong>Nenhuma tarefa encontrada</strong>Ajuste os filtros para ver mais tarefas.<br><button type="button" class="btn" data-act="clear-filters" data-scope="task">Limpar filtros</button></div>';
+
+    return '<div class="page-head"><div><h1>Checklist da mudança</h1><p>' + (ts.total ? ts.done + ' de ' + ts.total + ' concluídas (' + ts.pct + '%). ' : '') +
+      'As tarefas iniciais são exemplos editáveis, não exigências legais. Ajuste à sua realidade.</p></div>' +
+      '<button type="button" class="btn btn-primary" data-act="task-new">' + icon('plus', 'ic-sm') + 'Nova tarefa</button></div>' +
+      '<div class="toolbar" role="group" aria-label="Filtros">' +
+        selectHtml('status', 'task', 'Status', statusOpts, f.status) +
+        selectHtml('stage', 'task', 'Etapa', stOpts, f.stage) +
+        selectHtml('cat', 'task', 'Categoria', catOpts, f.cat) +
+        selectHtml('prio', 'task', 'Prioridade', PRIORITIES, f.prio) +
+        (filtering ? '<button type="button" class="btn btn-sm" data-act="clear-filters" data-scope="task">Limpar filtros</button>' : '') +
+      '</div>' + blocks;
+  }
+
+  function openTaskForm(t, presetStage, presetCat){
+    var isNew = !t;
+    t = t || { stage:presetStage || currentStage() || 1, category:presetCat || '', priority:'media', status:'pendente', title:'', desc:'', due:'', notes:'', link:'' };
+    var stOpts = {}; STAGES.forEach(function(s){ stOpts[s.n] = s.n + '. ' + s.t; });
+    var cats = taskCategories(); ARRIVAL_CATS.forEach(function(c){ if(cats.indexOf(c) === -1) cats.push(c); });
+    var srcNote = t.src && SOURCE_BY_ID[t.src] ? '<div class="callout callout-info" style="margin-bottom:14px">' + icon('link') + '<div>Fonte de referência: <strong>' + esc(SOURCE_BY_ID[t.src].title) + '</strong> (' + esc(SOURCE_BY_ID[t.src].org) + '). Endereço verificado em ' + fmtDate(SOURCES_CHECKED) + '.</div></div>' : '';
+    openForm({
+      title:isNew ? 'Nova tarefa' : 'Editar tarefa', intro:srcNote,
+      fields:[
+        { name:'title', label:'Título', required:true, value:t.title, max:200 },
+        { name:'desc', label:'Descrição', type:'textarea', value:t.desc, max:2000 },
+        { name:'stage', label:'Etapa', type:'select', options:stOpts, value:String(t.stage), row:true },
+        { name:'category', label:'Categoria', value:t.category, list:cats, max:60, row:true },
+        { name:'status', label:'Status', type:'select', options:TSTATUS, value:t.status, row:true },
+        { name:'priority', label:'Prioridade', type:'select', options:PRIORITIES, value:t.priority, row:true },
+        { name:'due', label:'Prazo (opcional)', type:'date', value:t.due },
+        { name:'link', label:'Link de referência', type:'url', value:t.link, placeholder:'https://', max:600 },
+        { name:'notes', label:'Observações', type:'textarea', value:t.notes }
+      ],
+      onDelete:isNew ? null : function(){
+        confirmAction({ title:'Excluir tarefa?', message:'A tarefa <strong>' + esc(t.title) + '</strong> será excluída. Eventos ligados a ela continuam no cronograma, sem o vínculo.', confirmLabel:'Excluir', danger:true }).then(function(ok){
+          if(!ok) return;
+          removeFrom(state.tasks, t.id);
+          state.events.forEach(function(e){ if(e.taskId === t.id) e.taskId = ''; });
+          saveState(); render(); toast('Tarefa excluída.');
+        });
+      },
+      onSubmit:function(v){
+        var e = validateDateField(v, 'due', 'Prazo') || validateUrlField(v, 'link');
+        if(e) return e;
+        var stage = Number(v.stage);
+        var target = isNew ? { id:uid(), src:'' } : t;
+        if(!isNew && target.stage !== stage) target.order = nextOrder(stage);
+        target.title = v.title; target.desc = v.desc; target.category = v.category; target.status = v.status;
+        target.priority = v.priority; target.due = v.due; target.notes = v.notes;
+        if(target.link !== v.link) target.src = '';
+        target.link = v.link;
+        if(isNew){ target.stage = stage; target.order = nextOrder(stage); state.tasks.push(target); }
+        else target.stage = stage;
+        saveState(); render(); toast(isNew ? 'Tarefa adicionada.' : 'Tarefa atualizada.');
+      }
+    });
+  }
+  function nextOrder(stage){
+    var max = 0;
+    state.tasks.forEach(function(t){ if(t.stage === stage && t.order > max) max = t.order; });
+    return max + 1;
+  }
+  function moveTask(id, dir){
+    var t = findTask(id); if(!t) return;
+    var sib = sortedTasks(state.tasks.filter(function(x){ return x.stage === t.stage; }));
+    sib.forEach(function(x, i){ x.order = i + 1; });
+    var i = sib.indexOf(t), j = i + dir;
+    if(j < 0 || j >= sib.length) return;
+    var tmp = sib[j].order; sib[j].order = t.order; t.order = tmp;
+    saveState(); render();
+    var btn = document.querySelector('[data-act="task-' + (dir < 0 ? 'up' : 'down') + '"][data-id="' + id + '"]');
+    if(btn && !btn.disabled) btn.focus(); else { var e = document.querySelector('[data-act="task-edit"][data-id="' + id + '"]'); if(e) e.focus(); }
+  }
+
+  /* =========================================================
+     VIEW — DOCUMENTOS
+     ========================================================= */
+  function renderDocumentos(){
+    var f = ui.doc;
+    var ds = docStats();
+    var catOpts = {}; state.docCategories.forEach(function(c){ catOpts[c] = c; });
+    var multiPerson = state.profile.acompanhado === 'acompanhado' || state.docs.some(function(d){ return d.person !== 'titular'; });
+    var list = state.docs.filter(function(d){
+      if(f.status === 'pendentes'){ if(docReady(d)) return false; }
+      else if(f.status === 'alertas'){ if(!docAlerts(d).some(function(a){ return a.kind !== 'pri'; })) return false; }
+      else if(f.status && d.status !== f.status) return false;
+      if(f.person && d.person !== f.person) return false;
+      if(f.cat && d.category !== f.cat) return false;
+      return true;
+    });
+    var statusOpts = { pendentes:'Ainda não prontos', alertas:'Com alerta de validade' };
+    Object.keys(DSTATUS).forEach(function(k){ statusOpts[k] = DSTATUS[k]; });
+    var filtering = f.status || f.person || f.cat;
+
+    var items = list.length ? '<div class="doc-list">' + list.map(function(d){
+      var alerts = docAlerts(d).map(function(a){ return '<span class="pill pill-' + a.kind + '">' + esc(a.t) + '</span>'; }).join('');
+      var st = docReady(d) ? 'pill-ok' : d.status === 'solicitado' || d.status === 'em-maos' ? 'pill-pri' : '';
+      var link = safeUrl(d.link);
+      return '<article class="card doc"><div><div class="doc-head"><button type="button" class="doc-name" data-act="doc-edit" data-id="' + d.id + '">' + esc(d.name) + '</button>' +
+        '<span class="pill ' + st + '">' + esc(DSTATUS[d.status]) + '</span>' + (multiPerson ? '<span class="pill">' + esc(PERSONS[d.person]) + '</span>' : '') + alerts + '</div>' +
+        '<div class="doc-facts"><span>Categoria: <b>' + esc(d.category) + '</b></span><span>Emissão: <b class="num">' + fmtDate(d.issued) + '</b></span><span>Validade: <b class="num">' + (d.expires ? fmtDate(d.expires) : 'não informada') + '</b></span>' +
+        '<span>Apostila: <b>' + esc(CHECKOPTS[d.apostila]) + '</b></span><span>Tradução juramentada: <b>' + esc(CHECKOPTS[d.traducao]) + '</b></span></div>' +
+        (d.notes ? '<p class="task-desc" style="margin-top:6px">' + esc(d.notes) + '</p>' : '') +
+        (link ? '<p style="margin-top:6px" class="small"><a href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">' + icon('ext', 'ic-sm') + ' ' + (d.src && SOURCE_BY_ID[d.src] ? esc(SOURCE_BY_ID[d.src].title) : 'Fonte / referência') + '</a></p>' : '') +
+        '</div><div><button type="button" class="icon-btn" data-act="doc-edit" data-id="' + d.id + '" aria-label="Editar ' + esc(d.name) + '">' + icon('edit') + '</button></div></article>';
+    }).join('') + '</div>' :
+      (state.docs.length ? '<div class="empty"><strong>Nenhum documento corresponde aos filtros</strong><button type="button" class="btn" data-act="clear-filters" data-scope="doc">Limpar filtros</button></div>' :
+        '<div class="empty"><strong>Nenhum documento cadastrado</strong>Liste aqui os documentos exigidos no seu procedimento para controlar situação e validade.<br><button type="button" class="btn btn-primary" data-act="doc-new">Adicionar documento</button></div>');
+
+    return '<div class="page-head"><div><h1>Documentos</h1><p>' + (ds.total ? ds.ready + ' de ' + ds.total + ' prontos. ' : '') + 'Controle situação, validade, apostila e tradução de cada documento.</p></div>' +
+      '<div class="btn-row"><button type="button" class="btn" data-act="doc-cats">Categorias</button><button type="button" class="btn btn-primary" data-act="doc-new">' + icon('plus', 'ic-sm') + 'Novo documento</button></div></div>' +
+      '<div class="callout callout-info" style="margin-bottom:10px">' + icon('shield') + '<div><strong>Não guarde arquivos aqui.</strong> Este módulo registra apenas informações de controle (nome, situação, datas). Guarde passaporte, certidões e outros documentos sensíveis em local seguro, fora da ferramenta.</div></div>' +
+      '<div class="callout callout-warn" style="margin-bottom:16px">' + icon('info') + '<div>A necessidade de apostila ou de tradução juramentada depende do documento, do país emissor e do procedimento. A lista inicial é um exemplo — confirme cada item com a fonte oficial do seu consulado ou órgão.</div></div>' +
+      '<div class="toolbar" role="group" aria-label="Filtros">' + selectHtml('status', 'doc', 'Situação', statusOpts, f.status) +
+        (multiPerson ? selectHtml('person', 'doc', 'Pessoa', PERSONS, f.person) : '') + selectHtml('cat', 'doc', 'Categoria', catOpts, f.cat) +
+        (filtering ? '<button type="button" class="btn btn-sm" data-act="clear-filters" data-scope="doc">Limpar filtros</button>' : '') + '</div>' + items;
+  }
+
+  function openDocForm(d){
+    var isNew = !d;
+    d = d || { name:'', category:state.docCategories[0] || 'Outros', person:'titular', status:'nao-iniciado', issued:'', expires:'', apostila:'', traducao:'', notes:'', link:'' };
+    var catOpts = {}; state.docCategories.forEach(function(c){ catOpts[c] = c; });
+    openForm({
+      title:isNew ? 'Novo documento' : 'Editar documento',
+      fields:[
+        { name:'name', label:'Nome do documento', required:true, value:d.name, max:200 },
+        { name:'category', label:'Categoria', type:'select', options:catOpts, value:d.category, row:true },
+        { name:'person', label:'Pessoa', type:'select', options:PERSONS, value:d.person, row:true },
+        { name:'status', label:'Situação', type:'select', options:DSTATUS, value:d.status },
+        { name:'issued', label:'Data de emissão', type:'date', value:d.issued, row:true },
+        { name:'expires', label:'Data de validade', type:'date', value:d.expires, row:true, hint:'Deixe em branco se não se aplica.' },
+        { name:'apostila', label:'Apostila', type:'select', options:CHECKOPTS, value:d.apostila, row:true },
+        { name:'traducao', label:'Tradução juramentada', type:'select', options:CHECKOPTS, value:d.traducao, row:true },
+        { name:'link', label:'Link da fonte oficial', type:'url', value:d.link, placeholder:'https://', max:600 },
+        { name:'notes', label:'Observações', type:'textarea', value:d.notes, placeholder:'Ex.: onde solicitar, prazo de emissão, número de protocolo…' }
+      ],
+      onDelete:isNew ? null : function(){
+        confirmAction({ title:'Excluir documento?', message:'<strong>' + esc(d.name) + '</strong> será removido da lista.', confirmLabel:'Excluir', danger:true }).then(function(ok){
+          if(!ok) return;
+          removeFrom(state.docs, d.id); saveState(); render(); toast('Documento excluído.');
+        });
+      },
+      onSubmit:function(v){
+        var e = validateDateField(v, 'issued', 'Emissão') || validateDateField(v, 'expires', 'Validade') || validateUrlField(v, 'link');
+        if(e) return e;
+        if(v.issued && v.expires && v.expires < v.issued) return { msg:'A validade não pode ser anterior à emissão.', field:'expires' };
+        var target = isNew ? { id:uid(), tpl:'', src:'' } : d;
+        ['name','category','person','status','issued','expires','apostila','traducao','notes'].forEach(function(k){ target[k] = v[k]; });
+        if(target.link !== v.link) target.src = '';
+        target.link = v.link;
+        if(isNew) state.docs.push(target);
+        saveState(); render(); toast(isNew ? 'Documento adicionado.' : 'Documento atualizado.');
+      }
+    });
+  }
+
+  function openDocCats(){
+    function body(){
+      return '<p class="small muted" style="margin-bottom:12px">Ao remover uma categoria em uso, os documentos passam para “Outros”.</p><ul class="mini-list">' + state.docCategories.map(function(c){
+        var used = state.docs.filter(function(d){ return d.category === c; }).length;
+        return '<li><div class="grow">' + esc(c) + ' <span class="small muted">(' + used + ')</span></div>' +
+          (c === 'Outros' ? '<span class="small muted">padrão</span>' : '<button type="button" class="btn btn-sm btn-danger-ghost" data-cat-del="' + esc(c) + '">Remover</button>') + '</li>';
+      }).join('') + '</ul><form id="cat-form" class="form-row" style="margin-top:14px" novalidate><label class="field">Nova categoria<input name="cat" maxlength="60" required></label><div style="align-self:end"><button class="btn btn-primary" type="submit">Adicionar</button></div></form><p class="form-error" id="cat-err" hidden></p>';
+    }
+    function bind(d){
+      d.querySelectorAll('[data-cat-del]').forEach(function(b){
+        b.addEventListener('click', function(){
+          var c = b.dataset.catDel;
+          state.docCategories = state.docCategories.filter(function(x){ return x !== c; });
+          state.docs.forEach(function(doc){ if(doc.category === c) doc.category = 'Outros'; });
+          if(ui.doc.cat === c) ui.doc.cat = '';
+          saveState(); d.querySelector('.dlg-body').innerHTML = body(); bind(d); render();
+        });
+      });
+      d.querySelector('#cat-form').addEventListener('submit', function(ev){
+        ev.preventDefault();
+        var v = ev.target.elements.cat.value.trim();
+        var err = d.querySelector('#cat-err');
+        if(!v){ err.textContent = 'Digite um nome.'; err.hidden = false; return; }
+        if(state.docCategories.some(function(x){ return x.toLowerCase() === v.toLowerCase(); })){ err.textContent = 'Essa categoria já existe.'; err.hidden = false; return; }
+        state.docCategories.push(v);
+        saveState(); d.querySelector('.dlg-body').innerHTML = body(); bind(d); render();
+        d.querySelector('#cat-form input').focus();
+      });
+    }
+    openModal({ title:'Categorias de documentos', body:body(), actions:[{ label:'Concluir', kind:'primary' }], onOpen:bind });
+  }
+
+  /* =========================================================
+     VIEW — FINANCEIRO
+     ========================================================= */
+  function renderFinanceiro(){
+    var b = state.budget;
+    var s = budgetSummary();
+    var cur = s.cur;
+    var needsRate = b.items.some(function(it){ return it.currency !== cur && (it.planned !== null || it.actual !== null); }) ||
+      (state.profile.orcamento !== null && state.profile.orcamentoMoeda !== cur) || (b.reserve !== null && b.reserveCurrency !== cur);
+    var rateAge = b.rateDate ? daysFromToday(b.rateDate) : null;
+
+    var settings = '<div class="card fin-settings">' +
+      '<div><div class="kpi-label" style="margin-bottom:4px">Exibir valores em</div><div class="seg" role="group" aria-label="Moeda de exibição">' +
+        '<button type="button" data-act="fin-display" data-cur="EUR" aria-pressed="' + (cur === 'EUR') + '">€ EUR</button><button type="button" data-act="fin-display" data-cur="BRL" aria-pressed="' + (cur === 'BRL') + '">R$ BRL</button></div></div>' +
+      '<label>Taxa de câmbio (1 € = R$)<input class="inline-input" type="text" inputmode="decimal" data-chg="fin-rate" value="' + esc(b.rate ? fmtPlain(b.rate) : '') + '" placeholder="Ex.: 6,20" aria-describedby="rate-help"></label>' +
+      '<label>Data da cotação<input class="inline-input" style="width:auto;text-align:left" type="date" data-chg="fin-rate-date" value="' + esc(b.rateDate) + '"></label>' +
+      '<p class="small muted" id="rate-help" style="flex-basis:100%">A taxa é informada por você e não é atualizada automaticamente. ' +
+        (b.rate ? (b.rateDate ? 'Cotação de ' + fmtDate(b.rateDate) + (rateAge !== null && rateAge < -30 ? ' — <span class="neg">tem mais de 30 dias, considere atualizar</span>' : '') + '.' : '<span class="neg">Informe a data da cotação.</span>') : 'Sem taxa, valores em outra moeda não entram nos totais.') + '</p>' +
+      '</div>';
+
+    var warn = s.unconverted ? '<div class="callout callout-warn" style="margin-top:12px">' + icon('alert') + '<div>' + s.unconverted + ' linha(s) estão em outra moeda e <strong>ficaram fora dos totais</strong>. Informe a taxa de câmbio acima.</div></div>' :
+      (needsRate && !b.rate ? '<div class="callout callout-warn" style="margin-top:12px">' + icon('alert') + '<div>Há valores em outra moeda. Informe a taxa de câmbio para convertê-los.</div></div>' : '');
+
+    var avail = s.available;
+    var gap = avail !== null && avail !== undefined ? round2(avail - s.planned) : null;
+    var kpis = '<div class="grid grid-kpi" style="margin-top:14px">' +
+      kpi('Orçamento total estimado', fmtMoney(s.planned, cur), 'soma dos valores previstos') +
+      kpi('Total já gasto', fmtMoney(s.actual, cur), s.planned ? Math.round(s.actual / s.planned * 100) + '% do previsto' : 'soma dos valores realizados') +
+      kpi('Valor restante', '<span class="' + (s.remaining < 0 ? 'neg' : '') + '">' + fmtMoney(s.remaining, cur) + '</span>', 'previsto − realizado') +
+      kpi('Disponível declarado', avail === null ? '—' : avail === undefined ? '—' : fmtMoney(avail, cur),
+        state.profile.orcamento === null ? '<a href="#/dados" data-act="profile-edit">informar no perfil</a>' : avail === null ? 'sem taxa para converter' : (gap >= 0 ? 'folga de ' + fmtMoney(gap, cur) + ' sobre o previsto' : '<span class="neg">faltam ' + fmtMoney(-gap, cur) + ' para cobrir o previsto</span>')) +
+      '<div class="card"><div class="kpi-label">Reserva financeira disponível</div>' +
+        '<div style="display:flex;gap:6px;margin-top:6px"><input class="inline-input" style="flex:1" type="text" inputmode="decimal" data-chg="fin-reserve" value="' + esc(b.reserve !== null ? fmtPlain(b.reserve) : '') + '" placeholder="0,00" aria-label="Reserva disponível">' +
+        '<select class="inline-input" style="width:auto" data-chg="fin-reserve-cur" aria-label="Moeda da reserva"><option' + (b.reserveCurrency === 'EUR' ? ' selected' : '') + '>EUR</option><option' + (b.reserveCurrency === 'BRL' ? ' selected' : '') + '>BRL</option></select></div>' +
+        '<p class="kpi-note">' + (s.reserve !== null && b.reserveCurrency !== cur ? '≈ ' + fmtMoney(s.reserve, cur) : 'valor já separado para emergências') + '</p></div>' +
+      '</div>';
+
+    var rows = b.items.map(function(it){
+      var diff = it.planned !== null ? round2(it.planned - (it.actual || 0)) : null;
+      return '<tr><td><button type="button" class="task-title" data-act="bud-edit" data-id="' + it.id + '">' + esc(it.category) + '</button>' + (it.desc ? '<div class="small muted">' + esc(it.desc) + '</div>' : '') + '</td>' +
+        '<td>' + it.currency + '</td>' +
+        '<td class="r"><input class="inline-input" type="text" inputmode="decimal" data-chg="bud-planned" data-id="' + it.id + '" value="' + esc(fmtPlain(it.planned)) + '" placeholder="—" aria-label="Previsto: ' + esc(it.category) + '"></td>' +
+        '<td class="r"><input class="inline-input" type="text" inputmode="decimal" data-chg="bud-actual" data-id="' + it.id + '" value="' + esc(fmtPlain(it.actual)) + '" placeholder="—" aria-label="Realizado: ' + esc(it.category) + '"></td>' +
+        '<td class="r num ' + (diff === null ? '' : diff < 0 ? 'neg' : 'pos') + '">' + (diff === null ? '—' : fmtMoney(diff, it.currency)) + '</td>' +
+        '<td class="r"><button type="button" class="icon-btn" data-act="bud-edit" data-id="' + it.id + '" aria-label="Editar ' + esc(it.category) + '">' + icon('edit') + '</button></td></tr>';
+    }).join('');
+    var table = b.items.length ? '<div class="table-wrap"><table class="bud-table"><thead><tr><th>Categoria</th><th>Moeda</th><th class="r">Previsto</th><th class="r">Realizado</th><th class="r">Diferença</th><th></th></tr></thead><tbody>' + rows + '</tbody>' +
+      '<tfoot><tr><td>Total (' + cur + ')</td><td></td><td class="r num">' + fmtMoney(s.planned, cur) + '</td><td class="r num">' + fmtMoney(s.actual, cur) + '</td><td class="r num ' + (s.remaining < 0 ? 'neg' : 'pos') + '">' + fmtMoney(s.remaining, cur) + '</td><td></td></tr></tfoot></table></div>' +
+      '<p class="small muted" style="margin-top:6px">Diferença = previsto − realizado. Negativo (vermelho) significa gasto acima do previsto. Valores aceitam o formato 1.250,00.</p>'
+      : '<div class="empty"><strong>Nenhuma linha de orçamento</strong>Adicione categorias de custo para planejar e acompanhar os gastos.<br><button type="button" class="btn btn-primary" data-act="bud-new">Adicionar linha</button></div>';
+
+    var cats = Object.keys(s.byCat).map(function(k){ return { k:k, p:s.byCat[k].planned, a:s.byCat[k].actual }; }).filter(function(c){ return c.p || c.a; })
+      .sort(function(x, y){ return Math.max(y.p, y.a) - Math.max(x.p, x.a); });
+    var max = cats.reduce(function(m, c){ return Math.max(m, c.p, c.a); }, 0);
+    var dist = cats.length ? '<div class="card"><div class="legend"><span><i style="background:color-mix(in srgb, var(--pri) 30%, white)"></i>Previsto</span><span><i style="background:var(--pri-2)"></i>Realizado</span></div><div class="bars">' + cats.map(function(c){
+      return '<div class="bar-row"><span>' + esc(c.k) + '</span><div class="bar-track" role="img" aria-label="' + esc(c.k) + ': previsto ' + esc(fmtMoney(c.p, cur)) + ', realizado ' + esc(fmtMoney(c.a, cur)) + '">' +
+        '<span class="plan" style="width:' + (max ? c.p / max * 100 : 0) + '%"></span><span class="act" style="width:' + (max ? c.a / max * 100 : 0) + '%"></span></div>' +
+        '<span class="num small">' + fmtMoney(c.p, cur) + (s.planned ? ' · ' + Math.round(c.p / s.planned * 100) + '%' : '') + '</span></div>';
+    }).join('') + '</div></div>' : '<div class="empty"><strong>Sem valores ainda</strong>A distribuição aparece quando você preencher valores previstos ou realizados.</div>';
+
+    return '<div class="page-head"><div><h1>Financeiro</h1><p>Planeje o previsto e registre o realizado por categoria. Os totais e diferenças são calculados automaticamente.</p></div>' +
+      '<button type="button" class="btn btn-primary" data-act="bud-new">' + icon('plus', 'ic-sm') + 'Nova linha</button></div>' +
+      settings + warn + kpis +
+      '<div class="section"><h2>Detalhamento</h2>' + table + '</div>' +
+      '<div class="section"><h2>Distribuição por categoria</h2>' + dist + '</div>';
+  }
+  function kpi(label, value, note){
+    return '<div class="card"><div class="kpi-label">' + esc(label) + '</div><div class="kpi-value">' + value + '</div><p class="kpi-note">' + note + '</p></div>';
+  }
+
+  function openBudgetForm(it){
+    var isNew = !it;
+    it = it || { category:'', desc:'', currency:state.budget.display, planned:null, actual:null };
+    var cats = BUDGET_TEMPLATE.slice();
+    state.budget.items.forEach(function(x){ if(cats.indexOf(x.category) === -1) cats.push(x.category); });
+    openForm({
+      title:isNew ? 'Nova linha de orçamento' : 'Editar linha de orçamento',
+      fields:[
+        { name:'category', label:'Categoria', required:true, value:it.category, list:cats, max:80 },
+        { name:'desc', label:'Descrição', value:it.desc, max:200, placeholder:'Opcional' },
+        { name:'currency', label:'Moeda', type:'select', options:{ EUR:'Euro (€)', BRL:'Real (R$)' }, value:it.currency },
+        { name:'planned', label:'Previsto', type:'money', value:fmtPlain(it.planned), row:true, placeholder:'0,00' },
+        { name:'actual', label:'Realizado', type:'money', value:fmtPlain(it.actual), row:true, placeholder:'0,00' }
+      ],
+      onDelete:isNew ? null : function(){
+        confirmAction({ title:'Excluir linha?', message:'A linha <strong>' + esc(it.category) + '</strong> e seus valores serão removidos.', confirmLabel:'Excluir', danger:true }).then(function(ok){
+          if(!ok) return;
+          removeFrom(state.budget.items, it.id); saveState(); render(); toast('Linha excluída.');
+        });
+      },
+      onSubmit:function(v){
+        var e = validateMoneyField(v, 'planned', 'Previsto') || validateMoneyField(v, 'actual', 'Realizado');
+        if(e) return e;
+        var target = isNew ? { id:uid() } : it;
+        target.category = v.category; target.desc = v.desc; target.currency = v.currency;
+        var p = parseNum(v.planned), a = parseNum(v.actual);
+        target.planned = p === null ? null : round2(p);
+        target.actual = a === null ? null : round2(a);
+        if(isNew) state.budget.items.push(target);
+        saveState(); render(); toast(isNew ? 'Linha adicionada.' : 'Linha atualizada.');
+      }
+    });
+  }
+
+  /* =========================================================
+     VIEW — CRONOGRAMA
+     ========================================================= */
+  function renderCronograma(){
+    var items = timelineItems(ui.tl.showDone);
+    var today = todayISO();
+    var overdue = items.filter(function(i){ return i.kind === 'task' && isOverdue(i.task); });
+    var future = items.filter(function(i){ return i.date >= today && !(i.kind === 'task' && isOverdue(i.task)); });
+    var past = items.filter(function(i){ return i.date < today && !(i.kind === 'task' && isOverdue(i.task)); });
+
+    function item(i){
+      var n = daysFromToday(i.date);
+      var doneTask = i.kind === 'task' && i.task.status === 'concluida';
+      var cls = i.kind === 'arrival' ? 'is-arrival' : (i.kind === 'task' && isOverdue(i.task)) ? 'is-overdue' : (n >= 0 && n <= 7 && !doneTask) ? 'is-soon' : '';
+      var p = i.date.split('-');
+      var sub = [];
+      if(i.kind === 'task'){
+        sub.push('<span class="pill">Prazo de tarefa · etapa ' + i.task.stage + '</span>');
+        sub.push('<span class="pill ' + (i.task.status === 'concluida' ? 'pill-ok' : i.task.status === 'andamento' ? 'pill-pri' : '') + '">' + TSTATUS[i.task.status] + '</span>');
+      } else if(i.kind === 'event'){
+        sub.push('<span class="pill pill-pri">Evento</span>');
+        if(i.task) sub.push('<span>Tarefa: <button type="button" class="task-title small" data-act="task-edit" data-id="' + i.task.id + '">' + esc(i.task.title) + '</button> (' + TSTATUS[i.task.status].toLowerCase() + ')</span>');
+      } else sub.push('<span class="pill pill-pri">Do seu perfil</span>');
+      sub.push('<span class="muted">' + (cls === 'is-overdue' ? '<span class="neg">atrasada · prazo ' + relDays(n) + '</span>' : relDays(n)) + '</span>');
+      var act = i.kind === 'event' ? '<button type="button" class="icon-btn" data-act="ev-edit" data-id="' + i.id + '" aria-label="Editar evento">' + icon('edit') + '</button>' :
+        i.kind === 'task' ? '<button type="button" class="icon-btn" data-act="task-edit" data-id="' + i.id + '" aria-label="Editar tarefa">' + icon('edit') + '</button>' :
+        '<button type="button" class="icon-btn" data-act="profile-edit" aria-label="Alterar data de chegada">' + icon('edit') + '</button>';
+      return '<li class="tl-item ' + cls + '"><div class="tl-date"><strong>' + p[2] + '/' + p[1] + '</strong><span>' + weekday(i.date) + ' · ' + p[0] + '</span></div>' +
+        '<div><div class="tl-title">' + esc(i.title) + '</div><div class="tl-sub">' + sub.join('') + '</div>' + (i.notes ? '<p class="task-desc">' + esc(i.notes) + '</p>' : '') + '</div>' + act + '</li>';
+    }
+
+    var body = !items.length ? '<div class="empty"><strong>Nenhuma data cadastrada</strong>Crie eventos (agendamentos, prazos, início das aulas) ou defina prazos nas tarefas. A data de chegada do seu perfil aparece aqui automaticamente.<br><button type="button" class="btn btn-primary" data-act="ev-new">Novo evento</button></div>' :
+      (overdue.length ? '<div class="section" style="margin-top:0"><h2 class="neg">Atrasadas (' + overdue.length + ')</h2><ul class="timeline">' + overdue.map(item).join('') + '</ul></div>' : '') +
+      '<div class="section"' + (overdue.length ? '' : ' style="margin-top:0"') + '><h2>Próximas datas</h2>' + (future.length ? '<ul class="timeline">' + future.map(item).join('') + '</ul>' : '<p class="muted">Nenhuma data futura.</p>') + '</div>' +
+      (past.length ? '<details class="section"><summary style="cursor:pointer;font-weight:700">Datas passadas (' + past.length + ')</summary><ul class="timeline" style="margin-top:12px">' + past.map(item).join('') + '</ul></details>' : '');
+
+    return '<div class="page-head"><div><h1>Cronograma</h1><p>Eventos, prazos das tarefas e a chegada prevista em uma linha do tempo. Alertas aparecem só aqui na tela — a ferramenta não envia notificações.</p></div>' +
+      '<button type="button" class="btn btn-primary" data-act="ev-new">' + icon('plus', 'ic-sm') + 'Novo evento</button></div>' +
+      '<div class="toolbar"><label class="field field-check"><input type="checkbox" data-chg="tl-done"' + (ui.tl.showDone ? ' checked' : '') + '> Mostrar prazos de tarefas concluídas</label>' +
+      '<span class="spacer"></span><span class="small muted"><span class="pill pill-bad">Atrasada</span> <span class="pill pill-warn">Até 7 dias</span></span></div>' + body;
+  }
+
+  function openEventForm(e){
+    var isNew = !e;
+    e = e || { title:'', date:'', taskId:'', notes:'' };
+    var taskOpts = { '':'— Nenhuma —' };
+    sortedTasks(state.tasks).forEach(function(t){ taskOpts[t.id] = t.stage + '. ' + (t.title.length > 70 ? t.title.slice(0, 69) + '…' : t.title); });
+    openForm({
+      title:isNew ? 'Novo evento' : 'Editar evento',
+      fields:[
+        { name:'title', label:'Título', required:true, value:e.title, max:200, placeholder:'Ex.: Atendimento no consulado' },
+        { name:'date', label:'Data', type:'date', required:true, value:e.date },
+        { name:'taskId', label:'Relacionar a uma tarefa', type:'select', options:taskOpts, value:e.taskId },
+        { name:'notes', label:'Observações', type:'textarea', value:e.notes }
+      ],
+      onDelete:isNew ? null : function(){
+        confirmAction({ title:'Excluir evento?', message:'<strong>' + esc(e.title) + '</strong> será removido do cronograma.', confirmLabel:'Excluir', danger:true }).then(function(ok){
+          if(!ok) return;
+          removeFrom(state.events, e.id); saveState(); render(); toast('Evento excluído.');
+        });
+      },
+      onSubmit:function(v){
+        if(!validISO(v.date)) return { msg:'Data inválida.', field:'date' };
+        var target = isNew ? { id:uid() } : e;
+        target.title = v.title; target.date = v.date; target.taskId = findTask(v.taskId) ? v.taskId : ''; target.notes = v.notes;
+        if(isNew) state.events.push(target);
+        saveState(); render(); toast(isNew ? 'Evento adicionado.' : 'Evento atualizado.');
+      }
+    });
+  }
+
+  /* =========================================================
+     VIEW — PRIMEIROS DIAS
+     ========================================================= */
+  function renderChegada(){
+    var tasks = sortedTasks(state.tasks.filter(function(t){ return t.stage === 8; }));
+    var s = taskStats(tasks);
+    var p = state.profile;
+    var n = p.chegada ? daysFromToday(p.chegada) : null;
+    var cats = ARRIVAL_CATS.slice();
+    tasks.forEach(function(t){ if(t.category && cats.indexOf(t.category) === -1) cats.splice(cats.length - 1, 0, t.category); });
+
+    var groups = cats.map(function(c){
+      var list = tasks.filter(function(t){ return t.category === c || (c === 'Outros' && !t.category); });
+      return '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h3>' + esc(c) + '</h3>' +
+        '<button type="button" class="icon-btn" data-act="task-new" data-stage="8" data-cat="' + esc(c) + '" aria-label="Adicionar item em ' + esc(c) + '">' + icon('plus') + '</button></div>' +
+        (list.length ? '<ul class="task-list" style="border-top:0;margin-top:4px">' + list.map(function(t){
+          return '<li class="task' + (t.status === 'concluida' ? ' is-done' : '') + '" style="padding-left:0;padding-right:0;grid-template-columns:auto 1fr">' +
+            '<input type="checkbox" class="task-check" data-chg="task-done" data-id="' + t.id + '"' + (t.status === 'concluida' ? ' checked' : '') + ' aria-label="Concluir: ' + esc(t.title) + '">' +
+            '<div><button type="button" class="task-title" data-act="task-edit" data-id="' + t.id + '">' + esc(t.title) + '</button>' + (t.desc ? '<p class="task-desc">' + esc(t.desc) + '</p>' : '') +
+            '<div class="task-meta">' + taskMetaPills(t, false, true) + '</div></div></li>';
+        }).join('') + '</ul>' : '<p class="small muted" style="margin-top:6px">Nenhum item. Use + para adicionar.</p>') + '</div>';
+    }).join('');
+
+    return '<div class="page-head"><div><h1>Primeiros dias na Espanha</h1><p>' + (s.total ? s.done + ' de ' + s.total + ' concluídos. ' : '') +
+      (n !== null ? (n > 0 ? 'Faltam ' + n + ' dias para a chegada prevista.' : n === 0 ? 'A chegada prevista é hoje.' : 'Você chegou há ' + (-n) + ' dias (pela data do perfil).') : '') + '</p></div>' +
+      '<button type="button" class="btn btn-primary" data-act="task-new" data-stage="8">' + icon('plus', 'ic-sm') + 'Novo item</button></div>' +
+      '<div class="callout callout-warn" style="margin-bottom:16px">' + icon('info') + '<div>Procedimentos administrativos depois da chegada (como TIE e empadronamiento) <strong>dependem da autorização concedida, da duração e da cidade</strong>. O que você pode fazer no país — inclusive trabalhar — é definido pelas condições da sua autorização: confira o seu documento e as fontes oficiais. ' +
+        '<a href="' + esc(SOURCE_BY_ID['cita-previa'].url) + '" target="_blank" rel="noopener noreferrer">Cita previa</a> · <a href="' + esc(SOURCE_BY_ID['policia-tie'].url) + '" target="_blank" rel="noopener noreferrer">Polícia Nacional — TIE de estudante</a></div></div>' +
+      (s.total ? '<div class="progress progress-lg" style="margin-bottom:16px" aria-hidden="true"><span style="width:' + s.pct + '%"></span></div>' : '') +
+      '<div class="grid grid-2">' + groups + '</div>' +
+      '<p class="small muted" style="margin-top:14px">Estes itens são a etapa 8 do Checklist da mudança — concluir aqui também atualiza o progresso geral.</p>';
+  }
+
+  /* =========================================================
+     VIEW — FONTES
+     ========================================================= */
+  function renderFontes(){
+    var builtin = SOURCES.map(function(s){
+      return '<article class="card src"><span class="src-org">' + esc(s.org) + '</span><a href="' + esc(s.url) + '" target="_blank" rel="noopener noreferrer">' + esc(s.title) + ' ' + icon('ext', 'ic-sm') + '</a>' +
+        '<p class="small">' + esc(s.use) + '</p><span class="src-check">Endereço verificado em ' + fmtDate(SOURCES_CHECKED) + '</span></article>';
+    }).join('');
+    var mine = state.sources.length ? state.sources.map(function(s){
+      return '<article class="card src" style="grid-template-columns:1fr auto"><div class="src"><a href="' + esc(s.url) + '" target="_blank" rel="noopener noreferrer">' + esc(s.title) + ' ' + icon('ext', 'ic-sm') + '</a>' +
+        (s.notes ? '<p class="small">' + esc(s.notes) + '</p>' : '') + '<span class="src-check">' + (s.checked ? 'Verificado por você em ' + fmtDate(s.checked) : 'Data de verificação não informada') + '</span></div>' +
+        '<button type="button" class="icon-btn" data-act="src-edit" data-id="' + s.id + '" aria-label="Editar">' + icon('edit') + '</button></article>';
+    }).join('') : '<div class="empty"><strong>Nenhum link seu ainda</strong>Adicione a página do seu consulado, do ayuntamiento da sua cidade, da sua instituição de ensino ou do profissional que te orienta.<br><button type="button" class="btn btn-primary" data-act="src-new">Adicionar link</button></div>';
+
+    return '<div class="page-head"><div><h1>Fontes oficiais</h1><p>Páginas oficiais para confirmar requisitos, taxas e prazos. Nenhum requisito foi copiado para cá: leia sempre a versão atual na própria página.</p></div>' +
+      '<button type="button" class="btn btn-primary" data-act="src-new">' + icon('plus', 'ic-sm') + 'Adicionar link</button></div>' +
+      '<div class="callout callout-warn" style="margin-bottom:16px">' + icon('alert') + '<div>Requisitos, taxas e prazos mudam e variam por consulado, província e tipo de curso. Se uma informação não puder ser confirmada na fonte oficial, considere-a <strong>não verificada</strong> e, se necessário, consulte um profissional habilitado.</div></div>' +
+      '<h2 style="margin-bottom:12px">Seus links</h2><div class="grid grid-2">' + mine + '</div>' +
+      '<div class="section"><h2>Referências incluídas</h2><div class="grid grid-2">' + builtin + '</div>' +
+      '<p class="small muted" style="margin-top:10px">“Endereço verificado” significa que a página foi localizada no site oficial nessa data. O conteúdo pode ter mudado depois.</p></div>';
+  }
+
+  function openSourceForm(s){
+    var isNew = !s;
+    s = s || { title:'', url:'', notes:'', checked:todayISO() };
+    openForm({
+      title:isNew ? 'Novo link' : 'Editar link',
+      fields:[
+        { name:'title', label:'Título', required:true, value:s.title, max:200, placeholder:'Ex.: Consulado da Espanha em …' },
+        { name:'url', label:'Endereço (URL)', type:'url', required:true, value:s.url, placeholder:'https://', max:600 },
+        { name:'checked', label:'Data da última verificação', type:'date', value:s.checked },
+        { name:'notes', label:'Observações', type:'textarea', value:s.notes }
+      ],
+      onDelete:isNew ? null : function(){
+        confirmAction({ title:'Excluir link?', message:'<strong>' + esc(s.title) + '</strong> será removido.', confirmLabel:'Excluir', danger:true }).then(function(ok){
+          if(!ok) return;
+          removeFrom(state.sources, s.id); saveState(); render(); toast('Link excluído.');
+        });
+      },
+      onSubmit:function(v){
+        var e = validateUrlField(v, 'url') || validateDateField(v, 'checked', 'Verificação');
+        if(e) return e;
+        var target = isNew ? { id:uid() } : s;
+        target.title = v.title; target.url = safeUrl(v.url); target.notes = v.notes; target.checked = v.checked;
+        if(isNew) state.sources.push(target);
+        saveState(); render(); toast(isNew ? 'Link adicionado.' : 'Link atualizado.');
+      }
+    });
+  }
+
+  /* =========================================================
+     VIEW — DADOS E PRIVACIDADE
+     ========================================================= */
+  function renderDados(){
+    var p = state.profile;
+    var rows = [
+      ['Nome', p.nome || '—'], ['País de origem', p.origem || '—'], ['Cidade de destino', p.cidade || '—'], ['Chegada prevista', fmtDate(p.chegada)],
+      ['Tipo de estudo', ESTUDOS[p.estudo] || '—'], ['Situação', SITUACOES[p.situacao] ? SITUACOES[p.situacao].t : '—'],
+      ['Orçamento estimado', p.orcamento !== null ? fmtMoney(p.orcamento, p.orcamentoMoeda) : '—'], ['Mudança', ACOMP[p.acompanhado] || '—']
+    ];
+    var exp = state.lastExportAt ? new Date(state.lastExportAt).toLocaleString('pt-BR') : 'nunca';
+    var persisted = storage.persisted === true ? 'O navegador marcou estes dados como persistentes (menor risco de limpeza automática).' :
+      storage.persisted === false ? 'O navegador não garantiu armazenamento persistente; ele pode apagar dados de sites pouco usados em caso de pouco espaço.' : '';
+
+    return '<div class="page-head"><div><h1>Dados e privacidade</h1><p>Perfil, backup, impressão e controle dos seus dados.</p></div></div>' +
+      '<div class="grid grid-2">' +
+      '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h2>Perfil</h2><button type="button" class="btn btn-sm" data-act="profile-edit">' + icon('edit', 'ic-sm') + 'Editar</button></div>' +
+        '<table><tbody>' + rows.map(function(r){ return '<tr><td class="muted small">' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</tbody></table></div>' +
+
+      '<div class="card"><h2 style="margin-bottom:8px">Backup</h2><p class="small">Baixe um arquivo com todo o seu planejamento. Use-o para restaurar os dados, trocar de navegador ou levar para outro aparelho.</p>' +
+        '<p class="small muted" style="margin-top:6px">Último backup: <strong>' + esc(exp) + '</strong></p>' +
+        '<div class="btn-row" style="margin-top:12px"><button type="button" class="btn btn-primary" data-act="export">Exportar backup (JSON)</button>' +
+        '<label class="btn" style="cursor:pointer">Importar backup<input type="file" accept="application/json,.json" data-chg="import-file" hidden></label></div>' +
+        '<p class="small muted" style="margin-top:10px">Importar substitui todos os dados atuais, depois de confirmação.</p></div>' +
+
+      '<div class="card"><h2 style="margin-bottom:8px">Resumo para imprimir</h2><p class="small">Gera um resumo com perfil, progresso, tarefas pendentes, documentos, orçamento e próximas datas. Na janela de impressão, escolha “Salvar como PDF” se preferir um arquivo.</p>' +
+        '<div class="btn-row" style="margin-top:12px"><button type="button" class="btn" data-act="print">Imprimir / salvar PDF</button></div></div>' +
+
+      '<div class="card"><h2 style="margin-bottom:8px">Onde ficam seus dados</h2><ul class="small" style="margin:0;padding-left:1.1em;display:grid;gap:6px">' +
+        '<li>Tudo fica salvo <strong>apenas no armazenamento local deste navegador</strong>, neste aparelho. Não há conta, cadastro nem servidor.</li>' +
+        '<li>A página não carrega serviços externos e é bloqueada de enviar dados pela rede. Links para fontes oficiais abrem em outra aba.</li>' +
+        '<li><strong>Não há sincronização</strong> entre aparelhos ou navegadores. Para mudar de aparelho, exporte e importe o backup.</li>' +
+        '<li>Limpar dados de navegação, usar janela anônima ou desinstalar o navegador pode <strong>apagar tudo</strong>. Faça backups regulares.</li>' +
+        '<li>Qualquer pessoa com acesso a este navegador pode ver os dados. Não registre números de documentos ou senhas.</li>' +
+        (persisted ? '<li>' + esc(persisted) + '</li>' : '') + '</ul></div>' +
+      '</div>' +
+
+      '<div class="section"><h2>Zona de cuidado</h2><div class="grid grid-2">' +
+        (state.demo ? '<div class="card"><h3>Sair do modo exemplo</h3><p class="small" style="margin:6px 0 12px">Apaga os dados fictícios e abre a configuração do seu planejamento.</p><button type="button" class="btn btn-primary" data-act="exit-demo">Começar meu planejamento</button></div>' : '') +
+        '<div class="card"><h3>Restaurar modelo inicial</h3><p class="small" style="margin:6px 0 12px">Substitui tarefas, documentos, orçamento e eventos pelo modelo inicial. Mantém o perfil e seus links.</p><button type="button" class="btn btn-danger-ghost" data-act="reset-template">Restaurar modelo</button></div>' +
+        '<div class="card"><h3>Apagar todos os dados</h3><p class="small" style="margin:6px 0 12px">Remove definitivamente o planejamento deste navegador, inclusive o perfil. Não pode ser desfeito.</p><button type="button" class="btn btn-danger-ghost" data-act="wipe">Apagar meus dados</button></div>' +
+      '</div></div>' +
+      '<p class="small muted" style="margin-top:20px">Espanha Organizada v' + APP_VERSION + ' · formato de dados ' + SCHEMA + '</p>';
+  }
+
+  function openProfileForm(){
+    var p = state.profile;
+    var sitOpts = { '':'Não informada' }; Object.keys(SITUACOES).forEach(function(k){ sitOpts[k] = SITUACOES[k].t; });
+    var estOpts = { '':'Não informado' }; Object.keys(ESTUDOS).forEach(function(k){ estOpts[k] = ESTUDOS[k]; });
+    var acoOpts = { '':'Não informado' }; Object.keys(ACOMP).forEach(function(k){ acoOpts[k] = ACOMP[k]; });
+    openForm({
+      title:'Editar perfil',
+      fields:[
+        { name:'nome', label:'Nome ou apelido', value:p.nome, max:60, row:true },
+        { name:'origem', label:'País de origem', value:p.origem, max:60, row:true },
+        { name:'cidade', label:'Cidade de destino', value:p.cidade, max:80, list:CITIES, row:true },
+        { name:'chegada', label:'Data prevista de chegada', type:'date', value:p.chegada, row:true },
+        { name:'estudo', label:'Tipo de estudo', type:'select', options:estOpts, value:p.estudo, row:true },
+        { name:'situacao', label:'Situação atual', type:'select', options:sitOpts, value:p.situacao, row:true },
+        { name:'orcamento', label:'Orçamento estimado', type:'money', value:fmtPlain(p.orcamento), row:true },
+        { name:'orcamentoMoeda', label:'Moeda', type:'select', options:{ EUR:'Euro (€)', BRL:'Real (R$)' }, value:p.orcamentoMoeda, row:true },
+        { name:'acompanhado', label:'Mudança', type:'select', options:acoOpts, value:p.acompanhado }
+      ],
+      onSubmit:function(v){
+        var e = validateDateField(v, 'chegada', 'Chegada') || validateMoneyField(v, 'orcamento', 'Orçamento');
+        if(e) return e;
+        ['nome','origem','cidade','chegada','estudo','situacao','orcamentoMoeda','acompanhado'].forEach(function(k){ p[k] = v[k]; });
+        var n = parseNum(v.orcamento);
+        p.orcamento = n === null ? null : round2(n);
+        saveState(); render(); toast('Perfil atualizado.');
+        offerProfileDocs();
+      }
+    });
+  }
+
+  /* Se o novo perfil sugere documentos do modelo que ainda não existem
+     (ex.: passou a ser mudança acompanhada), oferece incluí-los. */
+  function offerProfileDocs(){
+    var have = {}; state.docs.forEach(function(d){ if(d.tpl) have[d.tpl] = true; });
+    var missing = DOC_TEMPLATE.filter(function(t){ return t.when && t.when(state.profile) && !have[t.tpl]; });
+    if(!missing.length) return;
+    setTimeout(function(){
+      confirmAction({ title:'Adicionar documentos sugeridos?', message:'Com base no perfil atualizado, há ' + missing.length + ' documento(s) de exemplo que ainda não estão na sua lista: <strong>' +
+        missing.map(function(t){ return esc(t.name) + ' (' + PERSONS[t.person].toLowerCase() + ')'; }).join(', ') + '</strong>.', confirmLabel:'Adicionar' }).then(function(ok){
+        if(!ok) return;
+        missing.forEach(function(t){ state.docs.push(docFromTemplate(t)); if(state.docCategories.indexOf(t.cat) === -1) state.docCategories.push(t.cat); });
+        saveState(); render(); toast('Documentos adicionados.');
+      });
+    }, 50);
+  }
+
+  /* =========================================================
+     BACKUP — exportar / importar
+     ========================================================= */
+  function downloadText(text, filename, type){
+    var blob = new Blob([text], { type:type || 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+  }
+  function exportBackup(){
+    var now = new Date();
+    state.lastExportAt = now.toISOString();
+    var payload = { app:APP_ID, appVersion:APP_VERSION, schema:SCHEMA, exportedAt:now.toISOString(), data:state };
+    downloadText(JSON.stringify(payload, null, 2), 'espanha-organizada-backup-' + isoOf(now) + '.json');
+    // salva depois de montar o arquivo para que updatedAt continue <= lastExportAt
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(_){}
+    render();
+    toast('Backup baixado. Guarde o arquivo em local seguro.');
+  }
+  function importFile(file){
+    if(file.size > MAX_IMPORT_BYTES){ toast('Arquivo grande demais para ser um backup do Espanha Organizada.', true); return; }
+    var reader = new FileReader();
+    reader.onerror = function(){ toast('Não foi possível ler o arquivo.', true); };
+    reader.onload = function(){
+      var parsed, next;
+      try{ parsed = JSON.parse(String(reader.result)); }catch(e){ toast('O arquivo não é um JSON válido.', true); return; }
+      try{
+        if(!parsed || parsed.app !== APP_ID || !parsed.data) throw new Error('O arquivo não é um backup do Espanha Organizada.');
+        next = normalizeState(parsed.data);
+      }catch(e){ toast(e.message || 'Backup inválido.', true); return; }
+      next.profile.onboarded = true;
+      var summary = '<p>O backup de <strong>' + (parsed.exportedAt ? esc(new Date(parsed.exportedAt).toLocaleString('pt-BR')) : 'data desconhecida') + '</strong> contém:</p>' +
+        '<ul class="small"><li>' + next.tasks.length + ' tarefas (' + taskStats(next.tasks).done + ' concluídas)</li><li>' + next.docs.length + ' documentos</li><li>' + next.budget.items.length + ' linhas de orçamento</li><li>' + next.events.length + ' eventos e ' + next.sources.length + ' links</li></ul>' +
+        (state && state.profile.onboarded ? '<p><strong>Todos os dados atuais deste navegador serão substituídos.</strong> Se quiser, exporte um backup do estado atual antes.</p>' : '');
+      confirmAction({ title:'Importar backup?', message:summary, confirmLabel:'Importar e substituir', danger:!!(state && state.profile.onboarded) }).then(function(ok){
+        if(!ok) return;
+        next.lastExportAt = parsed.exportedAt || next.lastExportAt;
+        state = next;
+        ui.ob = { step:0, draft:null };
+        if(saveState()) toast('Backup importado com sucesso.');
+        location.hash = '#/inicio';
+        render();
+      });
+    };
+    reader.readAsText(file);
+  }
+
+  /* =========================================================
+     IMPRESSÃO
+     ========================================================= */
+  function buildPrint(){
+    if(!state || !state.profile.onboarded) return;
+    var p = state.profile, ts = taskStats(state.tasks), ds = docStats(), bs = budgetSummary();
+    var pend = sortedTasks(state.tasks.filter(function(t){ return t.status !== 'concluida'; }));
+    var upcoming = timelineItems(false).filter(function(i){ return i.date >= todayISO(); }).slice(0, 12);
+    var h = '<h1>Espanha Organizada — resumo do planejamento</h1>' +
+      '<p>' + (p.nome ? esc(p.nome) + ' · ' : '') + 'Destino: ' + esc(p.cidade || 'a definir') + ' · Chegada prevista: ' + fmtDate(p.chegada) + ' · Gerado em ' + new Date().toLocaleString('pt-BR') + (state.demo ? ' · <strong>DADOS FICTÍCIOS DE EXEMPLO</strong>' : '') + '</p>' +
+      '<h2>Progresso</h2><p>' + ts.done + ' de ' + ts.total + ' tarefas concluídas (' + ts.pct + '%) · ' + ts.overdue + ' atrasada(s) · Documentos prontos: ' + ds.ready + ' de ' + ds.total + '</p>' +
+      '<h2>Tarefas pendentes (' + pend.length + ')</h2>' + (pend.length ? '<table><thead><tr><th>Etapa</th><th>Tarefa</th><th>Status</th><th>Prioridade</th><th>Prazo</th></tr></thead><tbody>' +
+        pend.map(function(t){ return '<tr><td>' + t.stage + '</td><td>' + esc(t.title) + '</td><td>' + TSTATUS[t.status] + '</td><td>' + PRIORITIES[t.priority] + '</td><td>' + fmtDate(t.due) + (isOverdue(t) ? ' (atrasada)' : '') + '</td></tr>'; }).join('') + '</tbody></table>' : '<p>Nenhuma.</p>') +
+      '<h2>Documentos</h2>' + (state.docs.length ? '<table><thead><tr><th>Documento</th><th>Pessoa</th><th>Situação</th><th>Validade</th><th>Apostila</th><th>Tradução</th></tr></thead><tbody>' +
+        state.docs.map(function(d){ return '<tr><td>' + esc(d.name) + '</td><td>' + PERSONS[d.person] + '</td><td>' + DSTATUS[d.status] + '</td><td>' + fmtDate(d.expires) + '</td><td>' + CHECKOPTS[d.apostila] + '</td><td>' + CHECKOPTS[d.traducao] + '</td></tr>'; }).join('') + '</tbody></table>' : '<p>Nenhum.</p>') +
+      '<h2>Orçamento (' + bs.cur + ')</h2><p>Previsto: ' + fmtMoney(bs.planned, bs.cur) + ' · Realizado: ' + fmtMoney(bs.actual, bs.cur) + ' · Restante: ' + fmtMoney(bs.remaining, bs.cur) +
+        (state.budget.rate ? ' · Câmbio informado: 1 € = R$ ' + fmtPlain(state.budget.rate) + (state.budget.rateDate ? ' (' + fmtDate(state.budget.rateDate) + ')' : '') : '') + (bs.unconverted ? ' · ' + bs.unconverted + ' linha(s) fora do total por falta de câmbio' : '') + '</p>' +
+      '<table><thead><tr><th>Categoria</th><th>Moeda</th><th>Previsto</th><th>Realizado</th></tr></thead><tbody>' + state.budget.items.filter(function(it){ return it.planned !== null || it.actual !== null; }).map(function(it){
+        return '<tr><td>' + esc(it.category) + (it.desc ? ' — ' + esc(it.desc) : '') + '</td><td>' + it.currency + '</td><td>' + fmtMoney(it.planned, it.currency) + '</td><td>' + fmtMoney(it.actual, it.currency) + '</td></tr>';
+      }).join('') + '</tbody></table>' +
+      '<h2>Próximas datas</h2>' + (upcoming.length ? '<table><tbody>' + upcoming.map(function(i){ return '<tr><td>' + fmtDate(i.date) + '</td><td>' + esc(i.title) + '</td></tr>'; }).join('') + '</tbody></table>' : '<p>Nenhuma.</p>') +
+      '<p class="p-note">Ferramenta de organização pessoal. Não é assessoria jurídica nem serviço de imigração e não garante aprovação de visto ou autorização. Confirme requisitos nas fontes oficiais.</p>';
+    document.getElementById('print-root').innerHTML = h;
+  }
+  window.addEventListener('beforeprint', buildPrint);
+
+  /* =========================================================
+     AÇÕES
+     ========================================================= */
+  var ACTIONS = {
+    'more-menu':function(){
+      openModal({ title:'Mais módulos', autofocus:false, body:'<nav class="more-list">' + VIEWS.filter(function(v){ return MOBILE_MAIN.indexOf(v.id) === -1; }).map(function(v){
+        return '<a href="#/' + v.id + '">' + icon(v.icon) + esc(v.t) + '</a>';
+      }).join('') + '</nav>' });
+    },
+    'task-new':function(id, el){ openTaskForm(null, el.dataset.stage ? Number(el.dataset.stage) : null, el.dataset.cat || ''); },
+    'task-edit':function(id){ var t = findTask(id); if(t) openTaskForm(t); },
+    'task-up':function(id){ moveTask(id, -1); },
+    'task-down':function(id){ moveTask(id, 1); },
+    'clear-filters':function(id, el){
+      if(el.dataset.scope === 'task') ui.task = { status:'', stage:'', cat:'', prio:'' };
+      if(el.dataset.scope === 'doc') ui.doc = { status:'', person:'', cat:'' };
+      render();
+    },
+    'doc-new':function(){ openDocForm(null); },
+    'doc-edit':function(id){ var d = findIn(state.docs, id); if(d) openDocForm(d); },
+    'doc-cats':openDocCats,
+    'bud-new':function(){ openBudgetForm(null); },
+    'bud-edit':function(id){ var it = findIn(state.budget.items, id); if(it) openBudgetForm(it); },
+    'fin-display':function(id, el){ state.budget.display = el.dataset.cur === 'BRL' ? 'BRL' : 'EUR'; saveState(); render(); },
+    'ev-new':function(){ openEventForm(null); },
+    'ev-edit':function(id){ var e = findIn(state.events, id); if(e) openEventForm(e); },
+    'src-new':function(){ openSourceForm(null); },
+    'src-edit':function(id){ var s = findIn(state.sources, id); if(s) openSourceForm(s); },
+    'profile-edit':function(id, el, ev){ if(ev) ev.preventDefault(); openProfileForm(); },
+    'export':exportBackup,
+    'print':function(){ buildPrint(); window.print(); },
+    'reset-template':function(){
+      confirmAction({ title:'Restaurar o modelo inicial?', message:'Suas tarefas, documentos, linhas de orçamento e eventos atuais serão <strong>substituídos</strong> pelo modelo inicial. O perfil e seus links são mantidos. Recomendamos exportar um backup antes.', confirmLabel:'Restaurar modelo', danger:true, requireText:'RESTAURAR' }).then(function(ok){
+        if(!ok) return;
+        var keepRate = state.budget.rate, keepDate = state.budget.rateDate, keepDisplay = state.budget.display;
+        applyTemplate(state);
+        state.budget.reserve = null;
+        state.budget.rate = keepRate; state.budget.rateDate = keepDate; state.budget.display = keepDisplay;
+        state.demo = false;
+        saveState(); render(); toast('Modelo inicial restaurado.');
+      });
+    },
+    'wipe':function(){
+      confirmAction({ title:'Apagar todos os dados?', message:'Todo o planejamento será removido deste navegador, inclusive o perfil. <strong>Não é possível desfazer.</strong> Se quiser guardar uma cópia, exporte o backup antes.', confirmLabel:'Apagar definitivamente', danger:true, requireText:'APAGAR' }).then(function(ok){
+        if(!ok) return;
+        wipeAll();
+        toast('Seus dados foram apagados deste navegador.');
+      });
+    },
+    'exit-demo':function(){
+      confirmAction({ title:'Sair do modo exemplo?', message:'Os dados fictícios serão apagados e você vai configurar o seu planejamento do zero.', confirmLabel:'Começar meu planejamento' }).then(function(ok){
+        if(!ok) return;
+        wipeAll();
+        ui.ob.step = 1;
+        render();
+      });
+    }
+  };
+
+  function wipeAll(){
+    try{
+      localStorage.removeItem(STORAGE_KEY);
+      Object.keys(localStorage).forEach(function(k){ if(k.indexOf(STORAGE_KEY + '.') === 0) localStorage.removeItem(k); });
+    }catch(_){}
+    state = null;
+    storage.corruptRaw = null;
+    ui = { task:{ status:'', stage:'', cat:'', prio:'' }, doc:{ status:'', person:'', cat:'' }, tl:{ showDone:false }, openStages:{}, ob:{ step:0, draft:null } };
+    history.replaceState(null, '', location.pathname + location.search);
+    render();
+  }
+
+  var CHANGES = {
+    'task-done':function(el){
+      var t = findTask(el.dataset.id); if(!t) return;
+      t.status = el.checked ? 'concluida' : 'pendente';
+      saveState(); render();
+      if(el.checked) toast('Tarefa concluída.');
+    },
+    'filter':function(el){ ui[el.dataset.scope][el.dataset.key] = el.value; render(); },
+    'tl-done':function(el){ ui.tl.showDone = el.checked; render(); },
+    'bud-planned':function(el){ setBudgetValue(el, 'planned'); },
+    'bud-actual':function(el){ setBudgetValue(el, 'actual'); },
+    'fin-rate':function(el){
+      var n = parseNum(el.value);
+      if(n !== null && (isNaN(n) || n <= 0)){ el.classList.add('is-invalid'); toast('Taxa inválida. Use um número maior que zero, como 6,20.', true); return; }
+      state.budget.rate = n === null ? null : Math.round(n * 10000) / 10000;
+      if(n !== null && !state.budget.rateDate) state.budget.rateDate = todayISO();
+      saveState(); deferRender();
+    },
+    'fin-rate-date':function(el){
+      if(el.value && !validISO(el.value)){ toast('Data da cotação inválida.', true); return; }
+      state.budget.rateDate = el.value; saveState(); deferRender();
+    },
+    'fin-reserve':function(el){
+      var n = parseNum(el.value);
+      if(n !== null && (isNaN(n) || n < 0)){ el.classList.add('is-invalid'); toast('Valor inválido. Use o formato 1.500,00.', true); return; }
+      state.budget.reserve = n === null ? null : round2(n); saveState(); deferRender();
+    },
+    'fin-reserve-cur':function(el){ state.budget.reserveCurrency = el.value === 'BRL' ? 'BRL' : 'EUR'; saveState(); render(); },
+    'import-file':function(el){ if(el.files[0]) importFile(el.files[0]); el.value = ''; }
+  };
+
+  function setBudgetValue(el, field){
+    var it = findIn(state.budget.items, el.dataset.id); if(!it) return;
+    var n = parseNum(el.value);
+    if(n !== null && (isNaN(n) || n < 0)){
+      el.classList.add('is-invalid');
+      toast('Valor inválido em ' + it.category + '. Use o formato 1.250,00.', true);
+      return;
+    }
+    it[field] = n === null ? null : round2(n);
+    saveState();
+    deferRender();
+  }
+
+  document.addEventListener('click', function(e){
+    var el = e.target.closest('[data-act]');
+    if(!el || !state) return;
+    var fn = ACTIONS[el.dataset.act];
+    if(fn){ if(el.tagName === 'A') e.preventDefault(); fn(el.dataset.id, el, e); }
+  });
+  // Lembra quais etapas o usuário abriu/fechou, para o redesenho não desfazer.
+  document.addEventListener('click', function(e){
+    var sum = e.target.closest('details.stage > summary');
+    if(!sum) return;
+    var det = sum.parentNode;
+    setTimeout(function(){ ui.openStages[det.dataset.stage] = det.open; }, 0);
+  });
+  document.addEventListener('change', function(e){
+    var el = e.target.closest('[data-chg]');
+    if(!el || !state) return;
+    var fn = CHANGES[el.dataset.chg];
+    if(fn) fn(el);
+  });
+  // Enter em campo de valor confirma a edição sem enviar formulário.
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' && e.target.classList && e.target.classList.contains('inline-input') && e.target.tagName === 'INPUT'){ e.preventDefault(); e.target.blur(); }
+  });
+
+  var RENDERERS = { inicio:renderInicio, checklist:renderChecklist, documentos:renderDocumentos, cronograma:renderCronograma,
+                    financeiro:renderFinanceiro, chegada:renderChegada, fontes:renderFontes, dados:renderDados };
+
+  // Atualiza contagens de dias quando a data muda com a página aberta.
+  var renderedDay = todayISO();
+  setInterval(function(){
+    if(todayISO() !== renderedDay){ renderedDay = todayISO(); if(state && !dlg.open) render(); }
+  }, 60000);
+
+  if(state) requestPersistence();
+  render();
+})();
+</script>
+</body>
+</html>
