@@ -1005,7 +1005,7 @@ button{ font-family:inherit; }
 </main>
 
 <footer class="site-footer">
-  <p>Dados salvos apenas neste navegador (localStorage) — nada é enviado para nenhum servidor.</p>
+  <p>Dados salvos neste navegador. Depois de entrar (🔒 no topo), são sincronizados com a nuvem (Firebase) — só as contas autorizadas têm acesso.</p>
   <button id="clear-data-btn" class="btn btn-danger-ghost" type="button">🗑️ Limpar todos os dados salvos</button>
 </footer>
 
@@ -1079,11 +1079,76 @@ button{ font-family:inherit; }
   var cloudPushTimer = null;
   var suppressCloudPush = false; // true enquanto aplicamos um estado vindo da própria nuvem
 
+  /* Login da nuvem: e-mail e senha de contas criadas manualmente no
+     console do Firebase (só Léo e Celly). As regras do Firestore
+     liberam apenas esses UIDs. Sem login, o painel funciona só com o
+     localStorage deste aparelho. */
+  var cloudUser = null;
+  var cloudUnsub = null;
+
   function setSyncStatus(status){
     var el = document.getElementById('sync-status');
     if(!el) return;
-    el.className = 'sync-status' + (status === 'synced' ? ' is-synced' : status === 'offline' ? ' is-offline' : '');
-    el.textContent = status === 'synced' ? '☁️ sincronizado' : status === 'offline' ? '📴 sem nuvem (salvo só aqui)' : '🔄 conectando…';
+    el.className = 'sync-status' + (status === 'synced' ? ' is-synced' : status === 'connecting' ? '' : ' is-offline');
+    el.textContent = {
+      synced:'☁️ sincronizado',
+      signedout:'🔒 entrar para sincronizar',
+      denied:'⛔ conta sem acesso',
+      offline:'📴 sem nuvem (salvo só aqui)',
+      connecting:'🔄 conectando…'
+    }[status] || '📴 sem nuvem (salvo só aqui)';
+    el.title = cloudUser ? 'Conectado como ' + (cloudUser.email || '') + ' — clique para sair' : 'Clique para entrar e sincronizar entre aparelhos';
+  }
+
+  function cloudErrorStatus(err){
+    setSyncStatus(err && err.code === 'permission-denied' ? 'denied' : 'offline');
+  }
+
+  function openLoginDialog(){
+    var dlg = document.getElementById('cloud-login');
+    if(!dlg){
+      dlg = document.createElement('dialog');
+      dlg.id = 'cloud-login';
+      dlg.style.cssText = 'border:1px solid #ddd;border-radius:14px;padding:22px;max-width:340px;width:calc(100vw - 32px);font-family:inherit';
+      dlg.innerHTML = '<form method="dialog" id="cloud-login-form" style="display:flex;flex-direction:column;gap:10px">' +
+        '<strong style="font-size:1.05rem">Entrar para sincronizar</strong>' +
+        '<span style="font-size:.85rem;color:#5a5349">Use a conta criada para o painel. Os dados deste aparelho continuam salvos localmente.</span>' +
+        '<label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem;font-weight:700">E-mail<input type="email" name="email" autocomplete="username" required style="padding:9px;border:1px solid #ccc;border-radius:8px;font:inherit"></label>' +
+        '<label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem;font-weight:700">Senha<input type="password" name="senha" autocomplete="current-password" required style="padding:9px;border:1px solid #ccc;border-radius:8px;font:inherit"></label>' +
+        '<span id="cloud-login-err" role="alert" style="color:#b8332c;font-size:.85rem;min-height:1em"></span>' +
+        '<div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn" id="cloud-login-cancel">Cancelar</button><button type="submit" class="btn btn-primary">Entrar</button></div></form>';
+      document.body.appendChild(dlg);
+      dlg.querySelector('#cloud-login-cancel').addEventListener('click', function(){ dlg.close(); });
+      dlg.querySelector('#cloud-login-form').addEventListener('submit', function(ev){
+        ev.preventDefault();
+        var f = ev.target, err = dlg.querySelector('#cloud-login-err');
+        err.textContent = 'Entrando…';
+        firebase.auth().signInWithEmailAndPassword(f.email.value.trim(), f.senha.value).then(function(){
+          f.senha.value = ''; err.textContent = ''; dlg.close();
+        }).catch(function(e){
+          err.textContent = (e.code === 'auth/invalid-credential' || e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found') ? 'E-mail ou senha incorretos.' :
+            e.code === 'auth/too-many-requests' ? 'Muitas tentativas. Aguarde alguns minutos.' : 'Não foi possível entrar (' + e.code + ').';
+        });
+      });
+    }
+    dlg.showModal();
+  }
+
+  function bindSyncStatusClick(){
+    var el = document.getElementById('sync-status');
+    if(!el || el.dataset.bound) return;
+    el.dataset.bound = '1';
+    el.style.cursor = 'pointer';
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+    function act(){
+      if(typeof firebase === 'undefined' || !firebase.apps.length) return;
+      if(cloudUser){
+        if(confirm('Sair da sincronização neste aparelho? Os dados continuam salvos aqui, mas param de sincronizar.')) firebase.auth().signOut();
+      } else openLoginDialog();
+    }
+    el.addEventListener('click', act);
+    el.addEventListener('keydown', function(e){ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); act(); } });
   }
 
   function pushStateToCloud(){
@@ -1092,7 +1157,7 @@ button{ font-family:inherit; }
     cloudPushTimer = setTimeout(function(){
       cloudDocRef.set(state).catch(function(err){
         console.warn('Não foi possível salvar na nuvem.', err);
-        setSyncStatus('offline');
+        cloudErrorStatus(err);
       });
     }, 600);
   }
@@ -1110,8 +1175,15 @@ button{ font-family:inherit; }
     try{ firebase.initializeApp(FIREBASE_CONFIG); }
     catch(e){ setSyncStatus('offline'); return; }
 
+    bindSyncStatusClick();
     firebase.auth().onAuthStateChanged(function(user){
-      if(!user) return;
+      if(cloudUnsub){ cloudUnsub(); cloudUnsub = null; }
+      cloudReady = false; cloudDocRef = null;
+      // Sessões anônimas antigas não têm mais acesso: encerra e pede login.
+      if(user && user.isAnonymous){ firebase.auth().signOut(); return; }
+      cloudUser = user;
+      if(!user){ setSyncStatus('signedout'); return; }
+      setSyncStatus('connecting');
       cloudDocRef = firebase.firestore().collection('app').doc('planner');
       cloudDocRef.get().then(function(snap){
         if(snap.exists){
@@ -1121,24 +1193,20 @@ button{ font-family:inherit; }
         }
         cloudReady = true;
         setSyncStatus('synced');
-        cloudDocRef.onSnapshot(function(snap){
+        cloudUnsub = cloudDocRef.onSnapshot(function(snap){
           if(snap.metadata.hasPendingWrites) return;
           if(snap.exists) applyCloudState(snap.data());
           setSyncStatus('synced');
         }, function(err){
           console.warn('Erro de sincronização.', err);
-          setSyncStatus('offline');
+          cloudErrorStatus(err);
         });
       }).catch(function(err){
         console.warn('Erro ao ler dados da nuvem.', err);
-        setSyncStatus('offline');
+        cloudErrorStatus(err);
       });
     });
 
-    firebase.auth().signInAnonymously().catch(function(err){
-      console.warn('Não foi possível entrar na nuvem — dados continuam salvos só neste navegador.', err);
-      setSyncStatus('offline');
-    });
   }
 
   /* =========================================================
