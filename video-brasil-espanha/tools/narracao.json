@@ -1,0 +1,17 @@
+[
+ {"id":"s1a","scene":1,"tts":"Se você fizer isso na Espanha, vão te olhar torto.","cap":"Se você fizer isso na Espanha, vão te olhar torto."},
+ {"id":"s2a","scene":2,"tts":"No Brasil, é normal.","cap":"No Brasil é normal."},
+ {"id":"s2b","scene":2,"tts":"Aqui, se você aparece com a escova no banheiro do escritório, vira assunto.","cap":"Aqui, se você aparece com a escova no banheiro do escritório, vira assunto."},
+ {"id":"s3a","scene":3,"tts":"Aqui, o papel vai no vaso.","cap":"Aqui o papel vai no vaso."},
+ {"id":"s3b","scene":3,"tts":"O lixinho do lado? Quase não existe.","cap":"O lixinho do lado? Quase não existe."},
+ {"id":"s4a","scene":4,"tts":"Tênis em dez vezes sem juros?","cap":"Tênis em 10x sem juros?"},
+ {"id":"s4b","scene":4,"tts":"Aqui, isso praticamente não existe. Ou você paga, ou não leva.","cap":"Aqui isso praticamente não existe. Ou você paga, ou não leva."},
+ {"id":"s5a","scene":5,"tts":"No caixa, ninguém te ajuda.","cap":"No caixa ninguém te ajuda."},
+ {"id":"s5b","scene":5,"tts":"E a sacola, você paga.","cap":"E a sacola você paga."},
+ {"id":"s6a","scene":6,"tts":"Aqui, às dezenove horas, você ainda está lanchando.","cap":"Aqui às 19h você ainda está lanchando."},
+ {"id":"s6b","scene":6,"tts":"Jantar é às vinte e uma, vinte e duas horas.","cap":"Jantar é às 21h, 22h."},
+ {"id":"s7a","scene":7,"tts":"Domingo, grande parte do comércio fecha.","cap":"Domingo grande parte do comércio fecha."},
+ {"id":"s7b","scene":7,"tts":"Esqueceu de comprar no sábado? Problema seu.","cap":"Esqueceu de comprar no sábado? Problema seu."},
+ {"id":"s8a","scene":8,"tts":"Qual dessas te pegaria primeiro? Comenta aí.","cap":"Qual dessas te pegaria primeiro? Comenta aí."},
+ {"id":"s8b","scene":8,"tts":"E se você mora fora, conta o que te deixou chocado.","cap":"E se você mora fora, conta o que te deixou chocado."}
+]

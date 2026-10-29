@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brasil x Espanha — Reel</title>
+<style>
+  @font-face { font-family: 'Anton'; src: url('assets/fonts/Anton.woff2') format('woff2'); }
+  @font-face { font-family: 'Montserrat'; src: url('assets/fonts/Montserrat.woff2') format('woff2'); font-weight: 100 900; }
+  :root { --bg: #0e0e12; --fg: #f4f1ea; --muted: #9a98a3; --accent: #FFD400; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); font-family: Montserrat, system-ui, sans-serif; }
+  body { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 16px; }
+  #stage { position: relative; height: min(78vh, 160vw); aspect-ratio: 9 / 16; border-radius: 18px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+  canvas { width: 100%; height: 100%; display: block; }
+  #safe { position: absolute; inset: 0; pointer-events: none; display: none; }
+  #safe div { position: absolute; left: 0; right: 0; background: rgba(255,0,80,.18); }
+  .bar { display: flex; gap: 8px; align-items: center; width: min(100%, 520px); flex-wrap: wrap; justify-content: center; }
+  button { background: #22212a; color: var(--fg); border: 1px solid #34323d; border-radius: 10px; padding: 8px 14px; font: 700 14px Montserrat, sans-serif; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  input[type=range] { flex: 1; min-width: 200px; accent-color: var(--accent); }
+  #time { font: 600 13px ui-monospace, monospace; color: var(--muted); min-width: 92px; text-align: right; }
+  small { color: var(--muted); }
+  body.render { padding: 0; display: block; }
+  body.render #stage { height: auto; width: 1080px; border-radius: 0; box-shadow: none; }
+  body.render .bar, body.render small { display: none; }
+</style>
+</head>
+<body>
+  <div id="stage">
+    <canvas id="c" width="1080" height="1920"></canvas>
+    <div id="safe"><div style="top:0;height:11.5%"></div><div style="bottom:0;height:16.6%"></div></div>
+  </div>
+  <div class="bar">
+    <button id="play">▶ Play</button>
+    <input id="seek" type="range" min="0" max="55" step="0.01" value="0">
+    <span id="time">0.00 / 55.00</span>
+  </div>
+  <div class="bar">
+    <button id="safeBtn">Zonas seguras</button>
+    <button id="rec">⏺ Exportar WebM (tempo real)</button>
+  </div>
+  <small>Para o MP4 final em 1080×1920: <code>node tools/render.js</code> (ver README).</small>
+  <audio id="audio" src="audio/mix.wav" preload="auto"></audio>
+
+<script src="js/timeline.js"></script>
+<script src="js/ai_images.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/scenes.js"></script>
+<script src="js/main.js"></script>
+<script>
+(async function () {
+  const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+  const audio = document.getElementById('audio'), seek = document.getElementById('seek'), time = document.getElementById('time');
+  const isRender = new URLSearchParams(location.search).has('render');
+  if (isRender) document.body.classList.add('render');
+  await document.fonts.load("100px Anton"); await document.fonts.load("800 60px Montserrat"); await document.fonts.load("600 34px Montserrat");
+  await VIDEO.loadPlates();
+  seek.max = TL.duration;
+  let t = 0, playing = false, last = 0;
+  const draw = () => { VIDEO.renderAt(ctx, t); time.textContent = `${t.toFixed(2)} / ${TL.duration.toFixed(2)}`; seek.value = t; };
+  // API usada pelo renderizador (tools/render.js)
+  window.__seek = (tt) => { t = tt; VIDEO.renderAt(ctx, t); };
+  window.__frame = (tt, q) => { t = tt; VIDEO.renderAt(ctx, t); return cv.toDataURL('image/jpeg', q || 0.93); };
+  window.__ready = true;
+  draw();
+  if (isRender) return;
+  const loop = (now) => {
+    if (playing) {
+      if (!audio.paused && audio.readyState >= 2 && !audio.error) t = audio.currentTime;
+      else t += (now - last) / 1000;
+      if (t >= TL.duration) { t = TL.duration; playing = false; audio.pause(); document.getElementById('play').textContent = '▶ Play'; }
+      draw();
+    }
+    last = now; requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+  document.getElementById('play').onclick = (e) => {
+    playing = !playing; e.target.textContent = playing ? '❚❚ Pause' : '▶ Play';
+    if (playing) { if (t >= TL.duration - 0.05) t = 0; audio.currentTime = t; audio.play().catch(() => {}); } else audio.pause();
+  };
+  seek.oninput = () => { t = +seek.value; audio.currentTime = t; draw(); };
+  document.getElementById('safeBtn').onclick = () => { const s = document.getElementById('safe'); s.style.display = s.style.display === 'block' ? 'none' : 'block'; };
+  // Exportação no navegador (WebM, tempo real) — alternativa quando não houver Node/ffmpeg
+  document.getElementById('rec').onclick = async () => {
+    const stream = cv.captureStream(30);
+    try { const ac = new AudioContext(), src = ac.createMediaElementSource(audio), dst = ac.createMediaStreamDestination(); src.connect(dst); src.connect(ac.destination); dst.stream.getAudioTracks().forEach(tr => stream.addTrack(tr)); } catch (e) {}
+    const rec = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 12e6 });
+    const chunks = []; rec.ondataavailable = e => chunks.push(e.data);
+    rec.onstop = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(chunks, { type: 'video/webm' })); a.download = 'brasil-espanha.webm'; a.click(); };
+    t = 0; audio.currentTime = 0; rec.start(); playing = true; audio.play().catch(() => {});
+    const stopAt = () => { if (t >= TL.duration) rec.stop(); else setTimeout(stopAt, 100); }; stopAt();
+  };
+})();
+</script>
+</body>
+</html>
