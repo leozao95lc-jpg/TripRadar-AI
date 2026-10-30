@@ -1,6 +1,6 @@
 # Coisas normais no Brasil que na Espanha são estranhas 🇧🇷🇪🇸
 
-Reel vertical de 55 s (1080×1920, 30 fps) feito 100% em código: as ilustrações vetoriais, as animações, a tipografia, as legendas, a trilha e os efeitos sonoros. Cada quadro é uma função do tempo, então o mesmo projeto roda **no navegador** (player) e **renderiza o MP4** quadro a quadro.
+Reel vertical de 52,5 s (1080×1920, 30 fps) feito 100% em código: as ilustrações vetoriais, as animações, a tipografia, as legendas, a trilha e os efeitos sonoros. Cada quadro é uma função do tempo, então o mesmo projeto roda **no navegador** (player) e **renderiza o MP4** quadro a quadro.
 
 ## Como gerar
 
@@ -39,9 +39,20 @@ Player: sirva a pasta (`python3 -m http.server`) e abra `index.html`. Ele tem pl
 | 5 | 24,4–31,0 | Empacotar | VOCÊ EMPACOTA 🛒 / E PAGA PELA SACOLA |
 | 6 | 31,0–39,6 | Jantar | JANTAR ÀS 19H? 😳 / AQUI, MAIS TARDE! |
 | 7 | 39,6–45,8 | Domingo | ESQUECEU NO SÁBADO? / BOA SORTE NO DOMINGO 😅 |
-| 8 | 45,8–55,0 | CTA | QUAL TE PEGARIA PRIMEIRO? / CONTA AÍ NOS COMENTÁRIOS 👇 |
+| 8 | 45,8–52,5 | CTA | QUAL TE PEGARIA PRIMEIRO? / CONTA AÍ NOS COMENTÁRIOS 👇 |
 
-## Roteiro de locução (para regravar com voz humana)
+## Trocar a voz (ElevenLabs ou gravação própria)
+
+Exporte a narração inteira num único arquivo, com uma pausa entre as frases, e rode:
+
+```bash
+python3 tools/import_voz.py audio/fonte/SEU_ARQUIVO.mp3   # corta nas frases (ajuste a tabela CUTS)
+python3 tools/build_timeline.py && python3 tools/audio.py && node tools/render.js
+```
+
+O cronograma se ajusta sozinho: frase longa demais é antecipada dentro da cena, e frase sem áudio sai da narração e das legendas (com aviso). A versão atual usa a voz **Roger** do ElevenLabs (`audio/fonte/elevenlabs_roger.mp3`), que não tem a frase s8b. Por isso a cena final foi encurtada e o vídeo tem 52,5 s. A narração TTS anterior está guardada em `audio/narracao_piper/`.
+
+## Roteiro de locução
 
 A narração atual é uma voz sintética offline de baixa qualidade e funciona como **guia de tempo**. Para publicar, o recomendado é regravar com a sua voz: grave cada frase em um arquivo, com o mesmo nome, em `audio/narracao/` e rode `build_timeline.py` → `audio.py` → `render.js`. As legendas se ajustam à duração real de cada frase.
 
@@ -89,5 +100,6 @@ Revise sempre mãos, rostos e textos gerados pela IA antes de publicar.
 ## Créditos e licenças
 
 - Fontes: Anton e Montserrat (SIL Open Font License, Google Fonts), incluídas em `assets/fonts/`.
-- Voz sintética: Piper TTS, voz `pt-br-edresson-low`, treinada no [TTS-Portuguese-Corpus](https://github.com/Edresson/TTS-Portuguese-Corpus) (CC BY 4.0). Se publicar com essa voz, mantenha o crédito.
+- Voz atual: ElevenLabs, voz "Roger". Uso comercial e sem crédito exige plano pago do ElevenLabs; no plano gratuito é obrigatório creditar.
+- Voz sintética anterior: Piper TTS, voz `pt-br-edresson-low`, treinada no [TTS-Portuguese-Corpus](https://github.com/Edresson/TTS-Portuguese-Corpus) (CC BY 4.0). Se publicar com essa voz, mantenha o crédito.
 - Trilha e efeitos: sintetizados por `tools/audio.py`, originais deste projeto.

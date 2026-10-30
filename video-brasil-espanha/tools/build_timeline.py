@@ -15,7 +15,7 @@ SCENES = [
     {"n": 5, "key": "sacola",   "start": 24.4, "end": 31.0},
     {"n": 6, "key": "jantar",   "start": 31.0, "end": 39.6},
     {"n": 7, "key": "domingo",  "start": 39.6, "end": 45.8},
-    {"n": 8, "key": "cta",      "start": 45.8, "end": 55.0},
+    {"n": 8, "key": "cta",      "start": 45.8, "end": 52.5},
 ]
 # Início de cada fala (s)
 STARTS = {"s1a": 0.12, "s2a": 3.75, "s2b": 5.65, "s3a": 11.2, "s3b": 13.75, "s4a": 17.2,
@@ -30,10 +30,19 @@ def speech_bounds(path):
     return idx[0] / sr, idx[-1] / sr, len(x) / sr
 
 lines = []
+prev_end = 0.0
 for l in L:
-    a, b, dur = speech_bounds(os.path.join(ROOT, f"audio/narracao/{l['id']}.wav"))
-    t0 = STARTS[l['id']]
-    lines.append({**l, "t": t0, "speechStart": round(t0 + a, 3), "speechEnd": round(t0 + b, 3), "dur": round(dur, 3)})
+    path = os.path.join(ROOT, f"audio/narracao/{l['id']}.wav")
+    if not os.path.exists(path):
+        print(f"AVISO: {l['id']} sem áudio — fica fora da narração e das legendas"); continue
+    a, b, dur = speech_bounds(path)
+    sc = next(s for s in SCENES if s['n'] == l['scene'])
+    # começa no horário preferido; se não couber na cena, antecipa; nunca sobrepõe a fala anterior
+    t0 = max(STARTS[l['id']], prev_end + 0.2 - a)
+    if t0 + b > sc['end'] - 0.15: t0 = max(prev_end + 0.2 - a, sc['end'] - 0.15 - b)
+    if t0 + b > sc['end']: print(f"AVISO: {l['id']} passa do fim da cena {sc['n']} em {t0 + b - sc['end']:.2f}s")
+    prev_end = t0 + b
+    lines.append({**l, "t": round(t0, 3), "speechStart": round(t0 + a, 3), "speechEnd": round(t0 + b, 3), "dur": round(dur, 3)})
 
 def chunks(text, maxw=4):
     # quebra em blocos curtos respeitando pontuação

@@ -3,7 +3,7 @@ window.TL = {
  "fps": 30,
  "width": 1080,
  "height": 1920,
- "duration": 55.0,
+ "duration": 52.5,
  "scenes": [
   {
    "n": 1,
@@ -51,7 +51,7 @@ window.TL = {
    "n": 8,
    "key": "cta",
    "start": 45.8,
-   "end": 55.0
+   "end": 52.5
   }
  ],
  "lines": [
@@ -61,9 +61,9 @@ window.TL = {
    "tts": "Se você fizer isso na Espanha, vão te olhar torto.",
    "cap": "Se você fizer isso na Espanha, vão te olhar torto.",
    "t": 0.12,
-   "speechStart": 0.138,
-   "speechEnd": 3.114,
-   "dur": 3.152
+   "speechStart": 0.235,
+   "speechEnd": 2.942,
+   "dur": 3.06
   },
   {
    "id": "s2a",
@@ -71,9 +71,9 @@ window.TL = {
    "tts": "No Brasil, é normal.",
    "cap": "No Brasil é normal.",
    "t": 3.75,
-   "speechStart": 3.912,
-   "speechEnd": 5.389,
-   "dur": 1.744
+   "speechStart": 3.785,
+   "speechEnd": 4.863,
+   "dur": 1.17
   },
   {
    "id": "s2b",
@@ -81,9 +81,9 @@ window.TL = {
    "tts": "Aqui, se você aparece com a escova no banheiro do escritório, vira assunto.",
    "cap": "Aqui, se você aparece com a escova no banheiro do escritório, vira assunto.",
    "t": 5.65,
-   "speechStart": 5.684,
-   "speechEnd": 10.57,
-   "dur": 5.056
+   "speechStart": 5.687,
+   "speechEnd": 9.837,
+   "dur": 4.32
   },
   {
    "id": "s3a",
@@ -91,9 +91,9 @@ window.TL = {
    "tts": "Aqui, o papel vai no vaso.",
    "cap": "Aqui o papel vai no vaso.",
    "t": 11.2,
-   "speechStart": 11.214,
-   "speechEnd": 13.164,
-   "dur": 2.224
+   "speechStart": 11.249,
+   "speechEnd": 12.833,
+   "dur": 1.7
   },
   {
    "id": "s3b",
@@ -101,9 +101,9 @@ window.TL = {
    "tts": "O lixinho do lado? Quase não existe.",
    "cap": "O lixinho do lado? Quase não existe.",
    "t": 13.75,
-   "speechStart": 13.9,
-   "speechEnd": 16.524,
-   "dur": 2.928
+   "speechStart": 13.793,
+   "speechEnd": 15.898,
+   "dur": 2.23
   },
   {
    "id": "s4a",
@@ -111,9 +111,9 @@ window.TL = {
    "tts": "Tênis em dez vezes sem juros?",
    "cap": "Tênis em 10x sem juros?",
    "t": 17.2,
-   "speechStart": 17.314,
-   "speechEnd": 19.116,
-   "dur": 1.984
+   "speechStart": 17.242,
+   "speechEnd": 19.164,
+   "dur": 2.04
   },
   {
    "id": "s4b",
@@ -121,9 +121,9 @@ window.TL = {
    "tts": "Aqui, isso praticamente não existe. Ou você paga, ou não leva.",
    "cap": "Aqui isso praticamente não existe. Ou você paga, ou não leva.",
    "t": 19.55,
-   "speechStart": 19.598,
-   "speechEnd": 23.857,
-   "dur": 4.464
+   "speechStart": 19.592,
+   "speechEnd": 23.509,
+   "dur": 4.03
   },
   {
    "id": "s5a",
@@ -131,9 +131,9 @@ window.TL = {
    "tts": "No caixa, ninguém te ajuda.",
    "cap": "No caixa ninguém te ajuda.",
    "t": 24.6,
-   "speechStart": 24.925,
-   "speechEnd": 27.308,
-   "dur": 2.96
+   "speechStart": 24.64,
+   "speechEnd": 26.3,
+   "dur": 1.78
   },
   {
    "id": "s5b",
@@ -141,9 +141,9 @@ window.TL = {
    "tts": "E a sacola, você paga.",
    "cap": "E a sacola você paga.",
    "t": 27.9,
-   "speechStart": 27.941,
-   "speechEnd": 29.727,
-   "dur": 1.968
+   "speechStart": 27.948,
+   "speechEnd": 29.689,
+   "dur": 1.86
   },
   {
    "id": "s6a",
@@ -151,19 +151,19 @@ window.TL = {
    "tts": "Aqui, às dezenove horas, você ainda está lanchando.",
    "cap": "Aqui às 19h você ainda está lanchando.",
    "t": 31.2,
-   "speechStart": 31.238,
-   "speechEnd": 34.892,
-   "dur": 3.904
+   "speechStart": 31.242,
+   "speechEnd": 33.937,
+   "dur": 2.81
   },
   {
    "id": "s6b",
    "scene": 6,
    "tts": "Jantar é às vinte e uma, vinte e duas horas.",
    "cap": "Jantar é às 21h, 22h.",
-   "t": 35.45,
-   "speechStart": 35.463,
-   "speechEnd": 39.161,
-   "dur": 3.888
+   "t": 34.485,
+   "speechStart": 34.526,
+   "speechEnd": 39.45,
+   "dur": 5.05
   },
   {
    "id": "s7a",
@@ -171,9 +171,9 @@ window.TL = {
    "tts": "Domingo, grande parte do comércio fecha.",
    "cap": "Domingo grande parte do comércio fecha.",
    "t": 39.8,
-   "speechStart": 39.973,
-   "speechEnd": 42.517,
-   "dur": 2.864
+   "speechStart": 39.832,
+   "speechEnd": 42.2,
+   "dur": 2.45
   },
   {
    "id": "s7b",
@@ -181,9 +181,9 @@ window.TL = {
    "tts": "Esqueceu de comprar no sábado? Problema seu.",
    "cap": "Esqueceu de comprar no sábado? Problema seu.",
    "t": 42.95,
-   "speechStart": 43.028,
-   "speechEnd": 45.501,
-   "dur": 2.608
+   "speechStart": 43.009,
+   "speechEnd": 45.322,
+   "dur": 2.43
   },
   {
    "id": "s8a",
@@ -191,216 +191,186 @@ window.TL = {
    "tts": "Qual dessas te pegaria primeiro? Comenta aí.",
    "cap": "Qual dessas te pegaria primeiro? Comenta aí.",
    "t": 46.0,
-   "speechStart": 46.049,
-   "speechEnd": 48.552,
-   "dur": 2.56
-  },
-  {
-   "id": "s8b",
-   "scene": 8,
-   "tts": "E se você mora fora, conta o que te deixou chocado.",
-   "cap": "E se você mora fora, conta o que te deixou chocado.",
-   "t": 49.0,
-   "speechStart": 49.048,
-   "speechEnd": 52.208,
-   "dur": 3.44
+   "speechStart": 46.04,
+   "speechEnd": 48.681,
+   "dur": 3.029
   }
  ],
  "captions": [
   {
-   "t0": 0.138,
-   "t1": 1.229,
+   "t0": 0.235,
+   "t1": 1.228,
    "text": "Se você fizer isso"
   },
   {
-   "t0": 1.229,
-   "t1": 1.973,
+   "t0": 1.228,
+   "t1": 1.904,
    "text": "na Espanha,"
   },
   {
-   "t0": 1.973,
-   "t1": 3.614,
+   "t0": 1.904,
+   "t1": 3.442,
    "text": "vão te olhar torto."
   },
   {
-   "t0": 3.912,
-   "t1": 5.684,
+   "t0": 3.785,
+   "t1": 5.363,
    "text": "No Brasil é normal."
   },
   {
-   "t0": 5.684,
-   "t1": 6.167,
+   "t0": 5.687,
+   "t1": 6.097,
    "text": "Aqui,"
   },
   {
-   "t0": 6.167,
-   "t1": 7.402,
+   "t0": 6.097,
+   "t1": 7.146,
    "text": "se você aparece com"
   },
   {
-   "t0": 7.402,
-   "t1": 8.691,
+   "t0": 7.146,
+   "t1": 8.241,
    "text": "a escova no banheiro"
   },
   {
-   "t0": 8.691,
-   "t1": 9.657,
+   "t0": 8.241,
+   "t1": 9.062,
    "text": "do escritório,"
   },
   {
-   "t0": 9.657,
-   "t1": 11.07,
+   "t0": 9.062,
+   "t1": 10.337,
    "text": "vira assunto."
   },
   {
-   "t0": 11.214,
-   "t1": 12.433,
+   "t0": 11.249,
+   "t1": 12.239,
    "text": "Aqui o papel vai"
   },
   {
-   "t0": 12.433,
-   "t1": 13.664,
+   "t0": 12.239,
+   "t1": 13.333,
    "text": "no vaso."
   },
   {
-   "t0": 13.9,
-   "t1": 15.243,
+   "t0": 13.793,
+   "t1": 14.87,
    "text": "O lixinho do lado?"
   },
   {
-   "t0": 15.243,
-   "t1": 17.024,
+   "t0": 14.87,
+   "t1": 16.398,
    "text": "Quase não existe."
   },
   {
-   "t0": 17.314,
-   "t1": 18.515,
+   "t0": 17.242,
+   "t1": 18.523,
    "text": "Tênis em 10x sem"
   },
   {
-   "t0": 18.515,
-   "t1": 19.598,
+   "t0": 18.523,
+   "t1": 19.592,
    "text": "juros?"
   },
   {
-   "t0": 19.598,
-   "t1": 21.325,
+   "t0": 19.592,
+   "t1": 21.18,
    "text": "Aqui isso praticamente não"
   },
   {
-   "t0": 21.325,
-   "t1": 21.958,
+   "t0": 21.18,
+   "t1": 21.762,
    "text": "existe."
   },
   {
-   "t0": 21.958,
-   "t1": 22.936,
+   "t0": 21.762,
+   "t1": 22.662,
    "text": "Ou você paga,"
   },
   {
-   "t0": 22.936,
-   "t1": 24.357,
+   "t0": 22.662,
+   "t1": 24.009,
    "text": "ou não leva."
   },
   {
-   "t0": 24.925,
-   "t1": 26.586,
+   "t0": 24.64,
+   "t1": 25.797,
    "text": "No caixa ninguém te"
   },
   {
-   "t0": 26.586,
-   "t1": 27.808,
+   "t0": 25.797,
+   "t1": 26.8,
    "text": "ajuda."
   },
   {
-   "t0": 27.941,
-   "t1": 29.153,
+   "t0": 27.948,
+   "t1": 29.129,
    "text": "E a sacola você"
   },
   {
-   "t0": 29.153,
-   "t1": 30.227,
+   "t0": 29.129,
+   "t1": 30.189,
    "text": "paga."
   },
   {
-   "t0": 31.238,
-   "t1": 32.862,
+   "t0": 31.242,
+   "t1": 32.44,
    "text": "Aqui às 19h você"
   },
   {
-   "t0": 32.862,
-   "t1": 35.392,
+   "t0": 32.44,
+   "t1": 34.437,
    "text": "ainda está lanchando."
   },
   {
-   "t0": 35.463,
-   "t1": 38.104,
+   "t0": 34.526,
+   "t1": 38.043,
    "text": "Jantar é às 21h,"
   },
   {
-   "t0": 38.104,
-   "t1": 39.661,
+   "t0": 38.043,
+   "t1": 39.832,
    "text": "22h."
   },
   {
-   "t0": 39.973,
-   "t1": 41.466,
+   "t0": 39.832,
+   "t1": 41.222,
    "text": "Domingo grande parte do"
   },
   {
-   "t0": 41.466,
-   "t1": 43.017,
+   "t0": 41.222,
+   "t1": 42.7,
    "text": "comércio fecha."
   },
   {
-   "t0": 43.028,
-   "t1": 44.219,
+   "t0": 43.009,
+   "t1": 44.123,
    "text": "Esqueceu de comprar no"
   },
   {
-   "t0": 44.219,
-   "t1": 44.722,
+   "t0": 44.123,
+   "t1": 44.594,
    "text": "sábado?"
   },
   {
-   "t0": 44.722,
-   "t1": 46.001,
+   "t0": 44.594,
+   "t1": 45.822,
    "text": "Problema seu."
   },
   {
-   "t0": 46.049,
-   "t1": 47.254,
+   "t0": 46.04,
+   "t1": 47.312,
    "text": "Qual dessas te pegaria"
   },
   {
-   "t0": 47.254,
-   "t1": 47.857,
+   "t0": 47.312,
+   "t1": 47.947,
    "text": "primeiro?"
   },
   {
-   "t0": 47.857,
-   "t1": 49.048,
+   "t0": 47.947,
+   "t1": 49.081,
    "text": "Comenta aí."
-  },
-  {
-   "t0": 49.048,
-   "t1": 49.937,
-   "text": "E se você mora"
-  },
-  {
-   "t0": 49.937,
-   "t1": 50.381,
-   "text": "fora,"
-  },
-  {
-   "t0": 50.381,
-   "t1": 51.27,
-   "text": "conta o que te"
-  },
-  {
-   "t0": 51.27,
-   "t1": 52.608,
-   "text": "deixou chocado."
   }
  ],
  "sfx": [

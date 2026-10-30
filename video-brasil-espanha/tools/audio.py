@@ -149,8 +149,8 @@ def read_wav(p):
 voice = np.zeros(N)
 for l in TL['lines']:
     x = read_wav(os.path.join(ROOT, f"audio/narracao/{l['id']}.wav"))
-    x = x - np.convolve(x, np.ones(64) / 64, 'same')  # remove grave/DC
-    x = np.tanh(2.2 * x / (np.max(np.abs(x)) + 1e-9)) / np.tanh(2.2)  # compressão suave
+    x = fft_filter(x, 80)  # corta ronco abaixo de 80 Hz sem afinar a voz
+    x = np.tanh(1.4 * x / (np.max(np.abs(x)) + 1e-9)) / np.tanh(1.4)  # compressão suave
     place(voice, x, l['t'], 0.85)
 
 # ducking: música abaixa quando há voz
