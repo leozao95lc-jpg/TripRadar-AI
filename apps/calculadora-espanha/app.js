@@ -1,13 +1,12 @@
 /*
- * Calculadora de Imigração — Brasil para Espanha | De Mala y Cuia
+ * Custo de Vida na Espanha | De Mala y Cuia
  * JavaScript puro, sem dependências. Nenhum dado é salvo (sem cookies/localStorage).
  *
- * Para adicionar/editar um campo de custo, altere apenas a lista CAMPOS abaixo.
- *   etapa : 2 (Brasil, em R$) ou 3 (Espanha, em €)
- *   modo  : "fixo"   -> valor total, sem opção por pessoa
- *           "total"  -> padrão total, usuário pode trocar para "por pessoa"
- *           "pessoa" -> padrão por pessoa (multiplica pelo nº de pessoas)
- *           "mala"   -> valor por mala x malas por pessoa x pessoas
+ * Os valores de referência ficam em config.js.
+ * Para adicionar/editar uma categoria de gasto, altere a lista CAMPOS abaixo.
+ *   escopo: "casa"   -> valor único da moradia
+ *           "pessoa" -> valor por pessoa (multiplicado pelo nº de pessoas)
+ *   No quarto compartilhado, aluguel e contas passam a ser por pessoa (um quarto cada).
  */
 (function () {
   "use strict";
@@ -15,66 +14,39 @@
   var CFG = window.CALC_CONFIG || {};
 
   var CAMPOS = [
-    // ETAPA 2 — Brasil (R$)
-    { id: "passagens", etapa: 2, label: "Passagens aéreas", dica: "Valor total, já somando todas as pessoas.", modo: "fixo" },
-    { id: "bagagem", etapa: 2, label: "Bagagem despachada", dica: "Custo por mala. Deixe em branco se já está inclusa na passagem.", modo: "mala" },
-    { id: "vistos", etapa: 2, label: "Vistos e taxas consulares", dica: "Conforme o seu tipo de visto.", modo: "pessoa" },
-    { id: "apostilamento", etapa: 2, label: "Apostilamentos e traduções juramentadas", dica: "Certidões, diplomas, antecedentes criminais…", modo: "pessoa" },
-    { id: "seguro", etapa: 2, label: "Seguro saúde", dica: "Confira a cobertura exigida para o seu tipo de visto.", modo: "pessoa" },
-    { id: "outrosDocs", etapa: 2, label: "Outros documentos", dica: "Passaporte, certidões, autenticações…", modo: "total" },
-    // ETAPA 3 — Espanha (€)
-    { id: "hospedagem", etapa: 3, label: "Hospedagem inicial", dica: "Hotel, hostel ou aluguel temporário nas primeiras semanas.", modo: "total" },
-    { id: "caucao", etapa: 3, label: "Caução e entrada do aluguel", dica: "Fiança, primeiro mês e eventual taxa da imobiliária.", modo: "total" },
-    { id: "alimentacao", etapa: 3, label: "Alimentação inicial", dica: "Primeiras semanas, antes de usar a reserva mensal.", modo: "total" },
-    { id: "transporte", etapa: 3, label: "Transporte", dica: "Saída do aeroporto, passes iniciais, deslocamentos.", modo: "total" },
-    { id: "chip", etapa: 3, label: "Chip de celular", dica: "Chip e primeira recarga.", modo: "pessoa" },
-    { id: "docEspanha", etapa: 3, label: "Documentação na Espanha", dica: "Taxas, fotos, cópias e trâmites locais.", modo: "pessoa" },
-    { id: "outrosEspanha", etapa: 3, label: "Outros gastos iniciais", dica: "Móveis, utensílios, roupas de frio…", modo: "total" }
+    { id: "aluguel", label: "Aluguel", escopo: "casa", cor: "#1F3D2B" },
+    { id: "contas", label: "Contas da casa", dica: "Luz, água, gás e internet.", escopo: "casa", cor: "#3E7350" },
+    { id: "mercado", label: "Supermercado", dica: "Compras do mês para cozinhar em casa.", escopo: "pessoa", cor: "#E8622C" },
+    { id: "transporte", label: "Transporte público", dica: "Passe mensal de metrô/ônibus.", escopo: "pessoa", cor: "#C9A227" },
+    { id: "celular", label: "Celular", dica: "Plano mensal de dados.", escopo: "pessoa", cor: "#8FA98F" },
+    { id: "lazer", label: "Comer fora e lazer", dica: "Restaurantes, cafés, passeios.", escopo: "pessoa", cor: "#F0A07C" },
+    { id: "saude", label: "Seguro saúde", dica: "Plano privado. Coloque 0 se vai usar só o sistema público.", escopo: "pessoa", cor: "#6E8B74" },
+    { id: "outros", label: "Outros", dica: "Higiene, academia, roupas, assinaturas.", escopo: "pessoa", cor: "#B9A57A" }
   ];
-  var MOEDA_ETAPA = { 2: "BRL", 3: "EUR" };
 
-  var CORES = { brasil: "#E8622C", espanha: "#3E7350", reserva: "#C9A227", margem: "#1F3D2B" };
-  var ICONES = {
-    brasil: '<svg viewBox="0 0 24 24"><path d="M2.5 19h19M3 13.5l3.2 1 4.3-1.4-5.6-6 2-.7 8 4.8 4.4-1.5a1.8 1.8 0 0 1 1.2 3.4L6.6 17.3 3 13.5Z"/></svg>',
-    espanha: '<svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7M5 10v10h14V10M10 20v-6h4v6"/></svg>',
-    reserva: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M16 12.5h2M3 10h18"/></svg>',
-    margem: '<svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>'
-  };
+  var MORADIA = { quarto: "quarto compartilhado", estudio: "estúdio", ap1: "apartamento de 1 quarto", ap2: "apartamento de 2 quartos" };
+  var ESTILO = { economico: "econômico", moderado: "moderado", confortavel: "confortável" };
 
   // ---------- Estado (somente em memória) ----------
   var estado;
   function estadoInicial() {
     var e = {
-      etapa: 1,
-      pessoas: CFG.PESSOAS_INICIAL || 1,
-      malas: CFG.MALAS_INICIAL != null ? CFG.MALAS_INICIAL : 1,
-      cidade: "Madrid",
-      cidadeOutra: "",
-      meses: CFG.MESES_RESERVA_INICIAL || 3,
-      mensal: 0,
-      cotacao: CFG.COTACAO_INICIAL || 6.3,
-      margem: CFG.MARGEM_INICIAL || 0,
-      valores: {},
-      porPessoa: {}
+      etapa: 1, cidade: "Madrid", cidadeOutra: "", moradia: "quarto", pessoas: 1, estilo: "moderado",
+      cotacao: CFG.COTACAO_INICIAL || 6.3, valores: {}, editado: {}
     };
-    CAMPOS.forEach(function (c) {
-      e.valores[c.id] = 0;
-      e.porPessoa[c.id] = c.modo === "pessoa";
-    });
     return e;
   }
 
   // ---------- Utilitários ----------
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
-
   var fmtBRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
   var fmtEUR = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
   var fmtNum = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  var fmtInt = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2 });
   function brl(v) { return fmtBRL.format(Math.round(v)); }
   function eur(v) { return fmtEUR.format(Math.round(v)); }
 
-  // Aceita "1.500", "1500,50", "1.500,50", "1500.50"
   function lerNumero(txt) {
     var s = String(txt || "").replace(/[^\d,.]/g, "");
     if (s.indexOf(",") >= 0) s = s.replace(/\./g, "").replace(",", ".");
@@ -82,73 +54,76 @@
     var n = parseFloat(s);
     return isFinite(n) && n > 0 ? n : 0;
   }
-  function escreverNumero(n) { return n > 0 ? fmtNum.format(n) : ""; }
+  function escreverNumero(n) { return n > 0 ? fmtInt.format(n) : ""; }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 
-  // ---------- Cálculo ----------
-  // Valor efetivo de um campo, na moeda original do campo
-  function valorEfetivo(c) {
-    var v = estado.valores[c.id] || 0;
-    if (c.modo === "mala") return v * estado.malas * estado.pessoas;
-    if (c.modo !== "fixo" && estado.porPessoa[c.id]) return v * estado.pessoas;
-    return v;
+  // ---------- Referências ----------
+  function escopo(c) {
+    if ((c.id === "aluguel" || c.id === "contas") && estado.moradia === "quarto") return "pessoa";
+    return c.escopo;
   }
 
-  function calcular() {
-    var cot = estado.cotacao;
-    var brasilBRL = 0, espanhaEUR = 0;
+  function referencia(id) {
+    var cid = (CFG.CIDADES || {})[estado.cidade] || CFG.CIDADES.Outra;
+    var pp = CFG.POR_PESSOA || {};
+    var est = (CFG.ESTILO || {})[estado.estilo] || 1;
+    var arred5 = function (v) { return Math.round(v / 5) * 5; };
+    switch (id) {
+      case "aluguel": return cid[estado.moradia] || 0;
+      case "contas": return (CFG.CONTAS || {})[estado.moradia] || 0;
+      case "transporte": return cid.transporte || 0;
+      case "celular": return pp.celular || 0;
+      case "saude": return pp.saude || 0;
+      case "mercado": case "lazer": case "outros": return arred5((pp[id] || 0) * cid.indice * est);
+    }
+    return 0;
+  }
+
+  function aplicarReferencias(forcar) {
     CAMPOS.forEach(function (c) {
-      if (c.etapa === 2) brasilBRL += valorEfetivo(c);
-      else espanhaEUR += valorEfetivo(c);
+      if (forcar || !estado.editado[c.id]) {
+        estado.valores[c.id] = referencia(c.id);
+        if (forcar) estado.editado[c.id] = false;
+      }
     });
-    var reservaEUR = estado.meses * estado.mensal; // reserva calculada UMA única vez
-
-    // Tudo convertido para R$ antes de somar (nunca soma R$ com €)
-    var brasil = brasilBRL;
-    var espanha = espanhaEUR * cot;
-    var reserva = reservaEUR * cot;
-    var subtotal = brasil + espanha + reserva;
-    var margem = subtotal * (estado.margem / 100);
-    var total = subtotal + margem;
-
-    return {
-      cot: cot,
-      brasilBRL: brasilBRL, espanhaEUR: espanhaEUR, reservaEUR: reservaEUR,
-      brasil: brasil, espanha: espanha, reserva: reserva, margem: margem,
-      totalBRL: total, totalEUR: total / cot
-    };
   }
 
-  // ---------- Renderização dos campos ----------
+  // ---------- Cálculo ----------
+  function efetivo(c) {
+    var v = estado.valores[c.id] || 0;
+    return escopo(c) === "pessoa" ? v * estado.pessoas : v;
+  }
+  function calcular() {
+    var itens = CAMPOS.map(function (c) { return { c: c, v: efetivo(c) }; });
+    var totalEUR = itens.reduce(function (s, i) { return s + i.v; }, 0);
+    return { itens: itens, totalEUR: totalEUR, totalBRL: totalEUR * estado.cotacao, cot: estado.cotacao };
+  }
+
+  // ---------- Renderização ----------
+  function nomeCidade() {
+    return estado.cidade === "Outra" ? (estado.cidadeOutra.trim() || "outra cidade") : estado.cidade;
+  }
+  function textoPerfil() {
+    var p = estado.pessoas;
+    return MORADIA[estado.moradia] + " em " + nomeCidade() + ", " + p + (p === 1 ? " pessoa" : " pessoas") + ", estilo " + ESTILO[estado.estilo];
+  }
+
   function montarCampos() {
-    [2, 3].forEach(function (etapa) {
-      var alvo = $('[data-campos="' + etapa + '"]');
-      var simbolo = MOEDA_ETAPA[etapa] === "BRL" ? "R$" : "€";
-      alvo.innerHTML = CAMPOS.filter(function (c) { return c.etapa === etapa; }).map(function (c) {
-        var modo = (c.modo === "total" || c.modo === "pessoa")
-          ? '<div class="modo" data-modo="' + c.id + '" data-so-grupo>' +
-              '<button type="button" data-pp="0">Total</button>' +
-              '<button type="button" data-pp="1">Por pessoa</button></div>'
-          : "";
-        return '<div class="campo" data-campo="' + c.id + '">' +
-          '<label for="f_' + c.id + '">' + esc(c.label) + '</label>' +
-          '<p class="dica">' + esc(c.dica) + '</p>' + modo +
-          '<div class="entrada"><span class="moeda">' + simbolo + '</span>' +
-          '<input type="text" id="f_' + c.id + '" data-id="' + c.id + '" inputmode="decimal" placeholder="0,00" autocomplete="off" /></div>' +
-          '<p class="calc-linha" data-linha="' + c.id + '"></p></div>';
-      }).join("");
-    });
+    $("#campos").innerHTML = CAMPOS.map(function (c) {
+      return '<div class="campo" data-campo="' + c.id + '">' +
+        '<div class="campo-topo"><label for="f_' + c.id + '" data-label="' + c.id + '"></label><span class="tag" data-tag="' + c.id + '"></span></div>' +
+        '<p class="dica" data-dica="' + c.id + '">' + esc(c.dica || "") + '</p>' +
+        '<div class="entrada"><span class="moeda">€</span>' +
+        '<input type="text" id="f_' + c.id + '" data-id="' + c.id + '" inputmode="decimal" placeholder="0" autocomplete="off" /></div>' +
+        '<p class="calc-linha" data-linha="' + c.id + '"></p></div>';
+    }).join("");
   }
 
-  function sincronizarFormulario() {
-    sincronizarChips();
-    $("#pessoasOutro").value = Math.max(4, estado.pessoas);
-    $("#malasOutro").value = Math.max(3, estado.malas);
-    $("#cidadeOutra").value = estado.cidadeOutra;
-    // valores
-    CAMPOS.forEach(function (c) { $("#f_" + c.id).value = escreverNumero(estado.valores[c.id]); });
-    $("#mensal").value = escreverNumero(estado.mensal);
-    $("#cotacao").value = fmtNum.format(estado.cotacao);
+  function escreverCampos() {
+    CAMPOS.forEach(function (c) {
+      var el = $("#f_" + c.id);
+      if (document.activeElement !== el) el.value = escreverNumero(estado.valores[c.id]);
+    });
   }
 
   function marcarChips(grupo, valor) {
@@ -156,128 +131,96 @@
       b.setAttribute("aria-pressed", b.dataset.v === valor ? "true" : "false");
     });
   }
-
-  // Atualiza tudo que depende de valores (linhas auxiliares, parcial, resultado)
-  function atualizar() {
-    var multi = estado.pessoas > 1;
-    CAMPOS.forEach(function (c) {
-      var bloco = $('[data-campo="' + c.id + '"]');
-      if (c.modo === "mala") bloco.hidden = estado.malas === 0;
-      var seletor = $('[data-modo="' + c.id + '"]');
-      if (seletor) {
-        seletor.hidden = !multi;
-        $$("button", seletor).forEach(function (b) {
-          b.setAttribute("aria-pressed", (b.dataset.pp === "1") === !!estado.porPessoa[c.id] ? "true" : "false");
-        });
-      }
-      var linha = $('[data-linha="' + c.id + '"]');
-      var v = estado.valores[c.id] || 0;
-      var fmt = c.etapa === 2 ? brl : eur;
-      var txt = "";
-      if (v > 0 && c.modo === "mala") {
-        var qtd = estado.malas * estado.pessoas;
-        txt = "= " + fmt(valorEfetivo(c)) + " (" + qtd + (qtd === 1 ? " mala)" : " malas)");
-      } else if (v > 0 && multi && c.modo !== "fixo" && estado.porPessoa[c.id]) {
-        txt = "= " + fmt(valorEfetivo(c)) + " para " + estado.pessoas + " pessoas";
-      }
-      linha.textContent = txt;
-    });
-
-    var r = calcular();
-    $("#reservaLinha").textContent = estado.mensal > 0
-      ? "Reserva: " + estado.meses + " × " + eur(estado.mensal) + " = " + eur(r.reservaEUR) + "  (≈ " + brl(r.reserva) + ")"
-      : "";
-    $("#parcial").innerHTML = estado.etapa > 1 && r.totalBRL > 0
-      ? "Total parcial: <strong>" + brl(r.totalBRL) + "</strong> · " + eur(r.totalEUR)
-      : "";
-
-    if (estado.etapa === 5) renderResultado(r);
+  function sincronizarChips() {
+    marcarChips("cidade", estado.cidade);
+    marcarChips("moradia", estado.moradia);
+    marcarChips("pessoas", estado.pessoas >= 4 ? "4+" : String(estado.pessoas));
+    marcarChips("estilo", estado.estilo);
+    $("#cidadeOutraBox").hidden = estado.cidade !== "Outra";
+    $("#cidadeOutraDica").hidden = estado.cidade !== "Outra";
+    $("#pessoasOutroBox").hidden = estado.pessoas < 4;
+    $("#dicaQuarto").hidden = !(estado.moradia === "quarto" && estado.pessoas > 1);
   }
 
-  function nomeCidade() {
-    return estado.cidade === "Outra" ? (estado.cidadeOutra.trim() || "outra cidade") : estado.cidade;
+  function atualizar() {
+    var p = estado.pessoas;
+    CAMPOS.forEach(function (c) {
+      var porPessoa = escopo(c) === "pessoa";
+      var label = c.label;
+      if (c.id === "aluguel") label = estado.moradia === "quarto" ? "Aluguel do quarto" : "Aluguel do " + MORADIA[estado.moradia];
+      $('[data-label="' + c.id + '"]').textContent = label;
+      $('[data-tag="' + c.id + '"]').textContent = porPessoa ? "por pessoa" : "total da casa";
+      if (c.id === "aluguel") $('[data-dica="' + c.id + '"]').textContent = estado.moradia === "quarto"
+        ? "Quarto em apartamento compartilhado, valor de cada pessoa."
+        : "Valor mensal do imóvel inteiro.";
+      var ref = referencia(c.id);
+      var linha = "";
+      if (porPessoa && p > 1 && estado.valores[c.id] > 0) linha = "= " + eur(efetivo(c)) + " para " + p + " pessoas";
+      if (estado.editado[c.id] && ref > 0 && Math.round(ref) !== Math.round(estado.valores[c.id] || 0)) {
+        linha += (linha ? " · " : "") + "referência: " + eur(ref);
+      }
+      $('[data-linha="' + c.id + '"]').textContent = linha;
+    });
+    $("#perfilTxt").textContent = textoPerfil();
+
+    var r = calcular();
+    $("#parcial").innerHTML = estado.etapa === 2 && r.totalEUR > 0
+      ? "Total por mês: <strong>" + eur(r.totalEUR) + "</strong> · ≈ " + brl(r.totalBRL)
+      : "";
+    if (estado.etapa === 3) renderResultado(r);
   }
 
   function renderResultado(r) {
     var p = estado.pessoas;
-    $("#resPerfil").textContent = "Destino: " + nomeCidade() + " · " + p + (p === 1 ? " pessoa" : " pessoas") +
-      " · cotação de simulação 1 € = R$ " + fmtNum.format(r.cot);
-    $("#totalBRL").textContent = brl(r.totalBRL);
-    $("#totalEUR").textContent = "≈ " + eur(r.totalEUR);
-    $("#porPessoa").textContent = p > 1 ? "Equivale a " + brl(r.totalBRL / p) + " por pessoa" : "";
+    $("#resPerfil").textContent = textoPerfil().charAt(0).toUpperCase() + textoPerfil().slice(1);
+    $("#totalEUR").textContent = eur(r.totalEUR);
+    $("#totalBRL").textContent = "≈ " + brl(r.totalBRL) + " por mês";
+    $("#destaqueMsg").textContent = "Esse é o valor estimado para viver um mês em " + nomeCidade() + " morando em " +
+      (estado.moradia === "quarto" ? "um quarto compartilhado" : (estado.moradia === "estudio" ? "um estúdio" : "um " + MORADIA[estado.moradia])) + ".";
+    $("#porPessoa").textContent = p > 1 ? "Equivale a " + eur(r.totalEUR / p) + " por pessoa" : "";
 
-    var itens = [
-      { k: "brasil", t: "Gastos no Brasil", d: "Passagens e documentação", pri: brl(r.brasil), sec: "≈ " + eur(r.brasil / r.cot), v: r.brasil },
-      { k: "espanha", t: "Gastos iniciais na Espanha", d: "Chegada e instalação", pri: eur(r.espanhaEUR), sec: "≈ " + brl(r.espanha), v: r.espanha },
-      { k: "reserva", t: "Reserva financeira", d: estado.meses + (estado.meses === 1 ? " mês" : " meses") + " × " + eur(estado.mensal), pri: eur(r.reservaEUR), sec: "≈ " + brl(r.reserva), v: r.reserva }
-    ];
-    if (estado.margem > 0) {
-      itens.push({ k: "margem", t: "Margem para imprevistos", d: "+" + estado.margem + "% sobre o total", pri: brl(r.margem), sec: "≈ " + eur(r.margem / r.cot), v: r.margem });
-    }
-
-    $("#blocos").innerHTML = itens.map(function (i) {
-      return '<div class="bloco"><div class="bloco-ico" style="background:' + CORES[i.k] + '">' + ICONES[i.k] + '</div>' +
-        '<div class="bloco-txt"><p class="bloco-titulo">' + i.t + '</p><p class="bloco-detalhe">' + esc(i.d) + '</p></div>' +
-        '<div class="bloco-val"><strong>' + i.pri + '</strong><span>' + i.sec + '</span></div></div>';
+    $("#proj").innerHTML = [3, 6, 12].map(function (m) {
+      return '<div><span>' + m + ' meses</span><strong>' + eur(r.totalEUR * m) + '</strong><em>≈ ' + brl(r.totalBRL * m) + '</em></div>';
     }).join("");
 
-    // Gráfico de rosca (SVG puro; circunferência normalizada para 100)
-    var soma = r.totalBRL;
-    var donut = '<circle cx="21" cy="21" r="15.915" stroke="#F4EBDD"></circle>';
-    var leg = "";
-    if (soma > 0) {
-      var acum = 0;
-      itens.forEach(function (i) {
-        var pct = (i.v / soma) * 100;
-        if (pct > 0) {
-          donut += '<circle cx="21" cy="21" r="15.915" stroke="' + CORES[i.k] + '" stroke-dasharray="' + pct.toFixed(3) + " " + (100 - pct).toFixed(3) + '" stroke-dashoffset="' + (-acum).toFixed(3) + '"></circle>';
-          acum += pct;
-        }
-        leg += '<li><i style="background:' + CORES[i.k] + '"></i>' + i.t.replace("Gastos iniciais na", "Chegada na").replace("Gastos no", "Saída do") + "<b>" + Math.round(pct) + "%</b></li>";
-      });
-    } else {
-      leg = '<li class="vazio">Preencha alguns valores para ver a distribuição.</li>';
-    }
-    $("#donut").innerHTML = donut;
-    $("#legenda").innerHTML = leg;
+    var max = Math.max.apply(null, r.itens.map(function (i) { return i.v; }).concat([1]));
+    var ordenado = r.itens.filter(function (i) { return i.v > 0; }).sort(function (a, b) { return b.v - a.v; });
+    $("#barras").innerHTML = ordenado.length ? ordenado.map(function (i) {
+      var pct = r.totalEUR > 0 ? Math.round((i.v / r.totalEUR) * 100) : 0;
+      return '<li><div class="barra-topo"><span>' + esc(i.c.label) + '</span><span><b>' + eur(i.v) + '</b> · ' + pct + '%</span></div>' +
+        '<div class="barra"><i style="width:' + ((i.v / max) * 100).toFixed(1) + '%;background:' + i.c.cor + '"></i></div></li>';
+    }).join("") : '<li class="vazio">Preencha alguns valores para ver a distribuição.</li>';
   }
 
   // ---------- Navegação ----------
   function irPara(n) {
     estado.etapa = n;
     $$(".etapa").forEach(function (s) { s.hidden = Number(s.dataset.etapa) !== n; });
-    var noResultado = n === 5;
-    $("#resultado").hidden = !noResultado;
-    $("#nav").hidden = noResultado;
-    $("#progresso").hidden = noResultado;
-    if (!noResultado) {
-      $("#progressoFill").style.width = (n * 25) + "%";
-      $("#progressoTxt").textContent = "Etapa " + n + " de 4";
+    var res = n === 3;
+    $("#resultado").hidden = !res;
+    $("#nav").hidden = res;
+    $("#progresso").hidden = res;
+    if (!res) {
+      $("#progressoFill").style.width = (n * 50) + "%";
+      $("#progressoTxt").textContent = "Etapa " + n + " de 2";
       $("#btnVoltar").hidden = n === 1;
-      $("#btnProximo").textContent = n === 4 ? "Calcular" : "Próximo";
+      $("#btnProximo").textContent = n === 2 ? "Ver resultado" : "Próximo";
     }
+    if (n === 2) escreverCampos();
     atualizar();
-    $(".topo").scrollIntoView({ behavior: "smooth", block: "start" });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   // ---------- Resumo / compartilhamento ----------
   function linkApp() { return CFG.APP_URL || location.href.split("#")[0].split("?")[0]; }
-
   function resumoTexto() {
     var r = calcular();
-    var p = estado.pessoas;
-    var l = [
-      "🇧🇷➡️🇪🇸 Meu planejamento para imigrar para a Espanha",
-      "📍 " + nomeCidade() + " · " + p + (p === 1 ? " pessoa" : " pessoas"),
-      "",
-      "✈️ Gastos no Brasil: " + brl(r.brasil) + " (≈ " + eur(r.brasil / r.cot) + ")",
-      "🏠 Gastos iniciais na Espanha: " + eur(r.espanhaEUR) + " (≈ " + brl(r.espanha) + ")",
-      "💰 Reserva (" + estado.meses + (estado.meses === 1 ? " mês" : " meses") + "): " + eur(r.reservaEUR) + " (≈ " + brl(r.reserva) + ")"
-    ];
-    if (estado.margem > 0) l.push("🛟 Margem para imprevistos (+" + estado.margem + "%): " + brl(r.margem));
-    l.push("", "TOTAL ESTIMADO: " + brl(r.totalBRL) + " | " + eur(r.totalEUR));
-    if (p > 1) l.push("Por pessoa: " + brl(r.totalBRL / p));
-    l.push("Cotação de simulação: 1 € = R$ " + fmtNum.format(r.cot), "", "Simule a sua com a calculadora De Mala y Cuia:", linkApp());
+    var l = ["🇪🇸 Meu custo de vida mensal na Espanha", "📍 " + textoPerfil(), ""];
+    r.itens.filter(function (i) { return i.v > 0; }).forEach(function (i) { l.push("• " + i.c.label + ": " + eur(i.v)); });
+    l.push("", "TOTAL POR MÊS: " + eur(r.totalEUR) + " (≈ " + brl(r.totalBRL) + ")");
+    if (estado.pessoas > 1) l.push("Por pessoa: " + eur(r.totalEUR / estado.pessoas));
+    l.push("Em 12 meses: " + eur(r.totalEUR * 12));
+    l.push("Cotação de simulação: 1 € = R$ " + fmtNum.format(r.cot), "", "Simule o seu com a calculadora De Mala y Cuia:", linkApp());
     return l.join("\n");
   }
 
@@ -286,8 +229,10 @@
       var ta = document.createElement("textarea");
       ta.value = texto; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
       document.body.appendChild(ta); ta.select();
-      try { document.execCommand("copy"); aviso(msg); } catch (e) { aviso("Não foi possível copiar automaticamente."); }
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
       document.body.removeChild(ta);
+      aviso(ok ? msg : "Não foi possível copiar automaticamente.");
     }
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(texto).then(function () { aviso(msg); }, fallback);
@@ -304,116 +249,92 @@
 
   // ---------- Eventos ----------
   function ligarEventos() {
-    // chips (delegação)
     document.addEventListener("click", function (ev) {
       var chip = ev.target.closest("[data-chips] button");
-      if (chip) {
-        var g = chip.parentElement.dataset.chips, v = chip.dataset.v;
-        if (g === "pessoas") estado.pessoas = v === "4+" ? Math.max(4, Number($("#pessoasOutro").value) || 4) : Number(v);
-        if (g === "malas") estado.malas = v === "3+" ? Math.max(3, Number($("#malasOutro").value) || 3) : Number(v);
-        if (g === "cidade") estado.cidade = v;
-        if (g === "meses") estado.meses = Number(v);
-        if (g === "margem") estado.margem = Number(v);
-        sincronizarChips();
-        atualizar();
-        if (g === "pessoas" && v === "4+") $("#pessoasOutro").focus();
-        if (g === "cidade" && v === "Outra") $("#cidadeOutra").focus();
-        return;
-      }
-      var pp = ev.target.closest("[data-modo] button");
-      if (pp) {
-        estado.porPessoa[pp.parentElement.dataset.modo] = pp.dataset.pp === "1";
-        atualizar();
-      }
+      if (!chip) return;
+      var g = chip.parentElement.dataset.chips, v = chip.dataset.v;
+      if (g === "cidade") estado.cidade = v;
+      if (g === "moradia") estado.moradia = v;
+      if (g === "estilo") estado.estilo = v;
+      if (g === "pessoas") estado.pessoas = v === "4+" ? Math.max(4, Number($("#pessoasOutro").value) || 4) : Number(v);
+      aplicarReferencias(false);
+      sincronizarChips();
+      atualizar();
+      if (g === "cidade" && v === "Outra") $("#cidadeOutra").focus();
     });
 
-    // valores (atualização automática)
     document.addEventListener("input", function (ev) {
       var el = ev.target;
-      if (el.dataset.id) estado.valores[el.dataset.id] = lerNumero(el.value);
-      else if (el.id === "mensal") estado.mensal = lerNumero(el.value);
+      if (el.dataset.id) { estado.valores[el.dataset.id] = lerNumero(el.value); estado.editado[el.dataset.id] = true; }
       else if (el.id === "cotacao") { var c = lerNumero(el.value); if (c > 0) estado.cotacao = c; }
-      else if (el.id === "pessoasOutro") estado.pessoas = Math.min(20, Math.max(4, parseInt(el.value, 10) || 4));
-      else if (el.id === "malasOutro") estado.malas = Math.min(10, Math.max(3, parseInt(el.value, 10) || 3));
+      else if (el.id === "pessoasOutro") estado.pessoas = Math.min(12, Math.max(4, parseInt(el.value, 10) || 4));
       else if (el.id === "cidadeOutra") estado.cidadeOutra = el.value;
       else return;
       atualizar();
     });
 
-    // formata ao sair do campo
     document.addEventListener("focusout", function (ev) {
       var el = ev.target;
       if (el.dataset && el.dataset.id) el.value = escreverNumero(estado.valores[el.dataset.id]);
-      else if (el.id === "mensal") el.value = escreverNumero(estado.mensal);
       else if (el.id === "cotacao") el.value = fmtNum.format(estado.cotacao);
       else if (el.id === "pessoasOutro") el.value = estado.pessoas;
-      else if (el.id === "malasOutro") el.value = estado.malas;
     });
 
-    // Enter avança
     document.addEventListener("keydown", function (ev) {
-      if (ev.key === "Enter" && ev.target.tagName === "INPUT" && estado.etapa < 5) {
+      if (ev.key === "Enter" && ev.target.tagName === "INPUT" && estado.etapa < 3) {
         ev.preventDefault(); ev.target.blur(); $("#btnProximo").click();
       }
     });
 
     $("#btnVoltar").addEventListener("click", function () { if (estado.etapa > 1) irPara(estado.etapa - 1); });
     $("#btnProximo").addEventListener("click", function () {
-      if (estado.etapa === 4 && calcular().totalBRL === 0) {
-        aviso("Preencha ao menos um valor para calcular.");
-        return;
-      }
+      if (estado.etapa === 2 && calcular().totalEUR === 0) { aviso("Preencha ao menos um valor."); return; }
       irPara(estado.etapa + 1);
     });
+    $("#btnRestaurar").addEventListener("click", function () {
+      aplicarReferencias(true); escreverCampos(); atualizar(); aviso("Valores de referência restaurados.");
+    });
     $("#btnEditar").addEventListener("click", function () { irPara(2); });
-    var refazerArmado = null;
+
+    var armado = null;
     $("#btnRefazer").addEventListener("click", function () {
       var b = this;
-      if (!refazerArmado) { // confirmação em dois toques (sem pop-up)
+      if (!armado) { // confirmação em dois toques (sem pop-up)
         b.textContent = "Toque de novo para apagar";
-        refazerArmado = setTimeout(function () { refazerArmado = null; b.textContent = "Refazer simulação"; }, 3000);
+        armado = setTimeout(function () { armado = null; b.textContent = "Nova simulação"; }, 3000);
         return;
       }
-      clearTimeout(refazerArmado); refazerArmado = null; b.textContent = "Refazer simulação";
-      estado = estadoInicial();
-      sincronizarFormulario();
+      clearTimeout(armado); armado = null; b.textContent = "Nova simulação";
+      estado = estadoInicial(); aplicarReferencias(true);
+      sincronizarChips(); $("#cidadeOutra").value = ""; $("#pessoasOutro").value = 4;
+      $("#cotacao").value = fmtNum.format(estado.cotacao);
       irPara(1);
     });
+
     $("#btnCopiar").addEventListener("click", function () { copiar(resumoTexto(), "Resumo copiado! Cole onde quiser."); });
     $("#btnCompartilhar").addEventListener("click", function () {
       var texto = resumoTexto();
       if (navigator.share) {
-        navigator.share({ title: "Meu planejamento para imigrar para a Espanha", text: texto })
-          .catch(function (e) { if (e && e.name !== "AbortError") copiar(texto, "Resumo copiado para compartilhar!"); });
+        navigator.share({ title: "Meu custo de vida na Espanha", text: texto })
+          .catch(function (e) { if (!e || e.name !== "AbortError") copiar(texto, "Resumo copiado para compartilhar!"); });
       } else copiar(texto, "Resumo copiado para compartilhar!");
     });
-  }
-
-  function sincronizarChips() {
-    marcarChips("pessoas", estado.pessoas >= 4 ? "4+" : String(estado.pessoas));
-    marcarChips("malas", estado.malas >= 3 ? "3+" : String(estado.malas));
-    var lista = ["Madrid", "Valencia", "Barcelona", "Alicante", "Málaga"];
-    marcarChips("cidade", lista.indexOf(estado.cidade) >= 0 ? estado.cidade : "Outra");
-    marcarChips("meses", String(estado.meses));
-    marcarChips("margem", String(estado.margem));
-    $("#pessoasOutroBox").hidden = estado.pessoas < 4;
-    $("#malasOutroBox").hidden = estado.malas < 3;
-    $("#cidadeOutraBox").hidden = estado.cidade !== "Outra";
   }
 
   // ---------- Início ----------
   function iniciar() {
     if (CFG.INSTAGRAM_URL) $("#linkInstagram").href = CFG.INSTAGRAM_URL; else $("#linkInstagram").hidden = true;
     if (CFG.YOUTUBE_URL) $("#linkYoutube").href = CFG.YOUTUBE_URL; else $("#linkYoutube").hidden = true;
+    $("#refData").textContent = "referência " + (CFG.REFERENCIA_DATA || "");
     estado = estadoInicial();
+    aplicarReferencias(true);
     montarCampos();
-    sincronizarFormulario();
+    sincronizarChips();
+    $("#cotacao").value = fmtNum.format(estado.cotacao);
     ligarEventos();
     irPara(1);
   }
 
-  // Exposto apenas para testes automatizados
-  window.__calc = { calcular: calcular, lerNumero: lerNumero, get estado() { return estado; } };
-
+  window.__calc = { calcular: calcular, get estado() { return estado; } };
   iniciar();
 })();

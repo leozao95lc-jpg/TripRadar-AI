@@ -1,36 +1,33 @@
-# Calculadora de Imigração — Brasil para Espanha (De Mala y Cuia)
+# Custo de Vida na Espanha — De Mala y Cuia
 
-Aplicação web estática: HTML + CSS + JavaScript puro. Sem build, sem dependências, sem banco de dados.
-Nenhum dado do usuário é salvo (sem cookies, sem localStorage, sem envio para servidor).
+Calculadora de custo de vida **mensal** na Espanha (ex.: quanto custa um mês morando num quarto em Madri).
+HTML + CSS + JavaScript puro. Sem build, sem dependências. Nenhum dado do usuário é salvo.
 
-## Arquivos
+## Como funciona
 
-| Arquivo      | O que editar ali |
-|--------------|------------------|
-| `config.js`  | Links do Instagram/YouTube, link público, cotação inicial, valores padrão |
-| `app.js`     | Lista `CAMPOS` (adicionar/remover/renomear itens de custo) e a lógica de cálculo |
-| `styles.css` | Cores da marca (variáveis no topo), fontes e layout |
-| `index.html` | Textos fixos, etapas 1 e 4, rodapé |
+1. **Perfil:** cidade, tipo de moradia (quarto compartilhado, estúdio, ap. 1 ou 2 quartos), nº de pessoas e estilo de vida.
+2. **Gastos:** campos já vêm preenchidos com valores de referência e podem ser editados.
+3. **Resultado:** total mensal em € e R$, valor por pessoa, projeção de 3/6/12 meses e distribuição por categoria.
 
 ## Regras de cálculo
 
-- Etapa 2 em **R$**, etapas 3 e 4 em **€**. Tudo é convertido para R$ pela cotação antes de somar.
-- Itens "por pessoa" são multiplicados pelo nº de pessoas (o usuário pode trocar entre total e por pessoa).
-- Bagagem = custo por mala × malas por pessoa × pessoas.
-- Reserva = meses × gasto mensal do grupo (somada uma única vez).
-- Margem opcional (0/5/10/15%) aplicada sobre o subtotal.
-- Total em € = total em R$ ÷ cotação.
+- Itens "por pessoa" (mercado, transporte, celular, lazer, saúde, outros) × nº de pessoas.
+- Aluguel e contas: total da casa. No quarto compartilhado, são por pessoa (um quarto para cada).
+- Mercado, lazer e outros = base × índice da cidade × multiplicador do estilo (arredondado a €5).
+- Valores editados pelo usuário não são sobrescritos quando ele muda o perfil.
+- R$ = € × cotação (editável, não é tempo real).
 
-## Publicar (link público para a bio)
+## Valores de referência (`config.js`)
 
-Qualquer hospedagem estática serve. As mais simples:
+| Item | Fonte |
+|------|-------|
+| Quarto compartilhado | Idealista, relatórios de habitações 1º/2º tri 2026 |
+| Transporte Madrid (€32,70) | CRTM 2026, com desconto de 40% válido até 31/12/2026 |
+| Estúdio / apartamentos, demais transportes, mercado, lazer, contas | **Estimativas: validar antes de divulgar** |
 
-1. **Netlify Drop**: arraste a pasta `calculadora-espanha` em https://app.netlify.com/drop e você recebe um link na hora.
-2. **Vercel**: importe o repositório e defina *Root Directory* = `apps/calculadora-espanha`, sem comando de build.
-3. **GitHub Pages**: copie a pasta para um repositório próprio e ative Pages (branch `main`, pasta raiz).
+Atualize os valores e `REFERENCIA_DATA` periodicamente (sugestão: a cada trimestre).
 
-Depois de publicar, preencha `APP_URL` em `config.js` com o link final (ele vai no texto compartilhado).
+## Publicar
 
-## Testar localmente
-
-Abra `index.html` no navegador, ou rode `python3 -m http.server` dentro da pasta.
+Arraste esta pasta em https://app.netlify.com/drop (ou Vercel com Root Directory = esta pasta).
+Depois preencha `APP_URL` em `config.js` com o link final.
