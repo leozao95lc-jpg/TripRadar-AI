@@ -53,7 +53,7 @@ window.CALC_DATA = {
  },
  "parametros": {
   "data_atualizacao": "nov/2026",
-  "cotacao_fallback": 6.3,
+  "cotacao_fallback": 6.16,
   "cotacao_fallback_data": "05/11/2026",
   "aluguel_fator_essencial": 0.9,
   "premio_recem_chegado": 0.12,

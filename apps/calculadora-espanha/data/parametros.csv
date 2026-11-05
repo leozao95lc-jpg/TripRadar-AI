@@ -1,6 +1,6 @@
 chave;valor;fonte;nota
 data_atualizacao;nov/2026;;Data exibida na página
-cotacao_fallback;6,30;estimativa_dmc;Usada se a API de câmbio não responder
+cotacao_fallback;6,16;estimativa_dmc;Usada se a API de câmbio não responder
 cotacao_fallback_data;05/11/2026;;
 aluguel_fator_essencial;0,90;estimativa_dmc;Essencial = buscar abaixo da média
 premio_recem_chegado;0,12;estimativa_dmc;Real = sem histórico/nómina, mobiliado, temporada
