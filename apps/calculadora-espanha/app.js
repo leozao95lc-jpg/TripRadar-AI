@@ -15,10 +15,10 @@
   var CURTO = { essencial: "Essen.", confortavel: "Confort.", real: "Real" };
   var DESC = {
     essencial: "O piso: sem lazer pago, aluguel abaixo da média.",
-    confortavel: "Vida normal de classe média.",
-    real: "Como recém-chegados gastam de fato, com imprevistos."
+    confortavel: "Vida normal, como a nossa em Valência.",
+    real: "Com folga: passagem ao Brasil, imprevistos e o aluguel mais caro de quem acabou de chegar."
   };
-  var TIPO_SELO = { oficial: ["fonte", "fonte"], portal: ["fonte", "fonte"], estimativa: ["estimativa", "estimativa"], terceiro: ["terceiro", "terceiro"], imprensa: ["imprensa", "imprensa"] };
+  var TIPO_SELO = { oficial: ["fonte", "fonte"], portal: ["fonte", "fonte"], estimativa: ["estimativa", "estimativa"], terceiro: ["terceiro", "terceiro"], imprensa: ["imprensa", "imprensa"], comprovante: ["fonte", "nosso gasto"] };
 
   // ---------- Estado ----------
   var cambioPadrao = D.cambio[0];

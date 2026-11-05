@@ -23,6 +23,8 @@ Versão de referência: nov/2026.
 | 11 | `luz`/`gas` só por perfil | Ignora clima (aquecimento em Madrid × Málaga). | `fator_clima_luz` por cidade. |
 | 12 | Pontos fortes a manter | Fonte e data por cidade (`updated`, `sources`), perfis familiares e referência nomeada de bairro. | Mantidos e ampliados: cada linha mostra um selo de fonte, estimativa ou terceiro. |
 
+**Calibração com dados reais (nov/2026):** mercado, celular, seguro, farmácia, lazer, roupas, outros e contas do quarto foram calibrados com o orçamento comprovado do Café com Imigração (cap. 11 e 12): casal, quarto no centro de Valência, € 1.413 + seguro = € 1.522/mês planejados, € 1.472 gastos em outubro. A calculadora reproduz € 1.472 no cenário Confortável para esse perfil.
+
 **Riscos remanescentes (nossos):** aluguel de apartamento em Alicante (€/m² ambíguo entre 12,6 e 13,6), transporte fora de Madrid, cesta de supermercado, lazer e enxoval são **estimativas** e aparecem como tal na página. Antes de divulgar, valide com gastos reais da comunidade.
 
 ---

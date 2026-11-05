@@ -49,6 +49,13 @@ window.CALC_DATA = {
    "url": "https://docs.awesomeapi.com.br/api-de-moedas",
    "data": "tempo real",
    "tipo": "portal"
+  },
+  "cafe_com_imigracao": {
+   "id": "cafe_com_imigracao",
+   "titulo": "Café com Imigração, cap. 11 e 12: orçamento real de um casal em Valência (comprovantes, out–nov/2026)",
+   "url": null,
+   "data": "2026-11",
+   "tipo": "comprovante"
   }
  },
  "parametros": {
@@ -311,17 +318,17 @@ window.CALC_DATA = {
   },
   {
    "id": "contas_quarto",
-   "nome": "Contas do quarto (luz, água, internet)",
+   "nome": "Contas do quarto (excedente)",
    "grupo": "Moradia",
    "unidade": "adulto",
    "aplica": "quarto",
    "opcional": null,
-   "essencial": 40,
-   "confortavel": 50,
-   "real": 60,
+   "essencial": 0,
+   "confortavel": 10,
+   "real": 20,
    "escala_cidade": "nao",
-   "fonte": "estimativa_dmc",
-   "nota": "Muitas vezes já incluídas no aluguel"
+   "fonte": "cafe_com_imigracao",
+   "nota": "No quarto, as contas costumam vir no aluguel (no nosso, até € 30 por pessoa)"
   },
   {
    "id": "mercado_adulto",
@@ -330,12 +337,12 @@ window.CALC_DATA = {
    "unidade": "adulto",
    "aplica": "todos",
    "opcional": null,
-   "essencial": 200,
-   "confortavel": 260,
-   "real": 300,
+   "essencial": 175,
+   "confortavel": 215,
+   "real": 260,
    "escala_cidade": "sim",
-   "fonte": "estimativa_dmc",
-   "nota": null
+   "fonte": "cafe_com_imigracao",
+   "nota": "Nosso casal: € 400 planejados, € 500 no 1º mês"
   },
   {
    "id": "mercado_crianca",
@@ -344,9 +351,9 @@ window.CALC_DATA = {
    "unidade": "crianca",
    "aplica": "todos",
    "opcional": null,
-   "essencial": 120,
-   "confortavel": 155,
-   "real": 180,
+   "essencial": 105,
+   "confortavel": 130,
+   "real": 155,
    "escala_cidade": "sim",
    "fonte": "estimativa_dmc",
    "nota": null
@@ -363,7 +370,7 @@ window.CALC_DATA = {
    "real": "@transporte",
    "escala_cidade": "nao",
    "fonte": "@fonte_transporte",
-   "nota": "Crianças: passe gratuito ou simbólico"
+   "nota": "Quem mora no centro e anda a pé gasta bem menos"
   },
   {
    "id": "celular",
@@ -372,12 +379,12 @@ window.CALC_DATA = {
    "unidade": "adulto",
    "aplica": "todos",
    "opcional": null,
-   "essencial": 12,
-   "confortavel": 15,
-   "real": 20,
+   "essencial": 8,
+   "confortavel": 10,
+   "real": 15,
    "escala_cidade": "nao",
-   "fonte": "briefing_valencia",
-   "nota": null
+   "fonte": "cafe_com_imigracao",
+   "nota": "Nosso casal: € 20 para os dois"
   },
   {
    "id": "saude",
@@ -388,10 +395,10 @@ window.CALC_DATA = {
    "opcional": "seguro",
    "essencial": 55,
    "confortavel": 55,
-   "real": 70,
+   "real": 60,
    "escala_cidade": "nao",
-   "fonte": "briefing_valencia",
-   "nota": "Varia muito com a idade"
+   "fonte": "cafe_com_imigracao",
+   "nota": "Nosso casal: € 1.310/ano. Varia com a idade"
   },
   {
    "id": "farmacia",
@@ -400,11 +407,11 @@ window.CALC_DATA = {
    "unidade": "pessoa",
    "aplica": "todos",
    "opcional": null,
-   "essencial": 20,
-   "confortavel": 30,
-   "real": 40,
+   "essencial": 10,
+   "confortavel": 15,
+   "real": 25,
    "escala_cidade": "sim",
-   "fonte": "estimativa_dmc",
+   "fonte": "cafe_com_imigracao",
    "nota": null
   },
   {
@@ -415,11 +422,11 @@ window.CALC_DATA = {
    "aplica": "todos",
    "opcional": null,
    "essencial": 30,
-   "confortavel": 120,
-   "real": 180,
+   "confortavel": 85,
+   "real": 95,
    "escala_cidade": "sim",
-   "fonte": "estimativa_dmc",
-   "nota": null
+   "fonte": "cafe_com_imigracao",
+   "nota": "Nosso casal: € 160 por mês"
   },
   {
    "id": "roupas",
@@ -429,24 +436,24 @@ window.CALC_DATA = {
    "aplica": "todos",
    "opcional": null,
    "essencial": 0,
-   "confortavel": 40,
-   "real": 50,
+   "confortavel": 15,
+   "real": 25,
    "escala_cidade": "nao",
-   "fonte": "estimativa_dmc",
+   "fonte": "cafe_com_imigracao",
    "nota": null
   },
   {
    "id": "academia",
-   "nome": "Academia e esporte",
+   "nome": "Outros (academia, assinaturas)",
    "grupo": "Pessoal",
    "unidade": "adulto",
    "aplica": "todos",
    "opcional": null,
-   "essencial": 0,
-   "confortavel": 35,
-   "real": 40,
+   "essencial": 10,
+   "confortavel": 20,
+   "real": 25,
    "escala_cidade": "sim",
-   "fonte": "estimativa_dmc",
+   "fonte": "cafe_com_imigracao",
    "nota": null
   },
   {
@@ -461,7 +468,7 @@ window.CALC_DATA = {
    "real": 160,
    "escala_cidade": "sim",
    "fonte": "estimativa_dmc",
-   "nota": "Escola pública é gratuita. O briefing usa € 207 (provável concertada/creche)"
+   "nota": "Escola pública é gratuita"
   },
   {
    "id": "viagem_brasil",
@@ -472,10 +479,10 @@ window.CALC_DATA = {
    "opcional": null,
    "essencial": 0,
    "confortavel": 0,
-   "real": 85,
+   "real": 60,
    "escala_cidade": "nao",
    "fonte": "estimativa_dmc",
-   "nota": "€ 1.000/ano ÷ 12"
+   "nota": "€ 700/ano ÷ 12"
   },
   {
    "id": "documentos",
@@ -500,10 +507,10 @@ window.CALC_DATA = {
    "opcional": null,
    "essencial": 0,
    "confortavel": 0,
-   "real": 0.08,
+   "real": 0.05,
    "escala_cidade": "nao",
    "fonte": "estimativa_dmc",
-   "nota": "8% sobre o subtotal do cenário Real"
+   "nota": "5% sobre o subtotal do cenário Real"
   }
  ],
  "cambio": [

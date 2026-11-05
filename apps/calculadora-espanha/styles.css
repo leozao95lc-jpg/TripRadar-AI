@@ -83,6 +83,8 @@ legend { font-weight: 600; font-size: 14px; margin-bottom: 8px; padding: 0; }
 .camada[aria-checked="true"] .c-nome { color: var(--dourado); }
 .camada[aria-checked="true"] .c-eur { color: #fff; }
 .camada[aria-checked="true"] .c-brl, .camada[aria-checked="true"] .c-desc { color: rgba(244,235,221,.85); }
+.caso-real { margin: 12px 0 0; background: rgba(201,162,39,.14); border-radius: 14px; padding: 12px 14px; font-size: 13.5px; }
+.caso-real a { color: var(--laranja); font-weight: 600; white-space: nowrap; }
 .dica-centro { text-align: center; font-size: 12px; color: var(--suave); margin: 10px 0 0; }
 
 /* Tabela de detalhamento */
