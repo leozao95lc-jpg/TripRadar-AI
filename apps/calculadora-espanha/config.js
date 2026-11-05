@@ -17,10 +17,21 @@ window.CALC_CONFIG = {
   //   "netlify"  -> Netlify Forms (grátis, sem backend). Funciona ao publicar no Netlify.
   //   "endpoint" -> POST JSON para LEAD_ENDPOINT (Google Apps Script, Formspree, Make, n8n…)
   //   "demo"     -> não envia nada (apenas para pré-visualização)
-  LEAD_MODO: "netlify",
+  //   "mailerlite" -> formulário do MailerLite (veja MAILERLITE.md). Sem os IDs abaixo, cai no Netlify.
+  LEAD_MODO: "mailerlite",
   LEAD_ENDPOINT: "",
+
+  // MailerLite: copie do código de incorporação do formulário, no trecho
+  // action="https://assets.mailerlite.com/jsonp/ACCOUNT_ID/forms/FORM_ID/subscribe"
+  MAILERLITE_ACCOUNT_ID: "",
+  MAILERLITE_FORM_ID: "",
+  // Campos extras enviados ao MailerLite (crie antes, com estes nomes, em Assinantes > Campos).
+  // Ex.: ["cidade", "moradia", "cenario", "custo_mensal_eur"]. Vazio = só nome, e-mail e telefone.
+  MAILERLITE_CAMPOS_EXTRAS: [],
+
+  HOTMART_URL: "", // link do e-book completo, mostrado após o cadastro
   LEAD_TITULO: "Receba uma amostra do Café com Imigração",
-  LEAD_TEXTO: "Deixe seu e-mail e enviamos, de graça, o capítulo 9 do Café com Imigração.",
+  LEAD_TEXTO: "O capítulo 9 completo, de graça no seu e-mail: Moradia sem cair em golpe. Os 4 cuidados que fizeram a gente pegar a chave no 3º dia em Valência, quanto pagamos para entrar (com comprovante) e um checklist de 16 itens.",
   LEAD_MATERIAL: "cafe-com-imigracao-cap9", // identifica o material pedido no lead
   WHATSAPP_GRUPO_URL: "" // opcional: link do grupo/comunidade mostrado após o cadastro
 };

@@ -252,7 +252,19 @@
     };
     btn.disabled = true; msg.textContent = "Enviando…";
     var envio;
-    if (CFG.LEAD_MODO === "netlify") {
+    var ml = CFG.LEAD_MODO === "mailerlite" && CFG.MAILERLITE_ACCOUNT_ID && CFG.MAILERLITE_FORM_ID;
+    if (ml) {
+      // Formulário embutido do MailerLite: mesmo envio que o código de incorporação dele faz (sem chave de API na página).
+      var mlCorpo = new URLSearchParams();
+      mlCorpo.append("fields[email]", dados.email);
+      if (dados.nome) mlCorpo.append("fields[name]", dados.nome);
+      if (dados.whatsapp) mlCorpo.append("fields[phone]", dados.whatsapp);
+      (CFG.MAILERLITE_CAMPOS_EXTRAS || []).forEach(function (k) { if (dados[k] !== undefined && dados[k] !== "") mlCorpo.append("fields[" + k + "]", dados[k]); });
+      mlCorpo.append("ml-submit", "1"); mlCorpo.append("anticsrf", "true");
+      envio = fetch("https://assets.mailerlite.com/jsonp/" + CFG.MAILERLITE_ACCOUNT_ID + "/forms/" + CFG.MAILERLITE_FORM_ID + "/subscribe",
+        { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: mlCorpo.toString() })
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok && j && j.success !== false }; }); });
+    } else if (CFG.LEAD_MODO === "netlify" || CFG.LEAD_MODO === "mailerlite") { // MailerLite sem IDs: guarda no Netlify
       var corpo = new URLSearchParams(dados); corpo.append("form-name", "leads");
       envio = fetch("/", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: corpo.toString() });
     } else if (CFG.LEAD_MODO === "endpoint" && CFG.LEAD_ENDPOINT) {
@@ -263,7 +275,8 @@
     envio.then(function (r) {
       if (r && r.ok === false) throw new Error("http");
       $("#leadForm").reset();
-      msg.innerHTML = (r && r.demo ? "Modo demonstração: nada foi enviado. " : "") + "Pronto! A amostra do Café com Imigração chega no seu e-mail em instantes." +
+      msg.innerHTML = (r && r.demo ? "Modo demonstração: nada foi enviado. " : "") + "Pronto! O capítulo 9 chega no seu e-mail em alguns minutos. Se não aparecer, confira a caixa de spam ou Promoções." +
+        (CFG.HOTMART_URL ? ' <a href="' + esc(CFG.HOTMART_URL) + '" target="_blank" rel="noopener">Conheça o e-book completo.</a>' : "") +
         (CFG.WHATSAPP_GRUPO_URL ? ' <a href="' + esc(CFG.WHATSAPP_GRUPO_URL) + '" target="_blank" rel="noopener">Entre também na comunidade.</a>' : "");
     }).catch(function () {
       msg.textContent = "Não conseguimos enviar agora. Verifique sua conexão e tente de novo.";

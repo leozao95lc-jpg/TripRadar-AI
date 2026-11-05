@@ -33,13 +33,14 @@ Câmbio: a página consulta a cotação comercial ao abrir e a cada 5 minutos (A
 ## Captura de leads
 
 Escolha em `config.js` → `LEAD_MODO`:
-- `"netlify"` (padrão): Netlify Forms, grátis e sem backend. Os leads aparecem no painel do Netlify em *Forms → leads*.
+- `"mailerlite"` (padrão): envia para um formulário do MailerLite, que dispara a automação com o capítulo 9. Passo a passo e textos dos e-mails em **`MAILERLITE.md`**. Sem os IDs preenchidos, os leads ficam guardados no Netlify.
+- `"netlify"`: Netlify Forms, grátis e sem backend. Os leads aparecem no painel do Netlify em *Forms → leads*.
 - `"endpoint"`: POST JSON para `LEAD_ENDPOINT` (Google Apps Script → Planilha, Make, n8n, RD Station).
 - `"demo"`: não envia nada.
 
 Cada lead traz a simulação (cidade, moradia, perfil, cenário, custo em € e R$), o material pedido e as UTMs.
 
-Importante: o Netlify Forms só **guarda** o lead. Para **enviar o capítulo por e-mail** automaticamente, conecte uma ferramenta de e-mail (ex.: Brevo ou MailerLite via webhook do Netlify, ou `LEAD_MODO: "endpoint"` apontando para a automação).
+Importante: o Netlify Forms só **guarda** o lead. Quem envia o capítulo é a automação do MailerLite.
 
 ## Publicar
 
