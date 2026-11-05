@@ -185,6 +185,12 @@ legend { font-weight: 600; font-size: 14px; margin-bottom: 8px; padding: 0; }
 /* Câmbio */
 .fx-res { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .fx-res .kpi strong { font-size: 24px; }
+.fx-res .fx-total { grid-column: 1 / -1; background: var(--verde); }
+.fx-res .fx-total span, .fx-res .fx-total em { color: rgba(244,235,221,.85); }
+.fx-res .fx-total strong { color: #fff; font-size: 32px; }
+
+.ajuste-fx { margin-top: 12px; font-size: 13px; }
+.ajuste-fx summary { cursor: pointer; font-weight: 600; color: var(--verde-2); margin-bottom: 10px; }
 
 /* Lead */
 .lead { background: var(--verde); color: var(--creme); }

@@ -8,9 +8,10 @@ window.CALC_CONFIG = {
   YOUTUBE_URL: "https://www.youtube.com/@demalaycuia",
   APP_URL: "", // link público (vai no texto compartilhado). Vazio = endereço da página.
 
-  // Cotação comercial ao vivo (BCE via Frankfurter, sem chave). false = usa cotacao_fallback da planilha.
+  // Cotação comercial ao vivo, sem chave de API. false = usa cotacao_fallback da planilha.
+  // Fonte principal: AwesomeAPI (atualiza ao longo do dia). Reserva: BCE via Frankfurter (1x por dia útil).
   CAMBIO_AO_VIVO: true,
-  CAMBIO_API: "https://api.frankfurter.app/latest?from=EUR&to=BRL",
+  CAMBIO_ATUALIZAR_MIN: 5, // reconsulta a cada N minutos com a página aberta
 
   // Captura de lead
   //   "netlify"  -> Netlify Forms (grátis, sem backend). Funciona ao publicar no Netlify.
@@ -18,7 +19,8 @@ window.CALC_CONFIG = {
   //   "demo"     -> não envia nada (apenas para pré-visualização)
   LEAD_MODO: "netlify",
   LEAD_ENDPOINT: "",
-  LEAD_TITULO: "Receba seu plano de mudança completo",
-  LEAD_TEXTO: "Enviamos por e-mail a sua simulação, o checklist dos primeiros 30 dias na Espanha e os alertas quando os valores de referência forem atualizados.",
+  LEAD_TITULO: "Receba uma amostra do Café com Imigração",
+  LEAD_TEXTO: "Deixe seu e-mail e enviamos, de graça, o capítulo 9 do Café com Imigração.",
+  LEAD_MATERIAL: "cafe-com-imigracao-cap9", // identifica o material pedido no lead
   WHATSAPP_GRUPO_URL: "" // opcional: link do grupo/comunidade mostrado após o cadastro
 };

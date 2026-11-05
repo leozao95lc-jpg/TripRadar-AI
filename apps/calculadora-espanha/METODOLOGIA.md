@@ -1,6 +1,8 @@
 # Metodologia: Custo de Vida na Espanha (De Mala y Cuia)
 
-Versão de referência: nov/2026. Este documento registra a crítica ao briefing de referência, o modelo de dados, as fórmulas e o layout.
+Versão de referência: nov/2026.
+
+> **v3.1 (simplificação):** a página publicada mostra só o custo mensal em 3 cenários e a conversão para reais. Custo de chegada, renda necessária e duração da reserva foram retirados da página; as seções 3 e 4 abaixo registram como eram calculados, caso voltem no futuro. Este documento registra a crítica ao briefing de referência, o modelo de dados, as fórmulas e o layout.
 
 ---
 

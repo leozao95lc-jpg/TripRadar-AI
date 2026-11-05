@@ -5,7 +5,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), "..");
-const ABAS = ["fontes", "parametros", "irpf", "cidades", "tipologias", "perfis", "itens", "chegada", "cambio"];
+const ABAS = ["fontes", "parametros", "cidades", "tipologias", "perfis", "itens", "cambio"];
 
 function valor(s) {
   s = s.trim();
@@ -31,7 +31,7 @@ d.fontes = Object.fromEntries(d.fontes.map(f => [f.id, f]));
 
 // Validação: toda fonte citada precisa existir em fontes.csv
 const citadas = [];
-for (const aba of ["cidades", "tipologias", "itens", "chegada", "cambio"])
+for (const aba of ["cidades", "tipologias", "itens", "cambio"])
   for (const r of d[aba]) for (const [k, v] of Object.entries(r))
     if ((k === "fonte" || k.startsWith("fonte_")) && v && !String(v).startsWith("@")) citadas.push([aba, v]);
 const faltando = citadas.filter(([, f]) => !d.fontes[f]);

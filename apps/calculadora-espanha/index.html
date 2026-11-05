@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Custo de Vida na Espanha | De Mala y Cuia</title>
   <meta name="claude:viewport-fit-sides" content="cover" />
-  <meta name="description" content="Quanto custa viver na Espanha de verdade? 3 cenários, custo de chegada, salário necessário, quanto dura sua reserva e câmbio real com IOF. Valores com fonte e data." />
+  <meta name="description" content="Quanto custa viver na Espanha de verdade? Custo mensal em 3 cenários, com câmbio atualizado e valores com fonte e data." />
   <meta name="theme-color" content="#1F3D2B" />
   <meta property="og:title" content="Quanto custa viver na Espanha, de verdade?" />
-  <meta property="og:description" content="3 cenários, custo de chegada, salário necessário e quanto dura sua reserva. Com fontes e data de atualização." />
+  <meta property="og:description" content="Seu custo mensal em 3 cenários, com câmbio atualizado. Com fontes e data." />
   <meta property="og:type" content="website" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%231F3D2B'/><text x='50' y='68' font-size='54' text-anchor='middle' fill='%23F4EBDD' font-family='Georgia'>M</text></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -21,14 +21,13 @@
   <form name="leads" data-netlify="true" netlify-honeypot="bot-field" hidden>
     <input name="nome" /><input name="email" /><input name="whatsapp" /><input name="consentimento" />
     <input name="cidade" /><input name="moradia" /><input name="zona" /><input name="perfil" /><input name="cenario" />
-    <input name="custo_mensal_eur" /><input name="chegada_eur" /><input name="bruto_anual_eur" /><input name="runway_meses" />
-    <input name="reserva_brl" /><input name="utm_source" /><input name="utm_medium" /><input name="utm_campaign" /><input name="bot-field" />
+    <input name="custo_mensal_eur" /><input name="custo_mensal_brl" /><input name="material" /><input name="utm_source" /><input name="utm_medium" /><input name="utm_campaign" /><input name="bot-field" />
   </form>
 
   <header class="hero">
     <div class="marca">De Mala y Cuia <span aria-hidden="true">🇧🇷 🇪🇸</span></div>
     <h1>Quanto custa viver na Espanha, <em>de verdade?</em></h1>
-    <p class="hero-sub">Três cenários, custo de chegada, salário necessário, quanto dura sua reserva e o câmbio que você realmente paga. Valores com fonte e data.</p>
+    <p class="hero-sub">Seu custo mensal em três cenários, convertido pelo câmbio que você realmente paga. Valores com fonte e data.</p>
     <p class="hero-meta" id="heroMeta"></p>
   </header>
 
@@ -77,10 +76,6 @@
         <p class="dica-centro">Toque em um cenário para usá-lo em todos os cálculos abaixo.</p>
       </section>
 
-      <nav class="atalhos" aria-label="Seções">
-        <a href="#detalhe">Mês a mês</a><a href="#chegada">Chegada</a><a href="#renda">Renda</a><a href="#reserva">Reserva</a><a href="#cambio">Câmbio</a><a href="#fontes">Fontes</a>
-      </nav>
-
       <!-- DETALHAMENTO -->
       <section class="bloco" id="detalhe" aria-labelledby="tDetalhe">
         <h2 id="tDetalhe">Para onde vai o dinheiro</h2>
@@ -88,77 +83,26 @@
         <div class="tabela-wrap"><table class="tabela" id="tabela"></table></div>
         <p class="legenda-fonte"><span class="selo fonte">fonte</span> dado com fonte publicada <span class="selo estimativa">estimativa</span> estimativa a validar <span class="selo terceiro">terceiro</span> referência de terceiros</p>
       </section>
-
-      <!-- CHEGADA -->
-      <section class="bloco" id="chegada" aria-labelledby="tChegada">
-        <h2 id="tChegada">Custo de chegada</h2>
-        <p class="lead-txt">O que você paga <b>uma única vez</b> antes do primeiro mês normal, no cenário <b data-cenario-nome></b>.</p>
-        <div class="kpi-linha">
-          <div class="kpi"><span>Total de chegada</span><strong id="chegadaTotal"></strong><em id="chegadaBRL"></em></div>
-          <div class="kpi"><span>Equivale a</span><strong id="chegadaMeses"></strong><em>do custo mensal</em></div>
-        </div>
-        <ul class="lista" id="listaChegada"></ul>
-      </section>
-
-      <!-- RENDA NECESSÁRIA -->
-      <section class="bloco" id="renda" aria-labelledby="tRenda">
-        <h2 id="tRenda">Quanto você precisa ganhar</h2>
-        <p class="lead-txt">Calculadora reversa: o salário <b>bruto</b> que cobre o cenário <b data-cenario-nome></b> depois de impostos.</p>
-        <fieldset class="grupo" id="trabBox">
-          <legend>Quantas pessoas vão trabalhar?</legend>
-          <div class="chips" data-chips="trabalhadores">
-            <button type="button" data-v="1">1 pessoa</button>
-            <button type="button" data-v="2">2 pessoas</button>
-          </div>
-        </fieldset>
-        <div class="renda-grid">
-          <div class="cartao-renda destaque-verde">
-            <span class="cr-tag">Contrato na Espanha</span>
-            <strong id="rBruto14"></strong>
-            <em id="rBrutoAnual"></em>
-            <ul class="mini" id="rDetalhe"></ul>
-          </div>
-          <div class="cartao-renda">
-            <span class="cr-tag">Renda remota em reais</span>
-            <strong id="rRemoto"></strong>
-            <em>por mês, já com o câmbio efetivo</em>
-            <p class="mini-txt">Morando mais de 183 dias por ano na Espanha, você vira residente fiscal lá. A renda remota também paga imposto espanhol, o que este valor ainda não inclui.</p>
-          </div>
-        </div>
-        <div class="comparativo" id="rComparativo"></div>
-      </section>
-
-      <!-- RUNWAY -->
-      <section class="bloco" id="reserva" aria-labelledby="tReserva">
-        <h2 id="tReserva">Quanto tempo sua reserva dura</h2>
-        <div class="form-linha">
-          <label class="campo" for="reservaBRL"><span>Reserva que você vai levar</span>
-            <span class="entrada"><i>R$</i><input id="reservaBRL" type="text" inputmode="decimal" autocomplete="off" /></span></label>
-          <label class="campo" for="rendaEUR"><span>Renda mensal na Espanha</span>
-            <span class="entrada"><i>€</i><input id="rendaEUR" type="text" inputmode="decimal" placeholder="0" autocomplete="off" /></span></label>
-          <label class="campo" for="inicioRenda"><span>A renda começa após</span>
-            <span class="entrada"><input id="inicioRenda" type="number" min="0" max="24" inputmode="numeric" /><i>meses</i></span></label>
-        </div>
-        <div class="runway" id="runway"></div>
-      </section>
-
       <!-- CÂMBIO -->
       <section class="bloco" id="cambio" aria-labelledby="tCambio">
-        <h2 id="tCambio">O câmbio que você realmente paga</h2>
+        <h2 id="tCambio">Quanto isso dá em reais</h2>
+        <p class="lead-txt" id="fxOrigem"></p>
         <fieldset class="grupo">
-          <legend>Como vai converter o dinheiro?</legend>
+          <legend>Como você vai pagar na Espanha?</legend>
           <div class="chips" data-chips="metodo" id="chipsMetodo"></div>
         </fieldset>
-        <div class="form-linha">
-          <label class="campo" for="fxComercial"><span>Cotação comercial (1 €)</span>
-            <span class="entrada"><i>R$</i><input id="fxComercial" type="text" inputmode="decimal" autocomplete="off" /></span></label>
-          <label class="campo" for="fxSpread"><span>Spread</span>
-            <span class="entrada"><input id="fxSpread" type="text" inputmode="decimal" autocomplete="off" /><i>%</i></span></label>
-          <label class="campo" for="fxIof"><span>IOF</span>
-            <span class="entrada"><input id="fxIof" type="text" inputmode="decimal" autocomplete="off" /><i>%</i></span></label>
-        </div>
-        <p class="dica" id="fxOrigem"></p>
         <div class="fx-res" id="fxRes"></div>
+        <details class="ajuste-fx">
+          <summary>Ajustar cotação, spread e IOF</summary>
+          <div class="form-linha">
+            <label class="campo" for="fxComercial"><span>Cotação comercial (1 €)</span>
+              <span class="entrada"><i>R$</i><input id="fxComercial" type="text" inputmode="decimal" autocomplete="off" /></span></label>
+            <label class="campo" for="fxSpread"><span>Spread</span>
+              <span class="entrada"><input id="fxSpread" type="text" inputmode="decimal" autocomplete="off" /><i>%</i></span></label>
+            <label class="campo" for="fxIof"><span>IOF</span>
+              <span class="entrada"><input id="fxIof" type="text" inputmode="decimal" autocomplete="off" /><i>%</i></span></label>
+          </div>
+        </details>
       </section>
 
       <!-- LEAD -->
@@ -172,7 +116,7 @@
           <p class="hp" aria-hidden="true"><label>Não preencha<input name="bot-field" tabindex="-1" autocomplete="off" /></label></p>
           <label class="check" for="leadConsent"><input type="checkbox" id="leadConsent" />
             <span>Aceito receber conteúdos do De Mala y Cuia por e-mail e WhatsApp. Posso cancelar quando quiser. Meus dados não são vendidos nem compartilhados (LGPD).</span></label>
-          <button type="submit" class="btn btn-laranja" id="leadBtn">Quero meu plano</button>
+          <button type="submit" class="btn btn-laranja" id="leadBtn">Quero receber a amostra</button>
           <p class="lead-msg" id="leadMsg" role="status" aria-live="polite"></p>
         </form>
       </section>
@@ -195,7 +139,7 @@
             <li><b>Real:</b> o que recém-chegados costumam gastar de fato. Aluguel 12% acima da média (sem histórico na Espanha, imóvel mobiliado, contrato de temporada), passagem anual ao Brasil, renovação de documentos e 8% de imprevistos.</li>
             <li>Aluguel de apartamento = €/m² médio da cidade × área típica (estúdio 40 m², 1 quarto 55 m², 2 quartos 75 m²), com prêmio para imóveis pequenos.</li>
             <li>Salário necessário: IRPF simplificado (escala geral, contribuinte sem filhos) e Seguridade Social de 6,5%. O imposto real muda conforme a comunidade autônoma e a família.</li>
-            <li>Câmbio efetivo = cotação comercial × (1 + spread) × (1 + IOF).</li>
+            <li>Câmbio efetivo = cotação comercial × (1 + spread) × (1 + IOF). A cotação comercial é atualizada automaticamente enquanto a página está aberta.</li>
           </ul>
         </details>
       </section>
@@ -212,7 +156,7 @@
       <a id="linkInstagram" href="#" target="_blank" rel="noopener">Instagram</a>
       <a id="linkYoutube" href="#" target="_blank" rel="noopener">YouTube</a>
     </div>
-    <p class="aviso">Esta calculadora apresenta estimativas de planejamento financeiro. Os valores variam conforme bairro, época, perfil familiar e situação migratória. Não substitui orientação jurídica, fiscal ou financeira. A simulação não é salva; só guardamos seus dados de contato se você enviar o formulário.</p>
+    <p class="aviso">Esta calculadora apresenta estimativas de planejamento financeiro. Os valores variam conforme bairro, época, perfil familiar e situação migratória. Não substitui orientação jurídica ou financeira. A simulação não é salva; só guardamos seus dados de contato se você enviar o formulário.</p>
   </footer>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>

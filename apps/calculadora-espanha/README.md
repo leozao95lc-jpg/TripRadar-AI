@@ -1,6 +1,6 @@
 # Custo de Vida na Espanha (De Mala y Cuia)
 
-Calculadora de custo de vida na Espanha para brasileiros: 3 cenários (Essencial, Confortável, Real), custo de chegada, salário bruto necessário, quanto dura a reserva e câmbio efetivo com spread e IOF. Mostra fonte e data de cada valor e tem captura de lead.
+Calculadora de custo de vida mensal na Espanha para brasileiros: 3 cenários (Essencial, Confortável, Real) e conversão para reais com câmbio atualizado automaticamente (spread e IOF incluídos). Mostra fonte e data de cada valor e captura leads para a amostra do Café com Imigração.
 
 HTML + CSS + JavaScript puro. Sem build de front-end, sem dependências.
 
@@ -28,6 +28,8 @@ node scripts/build-data.mjs
 
 Rotina sugerida: revisão trimestral; em janeiro, revisar o transporte (os descontos de 2026 vencem em 31/12).
 
+Câmbio: a página consulta a cotação comercial ao abrir e a cada 5 minutos (AwesomeAPI; reserva: BCE via Frankfurter). Se as duas falharem, usa `cotacao_fallback` da planilha.
+
 ## Captura de leads
 
 Escolha em `config.js` → `LEAD_MODO`:
@@ -35,7 +37,9 @@ Escolha em `config.js` → `LEAD_MODO`:
 - `"endpoint"`: POST JSON para `LEAD_ENDPOINT` (Google Apps Script → Planilha, Make, n8n, RD Station).
 - `"demo"`: não envia nada.
 
-Cada lead traz a simulação (cidade, moradia, cenário, custo, chegada, salário, runway, reserva) e as UTMs.
+Cada lead traz a simulação (cidade, moradia, perfil, cenário, custo em € e R$), o material pedido e as UTMs.
+
+Importante: o Netlify Forms só **guarda** o lead. Para **enviar o capítulo por e-mail** automaticamente, conecte uma ferramenta de e-mail (ex.: Brevo ou MailerLite via webhook do Netlify, ou `LEAD_MODO: "endpoint"` apontando para a automação).
 
 ## Publicar
 
