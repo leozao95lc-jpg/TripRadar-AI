@@ -1,0 +1,6 @@
+id;nome;aluguel_m2;fonte_aluguel_m2;quarto;fonte_quarto;agua;transporte;transporte_nome;fonte_transporte;fator_custo;fator_clima_luz;centro_fator;centro_ref;periferia_fator;periferia_ref;periferia_transporte_extra;fonte_zonas;hospedagem_noite;atualizado
+madrid;Madrid;23,3;idealista_alquiler_2026;587;idealista_quartos_2026;25;32,7;Abono 30 dias zona A;crtm_2026;1,00;1,10;1,20;Centro, Salamanca;0,70;Móstoles, Alcalá;10,5;estimativa_dmc;55;2026-06
+barcelona;Barcelona;22,0;idealista_alquiler_2026;600;idealista_quartos_2026;30;22;T-usual zona 1;estimativa_dmc;1,05;1,00;1,15;Eixample, Ciutat Vella;0,72;L'Hospitalet, Badalona;12;estimativa_dmc;60;2026-06
+valencia;Valência;14,3;idealista_alquiler_2026;415;idealista_quartos_2026;31;35;SUMA mensal 1 zona;briefing_valencia;0,92;1,00;1,21;Ciutat Vella;0,66;Aldaia;12;briefing_valencia;45;2026-06
+malaga;Málaga;16,5;idealista_alquiler_2026;430;idealista_quartos_2026;28;27;Passe mensal EMT;estimativa_dmc;0,93;0,95;1,25;Centro Histórico;0,75;Alhaurín de la Torre;10;estimativa_dmc;55;2026-06
+alicante;Alicante;13,0;estimativa_dmc;390;idealista_quartos_2026;26;30;Passe mensal TAM;estimativa_dmc;0,88;0,95;1,15;Centro;0,78;San Vicente del Raspeig;8;estimativa_dmc;45;2026-06

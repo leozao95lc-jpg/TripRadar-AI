@@ -1,0 +1,20 @@
+id;nome;grupo;unidade;aplica;opcional;essencial;confortavel;real;escala_cidade;fonte;nota
+aluguel;Aluguel;Moradia;aluguel;todos;;;;;nao;idealista_alquiler_2026;€/m² × m² da tipologia × zona × cenário
+luz;Luz;Moradia;casa;apto;;45;50;60;nao;estimativa_dmc;Ajustada pelo clima da cidade
+gas;Gás;Moradia;casa;apto;;15;20;25;nao;estimativa_dmc;Zero se o imóvel for 100% elétrico
+agua;Água;Moradia;casa;apto;;@agua;@agua;@agua;nao;estimativa_dmc;
+internet;Internet fibra;Moradia;casa;apto;;30;30;35;nao;briefing_valencia;
+contas_quarto;Contas do quarto (luz, água, internet);Moradia;adulto;quarto;;40;50;60;nao;estimativa_dmc;Muitas vezes já incluídas no aluguel
+mercado_adulto;Supermercado (adultos);Alimentação;adulto;todos;;200;260;300;sim;estimativa_dmc;
+mercado_crianca;Supermercado (crianças);Alimentação;crianca;todos;;120;155;180;sim;estimativa_dmc;
+transporte;Transporte público;Transporte;adulto;todos;;@transporte;@transporte;@transporte;nao;@fonte_transporte;Crianças: passe gratuito ou simbólico
+celular;Celular;Comunicação;adulto;todos;;12;15;20;nao;briefing_valencia;
+saude;Seguro saúde privado;Saúde;pessoa;todos;seguro;55;55;70;nao;briefing_valencia;Varia muito com a idade
+farmacia;Higiene e farmácia;Saúde;pessoa;todos;;20;30;40;sim;estimativa_dmc;
+lazer;Lazer e restaurantes;Lazer;adulto;todos;;30;120;180;sim;estimativa_dmc;
+roupas;Roupas;Pessoal;pessoa;todos;;0;40;50;nao;estimativa_dmc;
+academia;Academia e esporte;Pessoal;adulto;todos;;0;35;40;sim;estimativa_dmc;
+escola;Escola pública (refeitório, material);Educação;crianca;todos;;40;110;160;sim;estimativa_dmc;Escola pública é gratuita. O briefing usa € 207 (provável concertada/creche)
+viagem_brasil;Passagem anual ao Brasil (mensalizada);Irregulares;pessoa;todos;;0;0;85;nao;estimativa_dmc;€ 1.000/ano ÷ 12
+documentos;Renovações e documentos (mensalizado);Irregulares;pessoa;todos;;0;0;10;nao;estimativa_dmc;TIE, certidões, apostilas
+imprevistos;Imprevistos;Irregulares;pct;todos;;0;0;0,08;nao;estimativa_dmc;8% sobre o subtotal do cenário Real

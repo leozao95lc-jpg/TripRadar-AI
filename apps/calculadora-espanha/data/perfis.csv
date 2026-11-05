@@ -1,0 +1,6 @@
+id;nome;adultos;criancas;fator_casa
+solo;Sozinho(a);1;0;0,80
+casal;Casal;2;0;1,00
+familia1;Casal + 1 filho;2;1;1,20
+familia2;Casal + 2 filhos;2;2;1,35
+familia3;Casal + 3 filhos;2;3;1,50

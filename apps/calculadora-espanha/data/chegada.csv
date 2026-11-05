@@ -1,0 +1,10 @@
+id;nome;regra;aplica;essencial;confortavel;real;fonte;nota
+fianza;Fiança legal;meses_aluguel;todos;1;1;1;lau_fianza;1 mês de aluguel, por lei
+garantia;Garantia adicional;meses_aluguel;apto;0;1;2;lau_fianza;Máximo legal de 2 meses (residência habitual)
+primeiro_mes;Primeiro mês de aluguel;meses_aluguel;todos;1;1;1;;
+honorarios;Honorários da imobiliária;fixo;apto;0;0;0;ley_vivienda;Por lei, pagos pelo proprietário. Não aceite cobrança.
+hospedagem;Hospedagem até achar moradia;noites;todos;10;14;21;estimativa_dmc;Noites × diária média da cidade
+enxoval;Móveis e enxoval;enxoval;todos;;;;estimativa_dmc;
+documentos_chegada;Taxas e documentos (TIE, fotos, cópias);pessoa;todos;25;30;40;estimativa_dmc;Empadronamiento é gratuito
+chip;Chip e primeira recarga;adulto;todos;10;15;20;estimativa_dmc;
+transporte_chegada;Transporte de chegada;fixo;todos;20;40;60;estimativa_dmc;Aeroporto e deslocamentos iniciais

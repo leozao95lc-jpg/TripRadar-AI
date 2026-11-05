@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Custo de Vida na Espanha | De Mala y Cuia</title>
   <meta name="claude:viewport-fit-sides" content="cover" />
-  <meta name="description" content="Quanto custa morar um mês na Espanha? Simule seu custo de vida mensal em Madrid, Barcelona, Valencia, Málaga ou Alicante. Grátis e sem cadastro." />
+  <meta name="description" content="Quanto custa viver na Espanha de verdade? 3 cenários, custo de chegada, salário necessário, quanto dura sua reserva e câmbio real com IOF. Valores com fonte e data." />
   <meta name="theme-color" content="#1F3D2B" />
-  <meta property="og:title" content="Quanto custa morar na Espanha?" />
-  <meta property="og:description" content="Simule seu custo de vida mensal na Espanha em 1 minuto, sem cadastro." />
+  <meta property="og:title" content="Quanto custa viver na Espanha, de verdade?" />
+  <meta property="og:description" content="3 cenários, custo de chegada, salário necessário e quanto dura sua reserva. Com fontes e data de atualização." />
   <meta property="og:type" content="website" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%231F3D2B'/><text x='50' y='68' font-size='54' text-anchor='middle' fill='%23F4EBDD' font-family='Georgia'>M</text></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -17,154 +17,209 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header class="topo">
+  <!-- Formulário estático para o Netlify detectar a captura de leads (não aparece na tela) -->
+  <form name="leads" data-netlify="true" netlify-honeypot="bot-field" hidden>
+    <input name="nome" /><input name="email" /><input name="whatsapp" /><input name="consentimento" />
+    <input name="cidade" /><input name="moradia" /><input name="zona" /><input name="perfil" /><input name="cenario" />
+    <input name="custo_mensal_eur" /><input name="chegada_eur" /><input name="bruto_anual_eur" /><input name="runway_meses" />
+    <input name="reserva_brl" /><input name="utm_source" /><input name="utm_medium" /><input name="utm_campaign" /><input name="bot-field" />
+  </form>
+
+  <header class="hero">
     <div class="marca">De Mala y Cuia <span aria-hidden="true">🇧🇷 🇪🇸</span></div>
-    <h1>Quanto custa morar na Espanha?</h1>
-    <p class="sub">Simule seu custo de vida mensal · 1 minuto · sem cadastro</p>
+    <h1>Quanto custa viver na Espanha, <em>de verdade?</em></h1>
+    <p class="hero-sub">Três cenários, custo de chegada, salário necessário, quanto dura sua reserva e o câmbio que você realmente paga. Valores com fonte e data.</p>
+    <p class="hero-meta" id="heroMeta"></p>
   </header>
 
-  <main class="cartao" id="app">
-    <div class="progresso" id="progresso" aria-label="Progresso">
-      <div class="progresso-barra"><span id="progressoFill"></span></div>
-      <p class="progresso-txt" id="progressoTxt">Etapa 1 de 2</p>
-    </div>
-
-    <!-- ETAPA 1 — PERFIL -->
-    <section class="etapa" data-etapa="1">
-      <h2>Como você vai morar?</h2>
-
-      <fieldset class="grupo">
-        <legend>Cidade</legend>
-        <div class="chips" data-chips="cidade">
-          <button type="button" data-v="Madrid">Madrid</button>
-          <button type="button" data-v="Barcelona">Barcelona</button>
-          <button type="button" data-v="Valencia">Valencia</button>
-          <button type="button" data-v="Málaga">Málaga</button>
-          <button type="button" data-v="Alicante">Alicante</button>
-          <button type="button" data-v="Outra">Outra</button>
-        </div>
-        <label class="extra" id="cidadeOutraBox" hidden>
-          Qual cidade?
-          <input type="text" id="cidadeOutra" maxlength="40" placeholder="Ex.: Sevilha" autocomplete="off" />
-        </label>
-        <p class="dica" id="cidadeOutraDica" hidden>Para outras cidades usamos uma média nacional. Ajuste os valores na próxima etapa.</p>
-      </fieldset>
-
-      <fieldset class="grupo">
-        <legend>Tipo de moradia</legend>
-        <div class="chips" data-chips="moradia">
-          <button type="button" data-v="quarto">Quarto compartilhado</button>
-          <button type="button" data-v="estudio">Estúdio</button>
-          <button type="button" data-v="ap1">Apartamento 1 quarto</button>
-          <button type="button" data-v="ap2">Apartamento 2 quartos</button>
-        </div>
-      </fieldset>
-
-      <fieldset class="grupo">
-        <legend>Quantas pessoas?</legend>
-        <div class="chips" data-chips="pessoas">
-          <button type="button" data-v="1">1 pessoa</button>
-          <button type="button" data-v="2">2 pessoas</button>
-          <button type="button" data-v="3">3 pessoas</button>
-          <button type="button" data-v="4+">4 ou mais</button>
-        </div>
-        <label class="extra" id="pessoasOutroBox" hidden>
-          Quantas pessoas?
-          <input type="number" id="pessoasOutro" min="4" max="12" value="4" inputmode="numeric" />
-        </label>
-        <p class="dica" id="dicaQuarto" hidden>No quarto compartilhado, calculamos um quarto para cada pessoa. Se for casal no mesmo quarto, ajuste o aluguel na próxima etapa.</p>
-      </fieldset>
-
-      <fieldset class="grupo">
-        <legend>Estilo de vida</legend>
-        <div class="chips" data-chips="estilo">
-          <button type="button" data-v="economico">Econômico</button>
-          <button type="button" data-v="moderado">Moderado</button>
-          <button type="button" data-v="confortavel">Confortável</button>
-        </div>
-        <p class="dica">Afeta mercado, lazer e outros gastos.</p>
-      </fieldset>
-    </section>
-
-    <!-- ETAPA 2 — GASTOS -->
-    <section class="etapa" data-etapa="2" hidden>
-      <h2>Seus gastos por mês</h2>
-      <p class="intro">Já preenchemos com <strong>valores de referência</strong> para <span id="perfilTxt"></span>. Ajuste o que quiser, em euros (€).</p>
-      <div class="campos" id="campos"></div>
-      <button type="button" class="link-btn" id="btnRestaurar">Voltar aos valores de referência</button>
-    </section>
-
-    <!-- RESULTADO -->
-    <section class="resultado" id="resultado" hidden>
-      <p class="res-kicker">Simulação</p>
-      <h2>Seu custo de vida mensal na Espanha</h2>
-      <p class="res-perfil" id="resPerfil"></p>
-
-      <div class="destaque">
-        <p class="destaque-label">Custo estimado por mês</p>
-        <p class="destaque-brl" id="totalEUR">€ 0</p>
-        <p class="destaque-eur" id="totalBRL">≈ R$ 0</p>
-        <p class="destaque-msg" id="destaqueMsg"></p>
-        <p class="destaque-pp" id="porPessoa"></p>
-      </div>
-
-      <div class="proj" id="proj"></div>
-
-      <div class="grafico">
-        <h3>Para onde vai o dinheiro</h3>
-        <ul class="barras" id="barras"></ul>
-      </div>
-
-      <div class="ajustes">
-        <div class="campo">
-          <label for="cotacao">Cotação usada: 1 € = R$</label>
-          <div class="entrada"><span class="moeda">R$</span>
-            <input type="text" id="cotacao" inputmode="decimal" autocomplete="off" />
+  <div class="layout">
+    <!-- PAINEL DE ESCOLHAS -->
+    <aside class="painel" aria-label="Seu perfil">
+      <div class="painel-in">
+        <fieldset class="grupo">
+          <legend>Cidade</legend>
+          <div class="chips" data-chips="cidade" id="chipsCidade"></div>
+        </fieldset>
+        <fieldset class="grupo">
+          <legend>Moradia</legend>
+          <div class="chips" data-chips="moradia" id="chipsMoradia"></div>
+        </fieldset>
+        <fieldset class="grupo">
+          <legend>Região</legend>
+          <div class="chips" data-chips="zona">
+            <button type="button" data-v="centro">Centro</button>
+            <button type="button" data-v="cidade">Cidade</button>
+            <button type="button" data-v="periferia">Região metropolitana</button>
           </div>
-          <p class="dica">Valor de simulação, <strong>não é cotação em tempo real</strong>. Se você vai receber em reais, use a cotação que realmente paga (com spread e IOF).</p>
+          <p class="dica" id="zonaDica"></p>
+        </fieldset>
+        <fieldset class="grupo">
+          <legend>Quem vai morar</legend>
+          <div class="chips" data-chips="perfil" id="chipsPerfil"></div>
+        </fieldset>
+        <fieldset class="grupo">
+          <legend>Seguro saúde privado?</legend>
+          <div class="chips" data-chips="seguro">
+            <button type="button" data-v="sim">Sim</button>
+            <button type="button" data-v="nao">Não, só o público</button>
+          </div>
+          <p class="dica">Obrigatório para vistos de estudante, nômade digital e residência não lucrativa.</p>
+        </fieldset>
+      </div>
+    </aside>
+
+    <main class="conteudo">
+      <!-- 3 CAMADAS -->
+      <section class="bloco" id="cenarios" aria-labelledby="tCenarios">
+        <h2 id="tCenarios">Seu custo mensal em 3 cenários</h2>
+        <p class="lead-txt" id="perfilTxt"></p>
+        <div class="camadas" id="camadas" role="radiogroup" aria-label="Cenário"></div>
+        <p class="dica-centro">Toque em um cenário para usá-lo em todos os cálculos abaixo.</p>
+      </section>
+
+      <nav class="atalhos" aria-label="Seções">
+        <a href="#detalhe">Mês a mês</a><a href="#chegada">Chegada</a><a href="#renda">Renda</a><a href="#reserva">Reserva</a><a href="#cambio">Câmbio</a><a href="#fontes">Fontes</a>
+      </nav>
+
+      <!-- DETALHAMENTO -->
+      <section class="bloco" id="detalhe" aria-labelledby="tDetalhe">
+        <h2 id="tDetalhe">Para onde vai o dinheiro</h2>
+        <p class="lead-txt">Valores mensais em euros. Toque em <b>editar</b> para usar o seu próprio valor.</p>
+        <div class="tabela-wrap"><table class="tabela" id="tabela"></table></div>
+        <p class="legenda-fonte"><span class="selo fonte">fonte</span> dado com fonte publicada <span class="selo estimativa">estimativa</span> estimativa a validar <span class="selo terceiro">terceiro</span> referência de terceiros</p>
+      </section>
+
+      <!-- CHEGADA -->
+      <section class="bloco" id="chegada" aria-labelledby="tChegada">
+        <h2 id="tChegada">Custo de chegada</h2>
+        <p class="lead-txt">O que você paga <b>uma única vez</b> antes do primeiro mês normal, no cenário <b data-cenario-nome></b>.</p>
+        <div class="kpi-linha">
+          <div class="kpi"><span>Total de chegada</span><strong id="chegadaTotal"></strong><em id="chegadaBRL"></em></div>
+          <div class="kpi"><span>Equivale a</span><strong id="chegadaMeses"></strong><em>do custo mensal</em></div>
         </div>
+        <ul class="lista" id="listaChegada"></ul>
+      </section>
+
+      <!-- RENDA NECESSÁRIA -->
+      <section class="bloco" id="renda" aria-labelledby="tRenda">
+        <h2 id="tRenda">Quanto você precisa ganhar</h2>
+        <p class="lead-txt">Calculadora reversa: o salário <b>bruto</b> que cobre o cenário <b data-cenario-nome></b> depois de impostos.</p>
+        <fieldset class="grupo" id="trabBox">
+          <legend>Quantas pessoas vão trabalhar?</legend>
+          <div class="chips" data-chips="trabalhadores">
+            <button type="button" data-v="1">1 pessoa</button>
+            <button type="button" data-v="2">2 pessoas</button>
+          </div>
+        </fieldset>
+        <div class="renda-grid">
+          <div class="cartao-renda destaque-verde">
+            <span class="cr-tag">Contrato na Espanha</span>
+            <strong id="rBruto14"></strong>
+            <em id="rBrutoAnual"></em>
+            <ul class="mini" id="rDetalhe"></ul>
+          </div>
+          <div class="cartao-renda">
+            <span class="cr-tag">Renda remota em reais</span>
+            <strong id="rRemoto"></strong>
+            <em>por mês, já com o câmbio efetivo</em>
+            <p class="mini-txt">Morando mais de 183 dias por ano na Espanha, você vira residente fiscal lá. A renda remota também paga imposto espanhol, o que este valor ainda não inclui.</p>
+          </div>
+        </div>
+        <div class="comparativo" id="rComparativo"></div>
+      </section>
+
+      <!-- RUNWAY -->
+      <section class="bloco" id="reserva" aria-labelledby="tReserva">
+        <h2 id="tReserva">Quanto tempo sua reserva dura</h2>
+        <div class="form-linha">
+          <label class="campo" for="reservaBRL"><span>Reserva que você vai levar</span>
+            <span class="entrada"><i>R$</i><input id="reservaBRL" type="text" inputmode="decimal" autocomplete="off" /></span></label>
+          <label class="campo" for="rendaEUR"><span>Renda mensal na Espanha</span>
+            <span class="entrada"><i>€</i><input id="rendaEUR" type="text" inputmode="decimal" placeholder="0" autocomplete="off" /></span></label>
+          <label class="campo" for="inicioRenda"><span>A renda começa após</span>
+            <span class="entrada"><input id="inicioRenda" type="number" min="0" max="24" inputmode="numeric" /><i>meses</i></span></label>
+        </div>
+        <div class="runway" id="runway"></div>
+      </section>
+
+      <!-- CÂMBIO -->
+      <section class="bloco" id="cambio" aria-labelledby="tCambio">
+        <h2 id="tCambio">O câmbio que você realmente paga</h2>
+        <fieldset class="grupo">
+          <legend>Como vai converter o dinheiro?</legend>
+          <div class="chips" data-chips="metodo" id="chipsMetodo"></div>
+        </fieldset>
+        <div class="form-linha">
+          <label class="campo" for="fxComercial"><span>Cotação comercial (1 €)</span>
+            <span class="entrada"><i>R$</i><input id="fxComercial" type="text" inputmode="decimal" autocomplete="off" /></span></label>
+          <label class="campo" for="fxSpread"><span>Spread</span>
+            <span class="entrada"><input id="fxSpread" type="text" inputmode="decimal" autocomplete="off" /><i>%</i></span></label>
+          <label class="campo" for="fxIof"><span>IOF</span>
+            <span class="entrada"><input id="fxIof" type="text" inputmode="decimal" autocomplete="off" /><i>%</i></span></label>
+        </div>
+        <p class="dica" id="fxOrigem"></p>
+        <div class="fx-res" id="fxRes"></div>
+      </section>
+
+      <!-- LEAD -->
+      <section class="bloco lead" id="leadBox" aria-labelledby="tLead">
+        <h2 id="tLead"></h2>
+        <p id="leadTexto"></p>
+        <form id="leadForm" novalidate>
+          <label class="campo" for="leadNome"><span>Nome</span><span class="entrada"><input id="leadNome" name="nome" autocomplete="given-name" /></span></label>
+          <label class="campo" for="leadEmail"><span>E-mail</span><span class="entrada"><input id="leadEmail" name="email" type="email" autocomplete="email" required /></span></label>
+          <label class="campo" for="leadWhats"><span>WhatsApp (opcional)</span><span class="entrada"><input id="leadWhats" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" /></span></label>
+          <p class="hp" aria-hidden="true"><label>Não preencha<input name="bot-field" tabindex="-1" autocomplete="off" /></label></p>
+          <label class="check" for="leadConsent"><input type="checkbox" id="leadConsent" />
+            <span>Aceito receber conteúdos do De Mala y Cuia por e-mail e WhatsApp. Posso cancelar quando quiser. Meus dados não são vendidos nem compartilhados (LGPD).</span></label>
+          <button type="submit" class="btn btn-laranja" id="leadBtn">Quero meu plano</button>
+          <p class="lead-msg" id="leadMsg" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <div class="acoes">
+        <button type="button" class="btn btn-verde" id="btnCompartilhar">Compartilhar resultado</button>
+        <button type="button" class="btn btn-creme" id="btnCopiar">Copiar resumo</button>
       </div>
 
-      <div class="acoes-res">
-        <button type="button" class="btn btn-pri" id="btnCompartilhar">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>
-          Compartilhar resultado</button>
-        <button type="button" class="btn btn-sec" id="btnCopiar">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
-          Copiar resumo</button>
-        <div class="acoes-linha">
-          <button type="button" class="btn btn-ghost" id="btnEditar">Editar valores</button>
-          <button type="button" class="btn btn-ghost" id="btnRefazer">Nova simulação</button>
-        </div>
-      </div>
-    </section>
+      <!-- FONTES -->
+      <section class="bloco fontes" id="fontes" aria-labelledby="tFontes">
+        <h2 id="tFontes">Fontes e metodologia</h2>
+        <p class="lead-txt" id="fontesData"></p>
+        <ul class="lista-fontes" id="listaFontes"></ul>
+        <details class="metodo">
+          <summary>Como os cenários são calculados</summary>
+          <ul>
+            <li><b>Essencial:</b> o piso para viver com dignidade. Aluguel 10% abaixo da média, sem lazer pago, academia ou roupas.</li>
+            <li><b>Confortável:</b> vida normal de classe média, com aluguel na média do mercado.</li>
+            <li><b>Real:</b> o que recém-chegados costumam gastar de fato. Aluguel 12% acima da média (sem histórico na Espanha, imóvel mobiliado, contrato de temporada), passagem anual ao Brasil, renovação de documentos e 8% de imprevistos.</li>
+            <li>Aluguel de apartamento = €/m² médio da cidade × área típica (estúdio 40 m², 1 quarto 55 m², 2 quartos 75 m²), com prêmio para imóveis pequenos.</li>
+            <li>Salário necessário: IRPF simplificado (escala geral, contribuinte sem filhos) e Seguridade Social de 6,5%. O imposto real muda conforme a comunidade autônoma e a família.</li>
+            <li>Câmbio efetivo = cotação comercial × (1 + spread) × (1 + IOF).</li>
+          </ul>
+        </details>
+      </section>
+    </main>
+  </div>
 
-    <nav class="nav" id="nav">
-      <div class="parcial" id="parcial"></div>
-      <div class="nav-botoes">
-        <button type="button" class="btn btn-ghost" id="btnVoltar">Voltar</button>
-        <button type="button" class="btn btn-pri" id="btnProximo">Próximo</button>
-      </div>
-    </nav>
-  </main>
+  <!-- Barra fixa no celular -->
+  <div class="barra-fixa" id="barraFixa" aria-hidden="true"></div>
 
   <footer class="rodape">
     <p class="rodape-marca">De Mala y Cuia 🇧🇷 🇪🇸</p>
     <p class="rodape-frase">“Planeje sua mudança, organize seu dinheiro e prepare-se para viver uma nova história.”</p>
     <div class="redes">
-      <a id="linkInstagram" href="#" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".6"/></svg>
-        Instagram</a>
-      <a id="linkYoutube" href="#" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="m10 9.2 5 2.8-5 2.8z"/></svg>
-        YouTube</a>
+      <a id="linkInstagram" href="#" target="_blank" rel="noopener">Instagram</a>
+      <a id="linkYoutube" href="#" target="_blank" rel="noopener">YouTube</a>
     </div>
-    <p class="aviso">Esta calculadora apresenta estimativas de planejamento financeiro. Os valores de referência são aproximados (<span id="refData"></span>) e podem variar conforme o bairro, a época e o seu perfil. Não substitui orientação jurídica ou financeira.</p>
+    <p class="aviso">Esta calculadora apresenta estimativas de planejamento financeiro. Os valores variam conforme bairro, época, perfil familiar e situação migratória. Não substitui orientação jurídica, fiscal ou financeira. A simulação não é salva; só guardamos seus dados de contato se você enviar o formulário.</p>
   </footer>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="config.js"></script>
+  <script src="data.js"></script>
+  <script src="engine.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

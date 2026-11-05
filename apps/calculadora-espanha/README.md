@@ -1,33 +1,42 @@
-# Custo de Vida na Espanha — De Mala y Cuia
+# Custo de Vida na Espanha (De Mala y Cuia)
 
-Calculadora de custo de vida **mensal** na Espanha (ex.: quanto custa um mês morando num quarto em Madri).
-HTML + CSS + JavaScript puro. Sem build, sem dependências. Nenhum dado do usuário é salvo.
+Calculadora de custo de vida na Espanha para brasileiros: 3 cenários (Essencial, Confortável, Real), custo de chegada, salário bruto necessário, quanto dura a reserva e câmbio efetivo com spread e IOF. Mostra fonte e data de cada valor e tem captura de lead.
 
-## Como funciona
+HTML + CSS + JavaScript puro. Sem build de front-end, sem dependências.
 
-1. **Perfil:** cidade, tipo de moradia (quarto compartilhado, estúdio, ap. 1 ou 2 quartos), nº de pessoas e estilo de vida.
-2. **Gastos:** campos já vêm preenchidos com valores de referência e podem ser editados.
-3. **Resultado:** total mensal em € e R$, valor por pessoa, projeção de 3/6/12 meses e distribuição por categoria.
+## Estrutura
 
-## Regras de cálculo
+| Caminho | O que é |
+|---|---|
+| `data/*.csv` | **Planilha-mestre** (uma aba por arquivo, `;` e decimal `,`). Aqui você atualiza os valores. |
+| `scripts/build-data.mjs` | Converte e valida os CSVs e gera `data.js` |
+| `data.js` | Gerado. Não edite à mão. |
+| `engine.js` | Motor de cálculo (funções puras, testável no Node) |
+| `app.js` | Interface |
+| `config.js` | Links, câmbio ao vivo e destino dos leads |
+| `METODOLOGIA.md` | Crítica ao briefing, modelo de dados, fórmulas e layout |
 
-- Itens "por pessoa" (mercado, transporte, celular, lazer, saúde, outros) × nº de pessoas.
-- Aluguel e contas: total da casa. No quarto compartilhado, são por pessoa (um quarto para cada).
-- Mercado, lazer e outros = base × índice da cidade × multiplicador do estilo (arredondado a €5).
-- Valores editados pelo usuário não são sobrescritos quando ele muda o perfil.
-- R$ = € × cotação (editável, não é tempo real).
+## Atualizar valores
 
-## Valores de referência (`config.js`)
+1. Abra o CSV no Excel e edite. Salve como CSV com separador `;`.
+2. Atualize `data_atualizacao` em `parametros.csv` e a data da fonte em `fontes.csv`.
+3. Rode o build (requer Node 18+):
 
-| Item | Fonte |
-|------|-------|
-| Quarto compartilhado | Idealista, relatórios de habitações 1º/2º tri 2026 |
-| Transporte Madrid (€32,70) | CRTM 2026, com desconto de 40% válido até 31/12/2026 |
-| Estúdio / apartamentos, demais transportes, mercado, lazer, contas | **Estimativas: validar antes de divulgar** |
+```bash
+node scripts/build-data.mjs
+```
 
-Atualize os valores e `REFERENCIA_DATA` periodicamente (sugestão: a cada trimestre).
+Rotina sugerida: revisão trimestral; em janeiro, revisar o transporte (os descontos de 2026 vencem em 31/12).
+
+## Captura de leads
+
+Escolha em `config.js` → `LEAD_MODO`:
+- `"netlify"` (padrão): Netlify Forms, grátis e sem backend. Os leads aparecem no painel do Netlify em *Forms → leads*.
+- `"endpoint"`: POST JSON para `LEAD_ENDPOINT` (Google Apps Script → Planilha, Make, n8n, RD Station).
+- `"demo"`: não envia nada.
+
+Cada lead traz a simulação (cidade, moradia, cenário, custo, chegada, salário, runway, reserva) e as UTMs.
 
 ## Publicar
 
-Arraste esta pasta em https://app.netlify.com/drop (ou Vercel com Root Directory = esta pasta).
-Depois preencha `APP_URL` em `config.js` com o link final.
+Arraste a pasta em https://app.netlify.com/drop ou conecte o repositório no Netlify com *Base directory* = `apps/calculadora-espanha`, sem comando de build. Depois preencha `APP_URL` em `config.js`.

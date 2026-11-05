@@ -1,0 +1,5 @@
+id;nome;m2;premio_m2;enxoval_essencial;enxoval_confortavel;enxoval_real;fonte
+quarto;Quarto compartilhado;;;150;250;400;estimativa_dmc
+estudio;Estúdio;40;1,15;500;800;1200;estimativa_dmc
+ap1;Apartamento 1 quarto;55;1,05;600;1000;1500;estimativa_dmc
+ap2;Apartamento 2 quartos;75;1,00;900;1500;2200;estimativa_dmc

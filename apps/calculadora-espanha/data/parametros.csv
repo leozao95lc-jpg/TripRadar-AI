@@ -1,0 +1,24 @@
+chave;valor;fonte;nota
+data_atualizacao;nov/2026;;Data exibida na página
+cotacao_fallback;6,30;estimativa_dmc;Usada se a API de câmbio não responder
+cotacao_fallback_data;05/11/2026;;
+aluguel_fator_essencial;0,90;estimativa_dmc;Essencial = buscar abaixo da média
+premio_recem_chegado;0,12;estimativa_dmc;Real = sem histórico/nómina, mobiliado, temporada
+quarto_fator_casal;1,20;estimativa_dmc;Casal dividindo o mesmo quarto
+ss_pct;0,065;irpf_aeat;Contribuição do trabalhador (comuns + desemprego + FP + MEI)
+ss_base_max_anual;61214;estimativa_dmc;Teto aproximado da base de cotização
+irpf_gastos;2000;irpf_aeat;Outros gastos dedutíveis (art. 19 LIRPF)
+irpf_minimo_pessoal;5550;irpf_aeat;Mínimo pessoal (art. 57 LIRPF)
+irpf_red_max;7302;irpf_aeat;Redução por rendimentos do trabalho
+irpf_red_lim1;14852;irpf_aeat;
+irpf_red_k1;1,75;irpf_aeat;
+irpf_red_lim2;17673,52;irpf_aeat;
+irpf_red_v2;2364,34;irpf_aeat;
+irpf_red_k2;1,14;irpf_aeat;
+irpf_red_lim3;19747,5;irpf_aeat;
+smi_mensal;1221;boe_smi_2026;
+smi_pagas;14;boe_smi_2026;
+nomade_pct_smi;2;estimativa_dmc;Visto nômade digital: 200% do SMI (conferir requisitos)
+nomade_dep1;0,75;estimativa_dmc;+75% do SMI pelo 1º dependente
+nomade_depn;0,25;estimativa_dmc;+25% por dependente adicional
+meses_meta_reserva;6;estimativa_dmc;Meta de reserva = chegada + N meses do cenário Real
