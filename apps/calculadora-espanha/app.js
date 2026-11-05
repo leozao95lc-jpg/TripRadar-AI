@@ -23,7 +23,7 @@
   // ---------- Estado ----------
   var cambioPadrao = D.cambio[0];
   var e = {
-    cidade: D.cidades[0].id, moradia: "quarto", zona: "cidade", perfil: "solo", seguro: false,
+    cidade: "valencia", moradia: "quarto", zona: "cidade", perfil: "solo", seguro: true,
     camada: "confortavel", overrides: {},
     fx: { metodo: cambioPadrao.id, comercial: P.cotacao_fallback, spread: cambioPadrao.spread_pct, iof: cambioPadrao.iof_pct }
   };
