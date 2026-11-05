@@ -25,7 +25,8 @@ body {
     radial-gradient(circle at 10% -10%, rgba(201,162,39,.18), transparent 40%),
     radial-gradient(circle at 110% 10%, rgba(62,115,80,.14), transparent 40%);
   line-height: 1.45;
-  padding: 0 16px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
 button, input { font: inherit; color: inherit; }
 [hidden] { display: none !important; }

@@ -366,8 +366,15 @@
       irPara(estado.etapa + 1);
     });
     $("#btnEditar").addEventListener("click", function () { irPara(2); });
+    var refazerArmado = null;
     $("#btnRefazer").addEventListener("click", function () {
-      if (!confirm("Apagar todos os valores e começar uma nova simulação?")) return;
+      var b = this;
+      if (!refazerArmado) { // confirmação em dois toques (sem pop-up)
+        b.textContent = "Toque de novo para apagar";
+        refazerArmado = setTimeout(function () { refazerArmado = null; b.textContent = "Refazer simulação"; }, 3000);
+        return;
+      }
+      clearTimeout(refazerArmado); refazerArmado = null; b.textContent = "Refazer simulação";
       estado = estadoInicial();
       sincronizarFormulario();
       irPara(1);
