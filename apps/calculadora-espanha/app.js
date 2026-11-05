@@ -60,7 +60,6 @@
     $$('[data-chips="' + grupo + '"] button').forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.v === String(valor) ? "true" : "false"); });
   }
   function perfilAtual() { return D.perfis.filter(function (p) { return p.id === e.perfil; })[0]; }
-  function cidadeAtual() { return D.cidades.filter(function (c) { return c.id === e.cidade; })[0]; }
 
   // ---------- Montagem inicial ----------
   function montar() {
@@ -100,12 +99,17 @@
     var zonaTxt = { centro: "no centro de ", cidade: "em ", periferia: "na região metropolitana de " }[e.zona];
     var perfilTxt = cx.tipo.nome + " " + zonaTxt + cid.nome + " · " + perfil.nome.toLowerCase() + (e.seguro ? " · com seguro privado" : "");
     $("#perfilTxt").textContent = perfilTxt;
-    $("#heroMeta").textContent = "Valores de referência atualizados em " + P.data_atualizacao + " · " + D.cidades.length + " cidades · câmbio efetivo R$ " + fN.format(R.efetivo.toFixed(2));
 
-    renderCamadas(); renderTabela(); renderCambio();
+    renderTabela(); renderFx();
+  }
 
+  // Tudo o que depende do câmbio (a tabela é só em euros e não precisa ser redesenhada)
+  function renderFx() {
+    R = M.calcular(D, e);
     var sel = R.camadas[e.camada].mensal.total;
-    $("#barraFixa").innerHTML = "<div><span>" + NOMES[e.camada] + "</span> · " + esc(cid.nome) + "<br>≈ " + brl(sel * R.efetivo) + "/mês</div><b>" + eur(sel) + "</b>";
+    $("#heroMeta").textContent = "Aluguéis: Idealista, jun/2026 · revisão dos valores: " + P.data_atualizacao + " · " + D.cidades.length + " cidades";
+    renderCamadas(); renderCambio();
+    $("#barraFixa").innerHTML = "<div><span>" + NOMES[e.camada] + "</span> · " + esc(R.cx.cidade.nome) + "<br>≈ " + brl(sel * R.efetivo) + "/mês</div><b>" + eur(sel) + "</b>";
   }
 
   function renderCamadas() {
@@ -167,7 +171,7 @@
   }
 
   function renderFontes() {
-    $("#fontesData").textContent = "Última atualização dos valores: " + P.data_atualizacao + ". Cada linha da tabela mostra se o valor tem fonte publicada ou é estimativa.";
+    $("#fontesData").textContent = "Valores revisados em " + P.data_atualizacao + ". Cada fonte mostra a data do dado original, e cada linha da tabela diz se o valor tem fonte publicada ou é estimativa.";
     $("#listaFontes").innerHTML = Object.keys(D.fontes).map(function (k) {
       var f = D.fontes[k], t = TIPO_SELO[f.tipo] || TIPO_SELO.estimativa;
       return '<li><span class="selo ' + t[0] + '">' + t[1] + "</span>" + (f.url ? '<a href="' + esc(f.url) + '" target="_blank" rel="noopener">' + esc(f.titulo) + "</a>" : "<span>" + esc(f.titulo) + "</span>") +
@@ -187,10 +191,11 @@
   function aplicarCotacao(v, origem) {
     if (!(v > 0) || fxEditado) return;
     e.fx.comercial = v; fxOrigem = origem;
-    escreverFx(); render();
+    if (document.activeElement !== $("#fxComercial")) $("#fxComercial").value = fN.format(v);
+    renderFx();
   }
   function buscarCambio() {
-    if (!CFG.CAMBIO_AO_VIVO || !window.fetch) return;
+    if (!CFG.CAMBIO_AO_VIVO || !window.fetch || document.hidden) return;
     pegarJson("https://economia.awesomeapi.com.br/json/last/EUR-BRL").then(function (j) {
       var q = j && j.EURBRL, v = q && parseFloat(q.bid);
       if (!v) throw new Error("vazio");
@@ -296,7 +301,10 @@
           e.fx.metodo = v; if (v !== "personalizado") { e.fx.spread = m.spread_pct; e.fx.iof = m.iof_pct; }
           escreverFx();
         } else e[g] = v;
-        if (g === "cidade" || g === "moradia" || g === "perfil" || g === "zona") editando = null;
+        if (g === "cidade" || g === "moradia" || g === "perfil" || g === "zona") {
+          editando = null;
+          if (Object.keys(e.overrides).length) { e.overrides = {}; aviso("Seus valores editados voltaram para a referência, porque o perfil mudou."); }
+        }
         render(); return;
       }
       var cam = t.closest("[data-camada]");
@@ -319,7 +327,7 @@
     });
 
     function numInput(id, fn) {
-      $(id).addEventListener("input", function () { fn(lerNumero(this.value)); render(); });
+      $(id).addEventListener("input", function () { fn(lerNumero(this.value)); setChips("metodo", e.fx.metodo); renderFx(); });
     }
     numInput("#fxComercial", function (v) { if (v > 0) { e.fx.comercial = v; fxEditado = true; fxOrigem = "Cotação informada por você."; } });
     numInput("#fxSpread", function (v) { e.fx.spread = v; e.fx.metodo = "personalizado"; });
@@ -340,5 +348,6 @@
   render();
   buscarCambio();
   if (CFG.CAMBIO_AO_VIVO && CFG.CAMBIO_ATUALIZAR_MIN) setInterval(buscarCambio, CFG.CAMBIO_ATUALIZAR_MIN * 60000);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) buscarCambio(); });
   window.__app = { get estado() { return e; }, get resultado() { return R; } };
 })();

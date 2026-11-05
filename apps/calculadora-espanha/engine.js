@@ -82,7 +82,7 @@
     var f = linha.fonte;
     if (f === "@fonte_transporte") f = cx.cidade.fonte_transporte;
     if (linha.id === "aluguel") f = cx.quarto ? cx.cidade.fonte_quarto : cx.cidade.fonte_aluguel_m2;
-    if (linha.id === "aluguel" && cx.e.zona !== "cidade" && cx.cidade.fonte_zonas === "estimativa_dmc") f = "estimativa_dmc";
+    if (linha.id === "aluguel" && cx.e.zona !== "cidade") f = cx.cidade.fonte_zonas || "estimativa_dmc"; // vale o elo mais fraco
     return f || "estimativa_dmc";
   }
 
