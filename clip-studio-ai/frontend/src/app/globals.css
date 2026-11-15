@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #111315;
+  --color-surface: #1c2023;
+  --color-raised: #262b2f;
+  --color-line: #30363b;
+  --color-green: #1f3d2b;
+  --color-green-soft: #2f5c41;
+  --color-orange: #e8622c;
+  --color-cream: #f4ebdd;
+  --color-gold: #c9a227;
+  --color-muted: #9b958a;
+  --color-danger: #d9534f;
+  --font-display: var(--font-bricolage), system-ui, sans-serif;
+  --font-mono: var(--font-space-mono), ui-monospace, monospace;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-cream);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.01em; }
+
+input, select, textarea {
+  background: var(--color-bg);
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  padding: 0.5rem 0.65rem;
+  color: var(--color-cream);
+  width: 100%;
+  font-size: 0.875rem;
+}
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--color-orange); outline-offset: -1px; }
+input[type="checkbox"] { width: auto; accent-color: var(--color-orange); }
+input[type="color"] { padding: 2px; height: 36px; }
+input[type="range"] { padding: 0; accent-color: var(--color-orange); }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 4px; }
