@@ -20,8 +20,13 @@ router = APIRouter(prefix="/api", dependencies=[Depends(security.require_auth)])
 
 # ---------- auth ----------
 @public.post("/auth/login")
-def login(body: LoginIn, response: Response):
-    if not security.check_password(body.password):
+def login(body: LoginIn, request: Request, response: Response):
+    ip = request.client.host if request.client else "?"
+    if security.login_blocked(ip):
+        raise HTTPException(429, "Muitas tentativas de acesso. Aguarde alguns minutos e tente de novo.")
+    ok = security.check_password(body.password)
+    security.register_login(ip, ok)
+    if not ok:
         raise HTTPException(401, "Senha incorreta.")
     s = get_settings()
     response.set_cookie(security.COOKIE, security.issue_token(), max_age=s.session_hours * 3600, httponly=True,
@@ -56,7 +61,6 @@ def create_project(body: ProjectIn, db: Session = Depends(get_db)):
     p = Project(name=body.name.strip(), description=body.description.strip())
     db.add(p)
     db.commit()
-    storage.project_dir(p.id, "videos")
     return _project_out(db, p)
 
 

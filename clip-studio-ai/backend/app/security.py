@@ -10,6 +10,21 @@ from fastapi import HTTPException, Request
 from .config import get_settings
 
 COOKIE = "clipstudio_session"
+_failures: dict[str, list[float]] = {}  # IP -> instantes das falhas recentes (memória do processo)
+WINDOW_SECONDS = 600
+
+
+def login_blocked(ip: str) -> bool:
+    recent = [t for t in _failures.get(ip, []) if time.time() - t < WINDOW_SECONDS]
+    _failures[ip] = recent
+    return len(recent) >= get_settings().login_max_failures
+
+
+def register_login(ip: str, ok: bool) -> None:
+    if ok:
+        _failures.pop(ip, None)
+    else:
+        _failures.setdefault(ip, []).append(time.time())
 
 
 def _sign(payload: str) -> str:

@@ -9,6 +9,28 @@ import { JobRow, useJobs } from "@/components/Jobs";
 import { Badge, Button, Card, ErrorNote, Field, Modal, useLoad } from "@/components/ui";
 
 const CLIP_COLOR: Record<string, string> = { suggested: "bg-cream/40", approved: "bg-green-soft", rejected: "bg-danger/50", rendered: "bg-gold" };
+const STEPS = ["Importado", "Transcrição", "Análise da IA", "Revisão", "Renderização", "Exportado"];
+
+/** Etapas do pipeline derivadas do que já existe de fato (transcrição, cortes, exportações). */
+function Stepper({ done, active, failed }: { done: boolean[]; active: number; failed: boolean }) {
+  return (
+    <ol className="mb-4 flex flex-wrap items-center gap-y-2 rounded-xl border border-line bg-surface px-4 py-3">
+      {STEPS.map((label, i) => {
+        const state = done[i] ? "done" : i === active ? (failed ? "failed" : "active") : "todo";
+        return (
+          <li key={label} className="flex items-center">
+            <span className={`grid h-6 w-6 place-items-center rounded-full font-mono text-[11px] font-bold ${state === "done" ? "bg-green-soft text-cream" : state === "active" ? "animate-pulse bg-orange text-bg" : state === "failed" ? "bg-danger text-cream" : "bg-raised text-muted"}`}>
+              {state === "done" ? "✓" : state === "failed" ? "!" : i + 1}
+            </span>
+            <span className={`ml-2 text-sm ${state === "todo" ? "text-muted" : state === "failed" ? "text-danger" : "text-cream"}`}>{label}</span>
+            {i < STEPS.length - 1 && <span className={`mx-3 h-px w-6 sm:w-10 ${done[i] ? "bg-green-soft" : "bg-line"}`} />}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
 const DEFAULTS = { min_clips: 5, max_clips: 10, preferred_min_seconds: 20, preferred_max_seconds: 60, max_seconds: 90, instructions: "" };
 
 export default function VideoPage() {
@@ -57,6 +79,9 @@ export default function VideoPage() {
   };
   const busy = active.some((j) => j.job_type !== "render");
   const hasTranscript = !!transcript.data;
+  const exported = list.some((c) => c.exports.length > 0);
+  const stepsDone = [true, hasTranscript, list.some((c) => c.editorial_score > 0), list.some((c) => c.status === "approved" || c.status === "rendered"), exported, exported];
+  const stepActive = ({ transcribing: 1, analyzing: 2, awaiting_review: 3, rendering: 4 } as Record<string, number>)[v?.status ?? ""] ?? (v?.status === "failed" ? stepsDone.indexOf(false) : -1);
   const visibleJobs = jobs.filter((j, i) => j.status === "pending" || j.status === "running" || (i === 0 && j.status === "failed"));
 
   const analysisForm = (
@@ -77,20 +102,21 @@ export default function VideoPage() {
 
   return (
     <Shell title={v?.filename ?? "Vídeo"}
-      subtitle={v && <span className="flex flex-wrap items-center gap-2"><Link className="text-orange hover:underline" href={`/projects/${v.project_id}`}>← Projeto</Link><Badge status={v.status} /><span className="font-mono text-xs">{fmtDur(v.duration)} · {v.resolution} · {v.fps} fps · {fmtSize(v.size_bytes)}{transcript.data ? ` · idioma: ${transcript.data.language}` : ""}</span></span>}
+      subtitle={v && <span className="flex flex-wrap items-center gap-2"><Link className="text-orange hover:underline" href={`/projects/${v.project_id}`}>← Projeto</Link><Badge status={v.status} />{v.hdr && <span title="Vídeo HDR: convertido automaticamente para SDR na visualização e na exportação"><Badge>HDR → SDR</Badge></span>}<span className="font-mono text-xs">{fmtDur(v.duration)} · {v.resolution} · {v.fps} fps · {fmtSize(v.size_bytes)}{transcript.data ? ` · idioma: ${transcript.data.language}` : ""}</span></span>}
       action={<div className="flex flex-wrap gap-2">
         {!hasTranscript && <Button variant="primary" disabled={busy} onClick={() => setModal("process")}>Transcrever e analisar</Button>}
         {hasTranscript && <Button variant="primary" disabled={busy} onClick={() => setModal("analyze")}>{list.length ? "Nova análise" : "Analisar com IA"}</Button>}
-        {hasTranscript && <Button disabled={busy} onClick={() => { setManual({ title: "", start_time: Math.floor(time), end_time: Math.min(v?.duration ?? 30, Math.floor(time) + 30) }); setModal("manual"); }}>+ Corte manual</Button>}
+        {v && <Button onClick={() => { setManual({ title: "", start_time: Math.floor(time), end_time: Math.min(v?.duration ?? 30, Math.floor(time) + 30) }); setModal("manual"); }}>+ Corte manual</Button>}
         <Button variant="danger" onClick={async () => { if (confirm("Excluir este vídeo, a transcrição e os cortes?")) { try { await api(`/videos/${id}`, { method: "DELETE" }); router.replace(`/projects/${v?.project_id}`); } catch (e) { setError((e as Error).message); } } }}>Excluir</Button>
       </div>}>
       <ErrorNote error={video.error || error} />
+      {v && <Stepper done={stepsDone} active={stepActive} failed={v.status === "failed"} />}
       {visibleJobs.length > 0 && <div className="mb-4 space-y-2">{visibleJobs.map((j) => <JobRow key={j.id} job={j} onChange={refresh} />)}</div>}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
         <div className="min-w-0 space-y-4">
           <div className="overflow-hidden rounded-xl border border-line bg-black">
-            <video ref={player} src={`${API}/api/videos/${id}/stream`} controls preload="metadata" onTimeUpdate={onTime} className="aspect-video w-full" />
+            <video key={v?.has_preview ? "preview" : "original"} ref={player} src={`${API}/api/videos/${id}/stream${v?.has_preview ? "?preview=1" : ""}`} controls preload="metadata" onTimeUpdate={onTime} className="aspect-video w-full" />
           </div>
 
           {v && (
@@ -142,7 +168,7 @@ export default function VideoPage() {
                 </button>
               ))}
             </div>
-          ) : <p className="text-sm text-muted">{hasTranscript ? "Nenhum corte ainda. Rode a análise com IA ou crie um corte manual." : "Transcreva o vídeo para a IA sugerir os melhores momentos."}</p>)}
+          ) : <p className="text-sm text-muted">{hasTranscript ? "Nenhum corte ainda. Rode a análise com IA ou crie um corte manual." : "Transcreva o vídeo para a IA sugerir os melhores momentos, ou crie um corte manual."}</p>)}
 
           {tab === "transcript" && (transcript.data ? (
             <div className="max-h-[480px] space-y-0.5 overflow-auto rounded-xl border border-line bg-surface p-3">
@@ -184,7 +210,7 @@ export default function VideoPage() {
       {modal === "analyze" && (
         <Modal title="Análise editorial com IA" onClose={() => setModal(null)}>
           <div className="space-y-4">
-            {list.length > 0 && <p className="rounded-lg border border-gold/40 bg-gold/10 px-3 py-2 text-xs text-gold">Sugestões ainda não revisadas serão substituídas. Cortes aprovados ou renderizados são mantidos e não serão sugeridos de novo.</p>}
+            {list.length > 0 && <p className="rounded-lg border border-gold/40 bg-gold/10 px-3 py-2 text-xs text-gold">Sugestões ainda não revisadas serão substituídas. Cortes aprovados, renderizados ou rejeitados são mantidos, e esses trechos não voltam como sugestão.</p>}
             {analysisForm}
             <ErrorNote error={error} />
             <div className="flex justify-end gap-2">

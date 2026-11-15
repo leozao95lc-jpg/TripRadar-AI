@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { api, Job, JOB_LABEL } from "@/lib/api";
+import { api, fmtElapsed, Job, JOB_LABEL } from "@/lib/api";
 import { Badge, Button, Progress } from "./ui";
 
 /** Acompanha os jobs de um vídeo (ou todos) por polling enquanto houver algo em andamento. */
@@ -37,7 +37,9 @@ export function JobRow({ job, onChange }: { job: Job; onChange?: () => void }) {
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
           <p className="truncate text-sm font-medium">{JOB_LABEL[job.job_type] ?? job.job_type}</p>
-          <p className="font-mono text-[11px] text-muted">{job.stage || "Na fila"}{running ? ` · ${Math.round(job.progress * 100)}%` : ""}{job.attempts > 1 ? ` · tentativa ${job.attempts}` : ""}</p>
+          <p className="font-mono text-[11px] text-muted">
+            {job.stage || "Na fila"}{running ? ` · ${Math.round(job.progress * 100)}%` : ""} · {running ? "tempo decorrido" : "duração"}: {fmtElapsed(job.elapsed_seconds)}{job.attempts > 1 ? ` · tentativa ${job.attempts}` : ""}
+          </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <Badge status={job.status} />

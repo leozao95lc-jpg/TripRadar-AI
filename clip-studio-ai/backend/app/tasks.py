@@ -1,7 +1,7 @@
 """Handlers dos jobs. Cada um é idempotente: reexecutar não duplica dados."""
 import json
+import shutil
 import time
-from pathlib import Path
 
 from . import editorial, media, render, storage, transcription
 from .db import SessionLocal
@@ -66,23 +66,27 @@ def _transcribe(ctx: JobContext, video: Video, params: dict, lo: float, hi: floa
     a, b = lo + (hi - lo) * 0.05, lo + (hi - lo) * 0.25
     if not video.proxy_path and (info["video_codec"] not in BROWSER_SAFE or src.suffix.lower() == ".mov"):
         ctx.progress(lo, "Gerando versão de visualização")
-        proxy = storage.project_dir(video.project_id, "proxies") / f"{video.id}.mp4"
-        media.make_proxy(src, proxy, video.duration, on_progress=ctx.span(lo, a), **kw)
+        proxy = storage.area("previews", video.project_id) / f"{video.id}.mp4"
+        media.make_proxy(src, proxy, video.duration, info["hdr_transfer"], on_progress=ctx.span(lo, a), **kw)
         with SessionLocal() as db:
             db.query(Video).filter(Video.id == video.id).update({"proxy_path": storage.rel(proxy)})
             db.commit()
     if not info["has_audio"]:
         raise AppError("O vídeo não possui faixa de áudio; não há o que transcrever.")
-    ctx.progress(a, "Extraindo áudio")
-    wav = ctx.work_dir / "audio.wav"
-    storage.ensure_space(int(video.duration * 32000) + 1024)
-    media.extract_audio(src, wav, video.duration, on_progress=ctx.span(a, b), **kw)
+    wav = storage.area("audio", video.project_id) / f"{video.id}.wav"
+    if not wav.is_file():  # reaproveitado em novas transcrições do mesmo vídeo
+        ctx.progress(a, "Extraindo áudio")
+        storage.ensure_space(int(video.duration * 32000) + 1024)
+        part = ctx.work_dir / "audio.wav"
+        media.extract_audio(src, part, video.duration, on_progress=ctx.span(a, b), **kw)
+        shutil.move(part, wav)
     ctx.progress(b, "Transcrevendo")
     result = transcription.transcribe(wav, video.duration, params.get("language") or None,
                                       on_progress=ctx.span(b, hi), should_cancel=ctx.cancelled)
     if not result["segments"]:
         raise AppError("Nenhuma fala foi detectada no vídeo.")
-    tdir = storage.project_dir(video.project_id, "transcripts")
+    ctx.check_cancel()  # projeto/vídeo excluído durante a transcrição: não grava nada
+    tdir = storage.area("transcripts", video.project_id)
     (tdir / f"{video.id}.json").write_text(json.dumps(result, ensure_ascii=False, indent=1), encoding="utf-8")
     (tdir / f"{video.id}.srt").write_text(to_srt(result["segments"]), encoding="utf-8")
     with SessionLocal() as db:
@@ -101,8 +105,8 @@ def _analyze(ctx: JobContext, video: Video, params: dict, lo: float) -> None:
         if t is None:
             raise AppError("Transcreva o vídeo antes de solicitar a análise editorial.")
         transcript = t.transcript_json
-        kept = db.query(Clip).filter(Clip.video_id == video.id, Clip.status != ClipStatus.SUGGESTED,
-                                     Clip.status != ClipStatus.REJECTED).all()
+        # aprovados, renderizados e rejeitados: decisões do usuário, não voltam como sugestão
+        kept = db.query(Clip).filter(Clip.video_id == video.id, Clip.status != ClipStatus.SUGGESTED).all()
         exclude = [(c.start_time, c.end_time) for c in kept]
     _set_status(video.id, VideoStatus.ANALYZING)
     ctx.progress(lo, "Análise editorial (IA)")
@@ -119,7 +123,9 @@ def _analyze(ctx: JobContext, video: Video, params: dict, lo: float) -> None:
             db.add(Clip(video_id=video.id, **s.model_dump()))
         db.query(Video).filter(Video.id == video.id).update({"status": VideoStatus.AWAITING_REVIEW})
         db.commit()
-    ctx.log(f"{len(suggestions)} cortes sugeridos")
+    ctx.log(f"{len(suggestions)} cortes sugeridos" + (
+        f" (abaixo do mínimo pedido de {cfg.min_clips}: o material não sustentou mais trechos com qualidade)"
+        if len(suggestions) < cfg.min_clips else ""))
 
 
 def handle_transcribe(ctx: JobContext) -> None:
@@ -157,17 +163,25 @@ def handle_render(ctx: JobContext) -> None:
     src = storage.resolve(video.file_path)
     w, h = (int(x) for x in video.resolution.split("x"))
     storage.ensure_space(int((end - start) * 2_500_000))
-    out_dir = storage.project_dir(video.project_id, "exports")
+    out_dir = storage.area("exports", video.project_id)
     dst = out_dir / f"{job.clip_id}_{opts.preset}_{int(time.time())}.mp4"
     brand = _brand()
     logo = storage.resolve(brand["logo_path"]) if brand.get("logo_path") else None
     args, warnings = render.build(src, ctx.work_dir / "out.mp4", start, end, opts, w, h, bool(video.has_audio),
-                                  segments, ctx.work_dir, logo, _custom_presets())
+                                  segments, ctx.work_dir, logo, _custom_presets(), video.hdr_transfer)
     for msg in warnings:
         ctx.log(f"Aviso: {msg}")
     ctx.progress(0.02, "Renderizando")
     media.run_ffmpeg(args, end - start, on_progress=ctx.span(0.02, 0.98), should_cancel=ctx.cancelled)
-    Path(ctx.work_dir / "out.mp4").replace(dst)  # só aparece em exports/ quando está completo
+    ctx.check_cancel()
+    shutil.move(ctx.work_dir / "out.mp4", dst)  # só aparece em exports/ quando está completo
+    cdir = storage.area("clips", video.project_id)  # artefatos do corte: legenda queimada (.ass) e .srt
+    if (ctx.work_dir / "subs.ass").is_file():
+        shutil.copy(ctx.work_dir / "subs.ass", cdir / f"{job.clip_id}.ass")
+    clip_segs = [{**s, "start": max(s["start"], start), "end": min(s["end"], end)}
+                 for s in segments if s["end"] > start and s["start"] < end]
+    if clip_segs:
+        (cdir / f"{job.clip_id}.srt").write_text(to_srt(clip_segs, offset=start), encoding="utf-8")
     p = render.PRESETS[opts.preset]
     with SessionLocal() as db:
         db.add(Export(clip_id=job.clip_id, file_path=storage.rel(dst), format=opts.preset,

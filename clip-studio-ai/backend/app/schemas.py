@@ -1,8 +1,17 @@
-from datetime import datetime
+from datetime import datetime, timezone
+from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, computed_field
 
 from .editorial import AnalysisConfig
+
+
+def _utc(d: datetime) -> datetime:
+    return d.replace(tzinfo=timezone.utc) if d.tzinfo is None else d
+
+
+# Sem isso o navegador interpretaria os horários como locais (3 h de erro no Brasil).
+UTCDateTime = Annotated[datetime, AfterValidator(_utc)]
 
 
 class ORM(BaseModel):
@@ -32,15 +41,17 @@ class VideoOut(ORM):
     resolution: str
     fps: float
     has_audio: bool
+    has_preview: bool
+    hdr: bool
     status: str
-    created_at: datetime
+    created_at: UTCDateTime
 
 
 class ProjectOut(ORM):
     id: str
     name: str
     description: str
-    created_at: datetime
+    created_at: UTCDateTime
     video_count: int = 0
     clip_count: int = 0
     export_count: int = 0
@@ -56,7 +67,7 @@ class ExportOut(ORM):
     format: str
     resolution: str
     size_bytes: int
-    created_at: datetime
+    created_at: UTCDateTime
     clip_title: str = ""
     project_id: str = ""
     project_name: str = ""
@@ -120,8 +131,14 @@ class JobOut(ORM):
     stage: str
     attempts: int
     error_message: str | None
-    created_at: datetime
-    updated_at: datetime
+    created_at: UTCDateTime
+    updated_at: UTCDateTime
+
+    @computed_field
+    @property
+    def elapsed_seconds(self) -> float:
+        end = datetime.now(timezone.utc) if self.status in ("pending", "running") else self.updated_at
+        return round(max(0.0, (end - self.created_at).total_seconds()), 1)
 
 
 class JobDetail(JobOut):

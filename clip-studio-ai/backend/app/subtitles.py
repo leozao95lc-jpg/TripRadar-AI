@@ -13,7 +13,6 @@ HEX = r"^#[0-9A-Fa-f]{6}$"
 class SubtitleStyle(BaseModel):
     font: str = "Montserrat"
     size: int = Field(64, ge=24, le=160)  # px no quadro 1080x1920
-    bold: bool = True
     uppercase: bool = False
     color: str = Field("#FFFFFF", pattern=HEX)
     highlight_words: bool = False
@@ -141,7 +140,7 @@ def build_ass(segments: list[dict], start: float, end: float, style: SubtitleSty
         "Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, "
         "Alignment, MarginL, MarginR, MarginV, Encoding\n"
         f"Style: Main,{style.font},{style.size},{_ass_color(style.color)},{_ass_color(style.color)},"
-        f"{outline_col},&H80000000,{-1 if style.bold else 0},0,0,0,100,100,0,0,"
+        f"{outline_col},&H80000000,-1,0,0,0,100,100,0,0,"
         f"{3 if box else 1},{max(style.outline_width, 8) if box else style.outline_width},0,5,60,60,0,1\n\n"
         "[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n"
     )

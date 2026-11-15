@@ -1,5 +1,3 @@
-import subprocess
-
 import pytest
 
 SEGMENTS = [
@@ -28,17 +26,17 @@ def fake_transcript(duration=30.0):
 
 @pytest.fixture(scope="session")
 def sample_video(tmp_path_factory):
-    """Vídeo sintético 16:9 de 30 s com áudio (gerado pelo próprio FFmpeg)."""
+    """Vídeo de teste 16:9 de 30 s gerado pelo FFmpeg (com fala sintetizada quando há `flite`)."""
+    from tests.make_test_video import make
+
     path = tmp_path_factory.mktemp("media") / "sample.mp4"
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i", "testsrc2=s=1280x720:r=30:d=30",
-                    "-f", "lavfi", "-i", "sine=frequency=440:duration=30", "-c:v", "libx264", "-preset", "ultrafast",
-                    "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest", str(path)], check=True)
+    make(path)
     return path
 
 
 @pytest.fixture()
 def client(tmp_path, monkeypatch):
-    monkeypatch.setenv("DATA_DIR", str(tmp_path / "data"))
+    monkeypatch.setenv("STORAGE_DIR", str(tmp_path / "storage"))
     monkeypatch.setenv("APP_PASSWORD", "senha-teste")
     monkeypatch.setenv("SECRET_KEY", "k" * 40)
     monkeypatch.setenv("QUEUE_EAGER", "true")
@@ -56,8 +54,10 @@ def client(tmp_path, monkeypatch):
     command.upgrade(Config("alembic.ini"), "head")  # os testes rodam sobre as migrações reais
     from fastapi.testclient import TestClient
 
+    from app import security
     from app.main import app
 
+    security._failures.clear()
     with TestClient(app) as c:
         yield c
     db.reset_engine()

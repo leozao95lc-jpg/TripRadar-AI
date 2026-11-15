@@ -58,13 +58,14 @@ class Video(Base):
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_id)
     project_id: Mapped[str] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"), index=True)
     filename: Mapped[str] = mapped_column(String(300))  # nome original (apenas exibição)
-    file_path: Mapped[str] = mapped_column(String(500))  # relativo a data_dir
+    file_path: Mapped[str] = mapped_column(String(500))  # relativo a storage_dir
     proxy_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
     size_bytes: Mapped[int] = mapped_column(Integer, default=0)
     duration: Mapped[float] = mapped_column(Float, default=0)
     resolution: Mapped[str] = mapped_column(String(20), default="")
     fps: Mapped[float] = mapped_column(Float, default=0)
     has_audio: Mapped[int] = mapped_column(Integer, default=1)
+    hdr_transfer: Mapped[str | None] = mapped_column(String(30), nullable=True)  # HLG/PQ; None = SDR
     status: Mapped[str] = mapped_column(String(30), default=VideoStatus.PENDING, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     project: Mapped[Project] = relationship(back_populates="videos")
@@ -72,6 +73,14 @@ class Video(Base):
         back_populates="video", cascade="all, delete-orphan", uselist=False
     )
     clips: Mapped[list["Clip"]] = relationship(back_populates="video", cascade="all, delete-orphan")
+
+    @property
+    def has_preview(self) -> bool:
+        return bool(self.proxy_path)
+
+    @property
+    def hdr(self) -> bool:
+        return bool(self.hdr_transfer)
 
 
 class Transcript(Base):

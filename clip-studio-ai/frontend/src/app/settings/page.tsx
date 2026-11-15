@@ -20,7 +20,7 @@ function Preview({ s }: { s: SubtitleStyle }) {
     <div className="relative mx-auto overflow-hidden rounded-lg border border-line bg-[#0b0c0d]" style={{ width: W, height: H }}>
       <div className="absolute inset-x-0 grid place-items-center bg-gradient-to-br from-green to-green-soft font-mono text-[10px] uppercase text-cream/60" style={{ top: picY, height: picH }}>vídeo original</div>
       <div className="absolute inset-x-0 -translate-y-1/2 px-2 text-center" style={{ top: y }}>
-        <span style={{ fontFamily: FONT_CSS[s.font], fontSize: s.size * scale, fontWeight: s.bold ? 800 : 500, color: s.color, textShadow: shadow, textTransform: s.uppercase ? "uppercase" : "none", background: s.background === "box" ? `${s.background_color}${alpha}` : "transparent", padding: s.background === "box" ? "2px 6px" : 0, lineHeight: 1.25 }}>
+        <span style={{ fontFamily: FONT_CSS[s.font], fontSize: s.size * scale, fontWeight: 800, color: s.color, textShadow: shadow, textTransform: s.uppercase ? "uppercase" : "none", background: s.background === "box" ? `${s.background_color}${alpha}` : "transparent", padding: s.background === "box" ? "2px 6px" : 0, lineHeight: 1.25 }}>
           {words.map((w, i) => <span key={i} style={{ color: s.highlight_words && i === 1 ? s.highlight_color : undefined }}>{w} </span>)}
         </span>
       </div>
@@ -110,7 +110,6 @@ export default function Settings() {
                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
                   <label className="flex items-center gap-1.5"><input type="checkbox" checked={style.highlight_words} onChange={(e) => st("highlight_words", e.target.checked)} /> Destacar palavra falada</label>
                   <label className="flex items-center gap-1.5"><input type="checkbox" checked={style.uppercase} onChange={(e) => st("uppercase", e.target.checked)} /> Maiúsculas</label>
-                  <label className="flex items-center gap-1.5"><input type="checkbox" checked={style.bold} onChange={(e) => st("bold", e.target.checked)} /> Negrito</label>
                 </div>
                 <div className="flex items-end gap-2 border-t border-line pt-3">
                   <Field label="Salvar como (nome do preset)"><input placeholder="ex.: entrevistas" value={name} onChange={(e) => setName(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "_"))} /></Field>

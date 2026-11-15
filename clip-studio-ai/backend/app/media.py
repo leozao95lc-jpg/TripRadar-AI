@@ -2,6 +2,7 @@
 import json
 import subprocess
 import time
+from functools import lru_cache
 from pathlib import Path
 from typing import Callable
 
@@ -15,6 +16,25 @@ class MediaError(AppError):
 
 class Cancelled(Exception):
     pass
+
+
+HDR_TRANSFERS = {"smpte2084", "arib-std-b67"}  # PQ (HDR10/Dolby Vision) e HLG (iPhone, câmeras)
+
+
+@lru_cache
+def available_filters() -> frozenset[str]:
+    r = subprocess.run([get_settings().ffmpeg_bin, "-hide_banner", "-filters"], capture_output=True, text=True,
+                       timeout=30)
+    return frozenset(parts[1] for parts in (line.split() for line in r.stdout.splitlines()) if len(parts) > 2)
+
+
+def tonemap_chain(transfer: str | None) -> str | None:
+    """Filtros que convertem HDR (BT.2020 HLG/PQ) em SDR BT.709. Sem isso, o H.264 8 bits sai
+    com cores lavadas. Devolve None para SDR ou quando o FFmpeg não tem zscale/tonemap."""
+    if transfer not in HDR_TRANSFERS or not {"zscale", "tonemap"} <= available_filters():
+        return None
+    return (f"zscale=tin={transfer}:pin=2020:min=2020_ncl:t=linear:npl=100,format=gbrpf32le,"
+            "zscale=p=709,tonemap=tonemap=hable:desat=0,zscale=t=709:m=709:r=limited,format=yuv420p")
 
 
 def probe(path: Path) -> dict:
@@ -39,9 +59,11 @@ def probe(path: Path) -> dict:
         w, h = h, w
     num, _, den = (v.get("avg_frame_rate") or "0/1").partition("/")
     fps = float(num) / float(den or 1) if float(den or 1) else 0.0
+    transfer = v.get("color_transfer")
     return {
         "duration": duration, "width": w, "height": h, "fps": round(fps, 3),
         "has_audio": a is not None, "video_codec": v.get("codec_name"), "audio_codec": a and a.get("codec_name"),
+        "pix_fmt": v.get("pix_fmt"), "hdr_transfer": transfer if transfer in HDR_TRANSFERS else None,
     }
 
 
@@ -80,10 +102,11 @@ def extract_audio(src: Path, dst: Path, duration: float, **kw) -> None:
     run_ffmpeg(["-i", str(src), "-vn", "-ac", "1", "-ar", "16000", "-c:a", "pcm_s16le", str(dst)], duration, **kw)
 
 
-def make_proxy(src: Path, dst: Path, duration: float, **kw) -> None:
+def make_proxy(src: Path, dst: Path, duration: float, hdr_transfer: str | None = None, **kw) -> None:
     """Proxy H.264 leve para o player de revisão (originais MOV/HEVC nem sempre tocam no navegador)."""
+    tm = tonemap_chain(hdr_transfer)
     run_ffmpeg(
-        ["-i", str(src), "-vf", "scale='min(1280,iw)':-2", "-c:v", "libx264", "-preset", "veryfast", "-crf", "28",
+        ["-i", str(src), "-vf", "scale='min(1280,iw)':-2" + (f",{tm}" if tm else ""), "-c:v", "libx264", "-preset", "veryfast", "-crf", "28",
          "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "96k", "-ac", "2", "-movflags", "+faststart", str(dst)],
         duration, **kw,
     )

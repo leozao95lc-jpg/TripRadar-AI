@@ -38,6 +38,7 @@ def upgrade() -> None:
     sa.Column('resolution', sa.String(length=20), nullable=False),
     sa.Column('fps', sa.Float(), nullable=False),
     sa.Column('has_audio', sa.Integer(), nullable=False),
+    sa.Column('hdr_transfer', sa.String(length=30), nullable=True),
     sa.Column('status', sa.String(length=30), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.ForeignKeyConstraint(['project_id'], ['projects.id'], ondelete='CASCADE'),

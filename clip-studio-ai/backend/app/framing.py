@@ -62,19 +62,19 @@ def plan_framing(mode: str, focus_x: float, src_w: int, src_h: int, out_w: int, 
     return FramingPlan("fit")
 
 
-def video_filter(plan: FramingPlan, out_w: int, out_h: int) -> tuple[str, tuple[int, int, int, int]]:
-    """Devolve o trecho de filtergraph ([0:v] -> [framed]) e a área (x, y, w, h) ocupada pela
-    imagem original no quadro final — usada para posicionar legendas fora dela."""
+def video_filter(plan: FramingPlan, out_w: int, out_h: int, tonemap: str | None = None) -> str:
+    """Trecho de filtergraph [0:v] -> [framed]. O tonemap (HDR -> SDR) entra depois da redução
+    de resolução, onde custa muito menos."""
+    tm = f",{tonemap}" if tonemap else ""
     if plan.mode == "crop":
-        f = (f"[0:v]scale={out_w}:{out_h}:force_original_aspect_ratio=increase,"
-             f"crop={out_w}:{out_h}:(iw-{out_w})*{plan.focus_x:.4f}:(ih-{out_h})/2,setsar=1[framed]")
-        return f, (0, 0, out_w, out_h)
-    f = (f"[0:v]split[bgsrc][fgsrc];"
-         f"[bgsrc]scale={out_w}:{out_h}:force_original_aspect_ratio=increase,crop={out_w}:{out_h},"
-         f"boxblur=24:4,eq=brightness=-0.12[bg];"
-         f"[fgsrc]scale={out_w}:{out_h}:force_original_aspect_ratio=decrease[fg];"
-         f"[bg][fg]overlay=(W-w)/2:(H-h)/2,setsar=1[framed]")
-    return f, (0, 0, 0, 0)  # área real calculada por quem conhece a resolução de origem
+        return (f"[0:v]scale={out_w}:{out_h}:force_original_aspect_ratio=increase,"
+                f"crop={out_w}:{out_h}:(iw-{out_w})*{plan.focus_x:.4f}:(ih-{out_h})/2{tm},setsar=1[framed]")
+    # fit: o quadro inteiro, reduzido, sobre uma cópia dele mesmo ampliada e desfocada
+    return (f"[0:v]scale={out_w}:{out_h}:force_original_aspect_ratio=decrease:force_divisible_by=2{tm},"
+            f"split[fgsrc][bgsrc];"
+            f"[bgsrc]scale={out_w}:{out_h}:force_original_aspect_ratio=increase,crop={out_w}:{out_h},"
+            f"boxblur=24:4,eq=brightness=-0.12[bg];"
+            f"[bg][fgsrc]overlay=(W-w)/2:(H-h)/2,setsar=1[framed]")
 
 
 def picture_area(mode: str, src_w: int, src_h: int, out_w: int, out_h: int) -> tuple[int, int, int, int]:

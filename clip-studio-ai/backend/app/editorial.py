@@ -112,7 +112,7 @@ def build_prompt(segments: list[dict], cfg: AnalysisConfig, language: str, chann
     if cfg.instructions:
         parts.append(f"Orientação editorial do usuário: {cfg.instructions}")
     if exclude:
-        parts.append("Trechos já aproveitados (não sugerir de novo nem sobrepor): "
+        parts.append("Trechos já aprovados ou descartados pelo usuário (não sugerir de novo nem sobrepor): "
                      + ", ".join(f"{_fmt(a)}-{_fmt(b)}" for a, b in exclude))
     parts.append("<transcricao>\n" + "\n".join(lines) + "\n</transcricao>")
     return "\n\n".join(parts)

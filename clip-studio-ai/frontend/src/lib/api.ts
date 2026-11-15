@@ -1,12 +1,12 @@
 export const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export type Project = { id: string; name: string; description: string; created_at: string; video_count: number; clip_count: number; export_count: number; videos?: Video[] };
-export type Video = { id: string; project_id: string; filename: string; size_bytes: number; duration: number; resolution: string; fps: number; has_audio: boolean; status: string; created_at: string };
+export type Video = { id: string; project_id: string; filename: string; size_bytes: number; duration: number; resolution: string; fps: number; has_audio: boolean; has_preview: boolean; hdr: boolean; status: string; created_at: string };
 export type ExportT = { id: string; clip_id: string; format: string; resolution: string; size_bytes: number; created_at: string; clip_title: string; project_id: string; project_name: string };
 export type Clip = { id: string; video_id: string; title: string; hook: string; start_time: number; end_time: number; duration: number; transcript: string; rationale: string; cta: string; editorial_score: number; category: string; warnings: string[]; status: string; render_options: Record<string, unknown>; exports: ExportT[] };
-export type Job = { id: string; project_id: string; video_id: string | null; clip_id: string | null; job_type: string; status: string; progress: number; stage: string; attempts: number; error_message: string | null; created_at: string; updated_at: string; log?: string };
+export type Job = { id: string; project_id: string; video_id: string | null; clip_id: string | null; job_type: string; status: string; progress: number; stage: string; attempts: number; error_message: string | null; created_at: string; updated_at: string; elapsed_seconds: number; log?: string };
 export type Segment = { id: number; start: number; end: number; text: string };
-export type SubtitleStyle = { font: string; size: number; bold: boolean; uppercase: boolean; color: string; highlight_words: boolean; highlight_color: string; outline_color: string; outline_width: number; background: "none" | "box"; background_color: string; background_opacity: number; position: "auto" | "top" | "middle" | "bottom"; margin_v: number; max_words: number; animation: "none" | "fade" | "pop" };
+export type SubtitleStyle = { font: string; size: number; uppercase: boolean; color: string; highlight_words: boolean; highlight_color: string; outline_color: string; outline_width: number; background: "none" | "box"; background_color: string; background_opacity: number; position: "auto" | "top" | "middle" | "bottom"; margin_v: number; max_words: number; animation: "none" | "fade" | "pop" };
 export type SubtitleSettings = { builtin: Record<string, SubtitleStyle>; custom: Record<string, SubtitleStyle>; fonts: string[]; render_presets: Record<string, { label: string; max_seconds: number }> };
 export type Brand = { channel_name: string; channel_description: string; primary_color: string; accent_color: string; default_subtitle_preset: string; has_logo: boolean };
 export type Dashboard = { totals: { projects: number; videos: number; clips: number; exports: number; active_jobs: number }; recent_projects: Project[]; active_jobs: Job[]; recent_exports: ExportT[]; disk_free_gb: number };
@@ -70,6 +70,10 @@ export const fmtTime = (t: number) => {
   return h ? `${h}:${String(m).padStart(2, "0")}:${ss}` : `${String(m).padStart(2, "0")}:${ss}`;
 };
 export const fmtDur = (t: number) => (t >= 3600 ? `${Math.floor(t / 3600)}h ${Math.round((t % 3600) / 60)}min` : t >= 60 ? `${Math.floor(t / 60)}min ${Math.round(t % 60)}s` : `${t.toFixed(1)}s`);
+export const fmtElapsed = (t: number) => {
+  const s = Math.round(t), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+  return h ? `${h}h ${String(m).padStart(2, "0")}min` : m ? `${m}min ${String(sec).padStart(2, "0")}s` : `${sec}s`;
+};
 export const fmtSize = (b: number) => (b >= 1e9 ? `${(b / 1e9).toFixed(2)} GB` : `${(b / 1e6).toFixed(1)} MB`);
 export const fmtDate = (iso: string) => new Date(iso).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit" });
 

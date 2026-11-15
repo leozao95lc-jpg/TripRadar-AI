@@ -4,7 +4,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from . import framing
+from . import framing, media
 from .config import get_settings
 from .subtitles import FONTS_DIR, PRESETS as SUB_PRESETS, SubtitleStyle, build_ass
 
@@ -45,7 +45,7 @@ def _fesc(p: Path) -> str:
 
 def build(src: Path, dst: Path, start: float, end: float, opts: RenderOptions, src_w: int, src_h: int,
           has_audio: bool, segments: list[dict], work_dir: Path, logo: Path | None = None,
-          custom_presets: dict | None = None) -> tuple[list[str], list[str]]:
+          custom_presets: dict | None = None, hdr_transfer: str | None = None) -> tuple[list[str], list[str]]:
     """Monta os argumentos do ffmpeg. Devolve (args, avisos)."""
     p = PRESETS[opts.preset]
     W, H = p["width"], p["height"]
@@ -55,7 +55,10 @@ def build(src: Path, dst: Path, start: float, end: float, opts: RenderOptions, s
     warnings = list(plan.warnings)
     if dur > p["max_seconds"]:
         warnings.append(f"Duração acima do limite usual de {p['label']} ({p['max_seconds']}s).")
-    fc, _ = framing.video_filter(plan, W, H)
+    tonemap = media.tonemap_chain(hdr_transfer)
+    if hdr_transfer and not tonemap:
+        warnings.append("Vídeo HDR e este FFmpeg não tem os filtros zscale/tonemap: as cores podem sair lavadas.")
+    fc = framing.video_filter(plan, W, H, tonemap)
     last = "framed"
     if opts.subtitles and segments:
         style = resolve_style(opts, custom_presets)
@@ -89,6 +92,7 @@ def build(src: Path, dst: Path, start: float, end: float, opts: RenderOptions, s
     s = get_settings()
     args = [*inputs, "-filter_complex", fc, "-map", "[vout]", "-map", "[aout]",
             "-c:v", "libx264", "-preset", s.render_preset, "-crf", str(s.render_crf), "-profile:v", "high",
+            *(["-color_primaries", "bt709", "-color_trc", "bt709", "-colorspace", "bt709"] if tonemap else []),
             *(["-r", str(opts.fps)] if opts.fps else []),
             "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", "-t", f"{dur:.3f}", str(dst)]
     return args, warnings

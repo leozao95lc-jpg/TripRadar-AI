@@ -22,6 +22,20 @@ def _get_model():
     return _model
 
 
+def _load_wav(path: Path):
+    """Lê o WAV 16 kHz mono gerado pelo FFmpeg. Evita o decodificador PyAV do faster-whisper,
+    que é incompatível com versões recentes do PyAV (erro `metadata_errors`)."""
+    import wave
+
+    import numpy as np
+
+    with wave.open(str(path), "rb") as w:
+        if (w.getframerate(), w.getnchannels(), w.getsampwidth()) != (16000, 1, 2):
+            raise AppError("Áudio extraído em formato inesperado.")
+        pcm = np.frombuffer(w.readframes(w.getnframes()), dtype=np.int16)
+    return pcm.astype(np.float32) / 32768.0
+
+
 def transcribe(audio: Path, duration: float, language: str | None = None,
                on_progress: Callable[[float], None] | None = None,
                should_cancel: Callable[[], bool] | None = None) -> dict:
@@ -32,7 +46,7 @@ def transcribe(audio: Path, duration: float, language: str | None = None,
     from .media import Cancelled
 
     segs, info = _get_model().transcribe(
-        str(audio), language=language, word_timestamps=True, vad_filter=True, beam_size=5,
+        _load_wav(audio), language=language, word_timestamps=True, vad_filter=True, beam_size=5,
     )
     out = []
     for i, s in enumerate(segs):  # gerador: a transcrição acontece conforme iteramos

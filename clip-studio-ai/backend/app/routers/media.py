@@ -6,6 +6,7 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import FileResponse, PlainTextResponse
 from sqlalchemy.orm import Session
+from starlette.concurrency import run_in_threadpool
 from starlette.requests import ClientDisconnect
 
 from .. import jobs as jobq, media, security, storage
@@ -21,6 +22,7 @@ router = APIRouter(prefix="/api", dependencies=[Depends(security.require_auth)])
 # Átomos de topo válidos em arquivos ISO-BMFF / QuickTime (MP4, M4V, MOV)
 MAGIC = {b"ftyp", b"moov", b"mdat", b"wide", b"free", b"skip"}
 CHUNK_LIMIT_MSG = "Arquivo acima do limite de {} MB."
+FLUSH_BYTES = 4 * 1024 * 1024
 
 
 # ---------- upload ----------
@@ -44,9 +46,17 @@ async def upload_video(project_id: str, filename: str, request: Request, db: Ses
     except storage.StorageError as e:
         raise HTTPException(507, str(e))
     video_id = uuid.uuid4().hex
-    vdir = storage.project_dir(project.id, "videos")
+    vdir = storage.area("originals", project.id)
     part, final = vdir / f"{video_id}.part", vdir / f"{video_id}{ext}"
-    size, head = 0, b""
+    size, head, buf = 0, b"", bytearray()
+
+    async def flush(f) -> None:
+        nonlocal buf
+        data, buf = buf, bytearray()
+        await run_in_threadpool(f.write, data)  # disco fora do event loop: a API segue respondendo
+        if storage.free_bytes() < s.min_free_disk_mb * 1024 * 1024:
+            raise HTTPException(507, "Espaço em disco insuficiente para concluir o upload.")
+
     try:
         with part.open("wb") as f:
             async for chunk in request.stream():
@@ -55,13 +65,16 @@ async def upload_video(project_id: str, filename: str, request: Request, db: Ses
                     raise HTTPException(413, CHUNK_LIMIT_MSG.format(s.max_upload_mb))
                 if len(head) < 12:
                     head += chunk[:12 - len(head)]
-                f.write(chunk)
+                buf += chunk
+                if len(buf) >= FLUSH_BYTES:  # no máximo alguns MB em memória, qualquer que seja o arquivo
+                    await flush(f)
+            await flush(f)
         if size == 0:
             raise HTTPException(400, "Arquivo vazio.")
         if len(head) < 12 or head[4:8] not in MAGIC:
             raise HTTPException(415, "O conteúdo do arquivo não corresponde a um vídeo MP4/MOV/M4V.")
         try:
-            info = media.probe(part)
+            info = await run_in_threadpool(media.probe, part)
         except media.MediaError as e:
             raise HTTPException(415, str(e))
         part.replace(final)
@@ -73,7 +86,8 @@ async def upload_video(project_id: str, filename: str, request: Request, db: Ses
         raise
     video = Video(id=video_id, project_id=project.id, filename=display, file_path=storage.rel(final),
                   size_bytes=size, duration=info["duration"], resolution=f"{info['width']}x{info['height']}",
-                  fps=info["fps"], has_audio=int(info["has_audio"]), status=VideoStatus.PENDING)
+                  fps=info["fps"], has_audio=int(info["has_audio"]), hdr_transfer=info["hdr_transfer"],
+                  status=VideoStatus.PENDING)
     db.add(video)
     db.commit()
     return video
@@ -88,15 +102,21 @@ def get_video(video_id: str, db: Session = Depends(get_db)):
 @router.delete("/videos/{video_id}", status_code=204, tags=["videos"])
 def delete_video(video_id: str, db: Session = Depends(get_db)):
     v = get_or_404(db, Video, video_id)
-    ensure_no_active_job(db, video_id=v.id)
+    ensure_no_active_job(db, video_id=v.id, include_renders=True)
     paths = [v.file_path, v.proxy_path, *(e.file_path for c in v.clips for e in c.exports)]
-    tdir = storage.project_dir(v.project_id, "transcripts")
+    tdir, adir = storage.area("transcripts", v.project_id), storage.area("audio", v.project_id)
+    cdir = storage.area("clips", v.project_id)
+    clip_ids = [c.id for c in v.clips]
     db.delete(v)
     db.commit()
     for p in paths:
         storage.remove(p)
     for ext in ("json", "srt"):
         (tdir / f"{video_id}.{ext}").unlink(missing_ok=True)
+    (adir / f"{video_id}.wav").unlink(missing_ok=True)
+    for cid in clip_ids:
+        for ext in ("ass", "srt"):
+            (cdir / f"{cid}.{ext}").unlink(missing_ok=True)
 
 
 @router.get("/videos/{video_id}/stream", tags=["videos"])
@@ -183,6 +203,8 @@ def create_clip(video_id: str, body: ClipCreate, db: Session = Depends(get_db)):
                 duration=round(end - body.start_time, 3), category="outro",
                 transcript=_text_between(_segments(db, v.id), body.start_time, end),
                 rationale="Corte criado manualmente.", warnings=[])
+    if v.status in (VideoStatus.PENDING, VideoStatus.TRANSCRIBED, VideoStatus.FAILED):
+        v.status = VideoStatus.AWAITING_REVIEW
     db.add(clip)
     db.commit()
     return clip
@@ -211,15 +233,31 @@ def update_clip(clip_id: str, body: ClipPatch, db: Session = Depends(get_db)):
     return clip
 
 
+@router.get("/clips/{clip_id}/srt", tags=["clips"])
+def clip_srt(clip_id: str, db: Session = Depends(get_db)):
+    """Legenda do corte em SRT (tempos relativos ao início do corte), para subir como caption nas redes."""
+    clip = get_or_404(db, Clip, clip_id)
+    segs = [{**s, "start": max(s["start"], clip.start_time), "end": min(s["end"], clip.end_time)}
+            for s in _segments(db, clip.video_id) if s["end"] > clip.start_time and s["start"] < clip.end_time]
+    if not segs:
+        raise HTTPException(404, "Não há transcrição para este corte.")
+    name = quote(storage.safe_display_name(clip.title) + ".srt")
+    return PlainTextResponse(to_srt(segs, offset=clip.start_time), media_type="application/x-subrip",
+                             headers={"Content-Disposition": f"attachment; filename*=UTF-8''{name}"})
+
+
 @router.delete("/clips/{clip_id}", status_code=204, tags=["clips"])
 def delete_clip(clip_id: str, db: Session = Depends(get_db)):
     clip = get_or_404(db, Clip, clip_id)
     ensure_no_active_job(db, clip_id=clip.id)
     paths = [e.file_path for e in clip.exports]
+    cdir = storage.area("clips", clip.video.project_id)
     db.delete(clip)
     db.commit()
     for p in paths:
         storage.remove(p)
+    for ext in ("ass", "srt"):
+        (cdir / f"{clip_id}.{ext}").unlink(missing_ok=True)
 
 
 @router.post("/clips/{clip_id}/render", response_model=JobOut, status_code=202, tags=["clips"])

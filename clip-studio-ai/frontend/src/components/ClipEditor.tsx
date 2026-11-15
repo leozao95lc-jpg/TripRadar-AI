@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
-import { API, api, Brand, CATEGORY, Clip, fmtDate, fmtSize, fmtTime, Job, SubtitleSettings } from "@/lib/api";
+import { useEffect, useRef, useState } from "react";
+import { API, api, Brand, CATEGORY, Clip, ExportT, fmtDate, fmtSize, fmtTime, Job, SubtitleSettings } from "@/lib/api";
 import { Badge, Button, ErrorNote, Field } from "./ui";
 
 type Props = {
@@ -19,6 +19,16 @@ export default function ClipEditor({ clip, duration, currentTime, onPlay, onChan
     setD({ title: clip.title, hook: clip.hook, cta: clip.cta, start: clip.start_time, end: clip.end_time });
     setError(null);
   }, [clip.id, clip.title, clip.hook, clip.cta, clip.start_time, clip.end_time]);
+
+  // feedback após exportar: aparece quando uma nova exportação deste corte fica pronta
+  const exports = [...clip.exports].sort((a, b) => b.created_at.localeCompare(a.created_at));
+  const known = useRef(clip.exports.length);
+  const [fresh, setFresh] = useState<ExportT | null>(null);
+  useEffect(() => {
+    if (clip.exports.length > known.current) setFresh(exports[0]);
+    known.current = clip.exports.length;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clip.exports.length]);
 
   const dirty = d.title !== clip.title || d.hook !== clip.hook || d.cta !== clip.cta || d.start !== clip.start_time || d.end !== clip.end_time;
   const len = d.end - d.start;
@@ -79,6 +89,17 @@ export default function ClipEditor({ clip, duration, currentTime, onPlay, onChan
         <Button variant="danger" className="flex-1" disabled={clip.status === "rejected"} onClick={() => patch({ status: "rejected" })}>✕ Rejeitar</Button>
       </div>
       <ErrorNote error={error} />
+      {fresh && (
+        <div role="status" className="rounded-lg border border-green-soft bg-green px-3 py-2.5 text-sm">
+          <p className="font-semibold">✓ Exportação concluída</p>
+          <p className="mt-0.5 text-cream/80">Vídeo vertical pronto ({fresh.resolution}, {fmtSize(fresh.size_bytes)}).</p>
+          <p className="mt-2 flex flex-wrap items-center gap-3">
+            <a className="rounded-md bg-orange px-3 py-1 font-semibold text-bg" href={`${API}/api/exports/${fresh.id}/download`}>Baixar vídeo</a>
+            <a className="underline" target="_blank" href={`${API}/api/exports/${fresh.id}/download?inline=true`}>Assistir</a>
+            <button className="ml-auto text-xs text-cream/70 hover:text-cream" onClick={() => setFresh(null)}>Fechar</button>
+          </p>
+        </div>
+      )}
 
       <details className="rounded-lg border border-line bg-bg p-3" open>
         <summary className="cursor-pointer font-mono text-[11px] uppercase text-muted">Por que a IA escolheu este trecho</summary>
@@ -131,9 +152,9 @@ export default function ClipEditor({ clip, duration, currentTime, onPlay, onChan
           {renderJob ? `Renderizando… ${Math.round(renderJob.progress * 100)}%` : clip.exports.length ? "Gerar novamente" : "Renderizar vídeo vertical"}
         </Button>
         {!canRender && !renderJob && <p className="text-xs text-muted">{dirty ? "Salve os ajustes antes de renderizar." : "Aprove o corte para liberar a renderização."}</p>}
-        {clip.exports.length > 0 && (
+        {exports.length > 0 && (
           <ul className="divide-y divide-line border-t border-line pt-1">
-            {clip.exports.map((e) => (
+            {exports.map((e) => (
               <li key={e.id} className="flex items-center justify-between gap-2 py-2 text-sm">
                 <span className="font-mono text-xs uppercase text-muted">{e.format} · {e.resolution} · {fmtSize(e.size_bytes)} · {fmtDate(e.created_at)}</span>
                 <span className="flex shrink-0 gap-3">
@@ -144,6 +165,7 @@ export default function ClipEditor({ clip, duration, currentTime, onPlay, onChan
             ))}
           </ul>
         )}
+        {clip.transcript && <a className="block text-xs text-muted hover:text-cream hover:underline" href={`${API}/api/clips/${clip.id}/srt`}>Baixar legenda do corte (.srt) para subir como caption</a>}
       </div>
       <Button small variant="danger" onClick={() => confirm("Excluir este corte e suas exportações?") && api(`/clips/${clip.id}`, { method: "DELETE" }).then(onChange).catch((e) => setError(e.message))}>Excluir corte</Button>
     </div>

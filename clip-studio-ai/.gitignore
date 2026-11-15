@@ -1,6 +1,9 @@
 .env
-data/
-backend/data/
+storage/*/*
+!storage/*/.gitkeep
+storage/clipstudio.db*
+storage/models/
+storage/brand/
 __pycache__/
 .pytest_cache/
 node_modules/

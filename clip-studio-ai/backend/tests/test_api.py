@@ -37,7 +37,7 @@ def test_upload_validation(auth, tmp_path, sample_video):
     assert upload(auth, pid, fake).status_code == 415
     assert upload(auth, pid, sample_video, "malware.exe").status_code == 415
     assert upload(auth, "f" * 32, sample_video).status_code == 404
-    assert not list(storage.project_dir(pid, "videos").iterdir())  # nada parcial fica para trás
+    assert not list(storage.area("originals", pid).iterdir())  # nada parcial fica para trás
 
 
 def test_full_pipeline(auth, sample_video, mocks):
@@ -83,7 +83,9 @@ def test_full_pipeline(auth, sample_video, mocks):
     exp = auth.get(f"/api/videos/{vid}/clips").json()[0]["exports"][0]
     r = auth.get(f"/api/exports/{exp['id']}/download")
     assert r.status_code == 200 and "attachment" in r.headers["content-disposition"]
-    out = storage.resolve("tmp") / "check.mp4"
+    srt = auth.get(f"/api/clips/{clip['id']}/srt").text  # tempos relativos ao início do corte
+    assert srt.startswith("1\n00:00:00,200 --> 00:00:04,000") and "passaporte" in srt
+    out = storage.resolve("temp") / "check.mp4"
     out.write_bytes(r.content)
     info = media.probe(out)
     assert (info["width"], info["height"]) == (1080, 1920)
@@ -97,11 +99,12 @@ def test_full_pipeline(auth, sample_video, mocks):
 
     d = auth.get("/api/dashboard").json()
     assert d["totals"] == {"projects": 1, "videos": 1, "clips": 2, "exports": 1, "active_jobs": 0}
-    assert not list(storage.resolve("tmp").glob("job_*"))  # temporários limpos
+    assert not list(storage.resolve("temp").glob("job_*"))  # temporários limpos
 
-    pdir = storage.project_dir(pid)
+    dirs = [storage.resolve(f"{a}/{pid}") for a in ("originals", "audio", "transcripts", "clips", "exports")]
+    assert all(d.is_dir() and any(d.iterdir()) for d in dirs)  # cada área tem os arquivos do projeto
     assert auth.delete(f"/api/projects/{pid}").status_code == 204
-    assert not pdir.exists() and auth.get("/api/projects").json() == []
+    assert not any(d.exists() for d in dirs) and auth.get("/api/projects").json() == []
     assert auth.get(f"/api/exports/{exp['id']}/download").status_code == 404
 
 

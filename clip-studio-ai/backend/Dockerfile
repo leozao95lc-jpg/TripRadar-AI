@@ -9,6 +9,6 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
-ENV DATA_DIR=/data HF_HOME=/data/models PYTHONUNBUFFERED=1
+ENV STORAGE_DIR=/storage HF_HOME=/storage/models PYTHONUNBUFFERED=1
 EXPOSE 8000
 CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
