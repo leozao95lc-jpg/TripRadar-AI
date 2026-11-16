@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     job_timeout_seconds: int = 6 * 3600
 
     # Transcrição
-    whisper_model: str = "small"
+    whisper_model: str = "large-v3-turbo"  # melhor relação qualidade/tempo medida (ver README)
     whisper_device: str = "auto"
     whisper_compute_type: str = "int8"
 

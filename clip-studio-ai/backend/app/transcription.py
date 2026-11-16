@@ -1,4 +1,5 @@
 """Transcrição local com Faster-Whisper. Nenhum áudio sai da máquina."""
+import re
 from pathlib import Path
 from typing import Callable
 
@@ -6,6 +7,66 @@ from .config import get_settings
 from .errors import AppError
 
 _model = None
+
+SENTENCE_END = re.compile(r"[.!?…]+[\"'”’»)\]]*$")
+ABBREVIATIONS = {"sr.", "sra.", "srta.", "dr.", "dra.", "prof.", "profa.", "av.", "ud.", "uds.", "vs."}
+MAX_UNIT_SECONDS = 15.0  # frases mais longas que isso são divididas na pausa mais forte
+MIN_PIECE_SECONDS = 2.5
+
+
+def _ends_sentence(word: str, next_word: str | None) -> bool:
+    w = word.strip()
+    if not SENTENCE_END.search(w) or w.lower() in ABBREVIATIONS or re.fullmatch(r"[A-Za-zÀ-ÿ]\.", w):
+        return False
+    if next_word:  # "eu acho que... não sei": reticências seguidas de minúscula não encerram a frase
+        first = next((c for c in next_word.strip() if c.isalpha()), "")
+        if first and first.islower():
+            return False
+    return True
+
+
+def _split_long(words: list[dict]) -> list[list[dict]]:
+    """Frase longa demais (fala sem pontuação ou o modelo trocou ponto por vírgula): divide na
+    pausa mais forte, de preferência depois de vírgula, até cada parte caber no limite."""
+    if words[-1]["end"] - words[0]["start"] <= MAX_UNIT_SECONDS:
+        return [words]
+    best = None
+    for i in range(len(words) - 1):
+        left = words[i]["end"] - words[0]["start"]
+        right = words[-1]["end"] - words[i + 1]["start"]
+        if left < MIN_PIECE_SECONDS or right < MIN_PIECE_SECONDS:
+            continue
+        gap = words[i + 1]["start"] - words[i]["end"]
+        clause = words[i]["word"].strip()[-1:] in ",;:"
+        if gap < 0.25 and not clause:
+            continue  # sem pausa nem pontuação: não há evidência de fronteira
+        score = gap + (0.3 if clause else 0.0) - 0.2 * abs(left - right) / (left + right)
+        if best is None or score > best[0]:
+            best = (score, i)
+    if best is None:
+        return [words]
+    i = best[1]
+    return _split_long(words[: i + 1]) + _split_long(words[i + 1:])
+
+
+def resegment(words: list[dict]) -> list[dict]:
+    """Reagrupa as palavras (com timestamps) em FRASES.
+
+    O Whisper devolve blocos de ~5 s que quase sempre começam e terminam no meio de uma frase.
+    Como os cortes são definidos por índice de segmento, as unidades precisam ser frases — assim
+    todo corte começa e termina em fronteira de frase por construção."""
+    sentences: list[list[dict]] = []
+    cur: list[dict] = []
+    for i, w in enumerate(words):
+        cur.append(w)
+        nxt = words[i + 1] if i + 1 < len(words) else None
+        long_pause = nxt is not None and nxt["start"] - w["end"] >= 2.0
+        if nxt is None or long_pause or _ends_sentence(w["word"], nxt["word"]):
+            sentences.append(cur)
+            cur = []
+    units = [piece for s in sentences for piece in _split_long(s)]
+    return [{"id": i, "start": u[0]["start"], "end": u[-1]["end"], "speaker": None,
+             "text": " ".join(w["word"].strip() for w in u), "words": u} for i, u in enumerate(units)]
 
 
 def _get_model():
@@ -62,7 +123,11 @@ def transcribe(audio: Path, duration: float, language: str | None = None,
         })
         if on_progress and duration > 0:
             on_progress(min(1.0, s.end / duration))
+    words = [w for seg in out for w in seg["words"] if w["word"]]
+    if words:  # sem timestamps por palavra (não deveria ocorrer) ficam os blocos originais
+        out = resegment(words)
     return {
         "language": info.language, "language_probability": round(float(info.language_probability), 4),
-        "duration": duration, "model": get_settings().whisper_model, "diarization": False, "segments": out,
+        "duration": duration, "model": get_settings().whisper_model, "diarization": False,
+        "segmentation": "sentences" if words else "whisper", "segments": out,
     }

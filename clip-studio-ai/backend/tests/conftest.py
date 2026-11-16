@@ -37,6 +37,7 @@ def sample_video(tmp_path_factory):
 @pytest.fixture()
 def client(tmp_path, monkeypatch):
     monkeypatch.setenv("STORAGE_DIR", str(tmp_path / "storage"))
+    monkeypatch.setenv("DATABASE_URL", "")  # nunca o banco real, mesmo se a variável existir no ambiente
     monkeypatch.setenv("APP_PASSWORD", "senha-teste")
     monkeypatch.setenv("SECRET_KEY", "k" * 40)
     monkeypatch.setenv("QUEUE_EAGER", "true")

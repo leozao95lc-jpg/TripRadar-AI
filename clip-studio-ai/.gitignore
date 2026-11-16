@@ -1,7 +1,7 @@
 .env
 storage/*/*
 !storage/*/.gitkeep
-storage/clipstudio.db*
+storage/*.db*
 storage/models/
 storage/brand/
 __pycache__/

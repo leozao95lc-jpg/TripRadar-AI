@@ -16,7 +16,7 @@ from ..deps import ensure_no_active_job, get_or_404
 from ..models import Clip, ClipStatus, Project, Transcript, Video, VideoStatus
 from ..render import RenderOptions
 from ..schemas import (AnalyzeIn, ClipCreate, ClipOut, ClipPatch, JobOut, ProcessIn, TranscribeIn, VideoOut)
-from ..subtitles import BUNDLED_FONTS, to_srt
+from ..subtitles import BUNDLED_FONTS, clip_words, to_srt
 
 router = APIRouter(prefix="/api", dependencies=[Depends(security.require_auth)])
 # Átomos de topo válidos em arquivos ISO-BMFF / QuickTime (MP4, M4V, MOV)
@@ -176,8 +176,8 @@ def _segments(db: Session, video_id: str) -> list[dict]:
 
 
 def _text_between(segments: list[dict], start: float, end: float) -> str:
-    return " ".join(s["text"].strip() for s in segments if (s["start"] + s["end"]) / 2 >= start
-                    and (s["start"] + s["end"]) / 2 <= end)
+    """Texto falado dentro do intervalo, com precisão de palavra (cortes ajustados à mão)."""
+    return " ".join(w["word"] for w in clip_words(segments, start, end))
 
 
 def _check_range(v: Video, start: float, end: float) -> None:
@@ -237,12 +237,11 @@ def update_clip(clip_id: str, body: ClipPatch, db: Session = Depends(get_db)):
 def clip_srt(clip_id: str, db: Session = Depends(get_db)):
     """Legenda do corte em SRT (tempos relativos ao início do corte), para subir como caption nas redes."""
     clip = get_or_404(db, Clip, clip_id)
-    segs = [{**s, "start": max(s["start"], clip.start_time), "end": min(s["end"], clip.end_time)}
-            for s in _segments(db, clip.video_id) if s["end"] > clip.start_time and s["start"] < clip.end_time]
-    if not segs:
+    srt = to_srt(_segments(db, clip.video_id), clip.start_time, clip.end_time)
+    if not srt:
         raise HTTPException(404, "Não há transcrição para este corte.")
     name = quote(storage.safe_display_name(clip.title) + ".srt")
-    return PlainTextResponse(to_srt(segs, offset=clip.start_time), media_type="application/x-subrip",
+    return PlainTextResponse(srt, media_type="application/x-subrip",
                              headers={"Content-Disposition": f"attachment; filename*=UTF-8''{name}"})
 
 

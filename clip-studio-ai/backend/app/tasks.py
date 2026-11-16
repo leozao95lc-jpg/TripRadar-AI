@@ -178,10 +178,9 @@ def handle_render(ctx: JobContext) -> None:
     cdir = storage.area("clips", video.project_id)  # artefatos do corte: legenda queimada (.ass) e .srt
     if (ctx.work_dir / "subs.ass").is_file():
         shutil.copy(ctx.work_dir / "subs.ass", cdir / f"{job.clip_id}.ass")
-    clip_segs = [{**s, "start": max(s["start"], start), "end": min(s["end"], end)}
-                 for s in segments if s["end"] > start and s["start"] < end]
-    if clip_segs:
-        (cdir / f"{job.clip_id}.srt").write_text(to_srt(clip_segs, offset=start), encoding="utf-8")
+    clip_srt = to_srt(segments, start, end)
+    if clip_srt:
+        (cdir / f"{job.clip_id}.srt").write_text(clip_srt, encoding="utf-8")
     p = render.PRESETS[opts.preset]
     with SessionLocal() as db:
         db.add(Export(clip_id=job.clip_id, file_path=storage.rel(dst), format=opts.preset,

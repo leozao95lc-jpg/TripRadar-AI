@@ -48,10 +48,66 @@ def _ts(t: float, sep: str) -> str:
     return f"{h:02d}:{m:02d}:{s:02d}{sep}{ms:03d}"
 
 
-def to_srt(segments: list[dict], offset: float = 0.0) -> str:
+def _chars(ws: list[dict]) -> int:
+    return sum(len(w["word"]) + 1 for w in ws) - 1
+
+
+def caption_cues(words: list[dict], max_chars: int = 84, max_seconds: float = 6.0) -> list[list[dict]]:
+    """Agrupa palavras em blocos de legenda (até 2 linhas de ~42 caracteres).
+
+    Cada frase vira um bloco; frases longas são divididas em partes equilibradas (de preferência
+    depois de vírgula) em vez de encher o bloco e deixar um resto de duas palavras."""
+    sentences: list[list[dict]] = []
+    cur: list[dict] = []
+    for w in words:
+        cur.append(w)
+        if re.search(r"[.!?…][\"'”’»)\]]*$", w["word"]):
+            sentences.append(cur)
+            cur = []
+    if cur:
+        sentences.append(cur)
+
+    def split(ws: list[dict]) -> list[list[dict]]:
+        if len(ws) < 2 or (_chars(ws) <= max_chars and ws[-1]["end"] - ws[0]["start"] <= max_seconds):
+            return [ws]
+        total, acc, best = _chars(ws), 0, None
+        for i, w in enumerate(ws[:-1]):
+            acc += len(w["word"]) + 1
+            score = abs(acc - total / 2) - (12 if w["word"][-1:] in ",;:" else 0)
+            if best is None or score < best[0]:
+                best = (score, i)
+        i = best[1]
+        return split(ws[: i + 1]) + split(ws[i + 1:])
+
+    cues: list[list[dict]] = []
+    for piece in (p for s in sentences for p in split(s)):
+        prev = cues[-1] if cues else None
+        if (prev and _chars(prev) < 20 and _chars(prev) + 1 + _chars(piece) <= max_chars
+                and piece[0]["start"] - prev[-1]["end"] < 1.0 and piece[-1]["end"] - prev[0]["start"] <= max_seconds):
+            cues[-1] = prev + piece  # evita bloco relâmpago de uma ou duas palavras
+        else:
+            cues.append(piece)
+    return cues
+
+
+def _two_lines(text: str, width: int = 42) -> str:
+    if len(text) <= width:
+        return text
+    mid = len(text) // 2
+    spaces = [i for i, c in enumerate(text) if c == " "]
+    if not spaces:
+        return text
+    cut = min(spaces, key=lambda i: abs(i - mid))
+    return text[:cut] + "\n" + text[cut + 1:]
+
+
+def to_srt(segments: list[dict], start: float = 0.0, end: float | None = None) -> str:
+    """SRT do trecho [start, end] com tempos relativos a `start` (padrão: transcrição inteira)."""
+    words = clip_words(segments, start, float("inf") if end is None else end)
     out = []
-    for i, s in enumerate(segments, 1):
-        out.append(f"{i}\n{_ts(s['start'] - offset, ',')} --> {_ts(s['end'] - offset, ',')}\n{s['text'].strip()}\n")
+    for i, cue in enumerate(caption_cues(words), 1):
+        text = _two_lines(" ".join(w["word"] for w in cue))
+        out.append(f"{i}\n{_ts(cue[0]['start'], ',')} --> {_ts(cue[-1]['end'], ',')}\n{text}\n")
     return "\n".join(out)
 
 
