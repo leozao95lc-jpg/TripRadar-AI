@@ -79,6 +79,10 @@ class Video(Base):
         return bool(self.proxy_path)
 
     @property
+    def has_transcript(self) -> bool:
+        return self.transcript is not None
+
+    @property
     def hdr(self) -> bool:
         return bool(self.hdr_transfer)
 

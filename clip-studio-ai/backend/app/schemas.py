@@ -42,6 +42,7 @@ class VideoOut(ORM):
     fps: float
     has_audio: bool
     has_preview: bool
+    has_transcript: bool
     hdr: bool
     status: str
     created_at: UTCDateTime

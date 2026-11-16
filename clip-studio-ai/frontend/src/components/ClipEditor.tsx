@@ -58,7 +58,9 @@ export default function ClipEditor({ clip, duration, currentTime, onPlay, onChan
           {clip.editorial_score > 0 && <span className="font-mono text-xs text-muted">/100</span>}
         </span>
       </div>
-      <p className="-mt-2 text-right font-mono text-[10px] uppercase text-muted">Pontuação editorial da IA — não é previsão de visualizações</p>
+      <p className="-mt-2 text-right font-mono text-[10px] uppercase text-muted">
+        {clip.editorial_score > 0 ? "Pontuação editorial da IA — não é previsão de visualizações" : "Corte manual — sem pontuação da IA"}
+      </p>
 
       {clip.warnings.map((w) => <p key={w} className="rounded-lg border border-gold/40 bg-gold/10 px-3 py-2 text-xs text-gold">{w}</p>)}
 
@@ -102,7 +104,7 @@ export default function ClipEditor({ clip, duration, currentTime, onPlay, onChan
       )}
 
       <details className="rounded-lg border border-line bg-bg p-3" open>
-        <summary className="cursor-pointer font-mono text-[11px] uppercase text-muted">Por que a IA escolheu este trecho</summary>
+        <summary className="cursor-pointer font-mono text-[11px] uppercase text-muted">{clip.editorial_score > 0 ? "Por que a IA escolheu este trecho" : "Origem do corte"}</summary>
         <p className="mt-2 text-sm">{clip.rationale || "—"}</p>
       </details>
       <details className="rounded-lg border border-line bg-bg p-3">

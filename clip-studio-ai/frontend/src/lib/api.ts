@@ -1,7 +1,7 @@
 export const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export type Project = { id: string; name: string; description: string; created_at: string; video_count: number; clip_count: number; export_count: number; videos?: Video[] };
-export type Video = { id: string; project_id: string; filename: string; size_bytes: number; duration: number; resolution: string; fps: number; has_audio: boolean; has_preview: boolean; hdr: boolean; status: string; created_at: string };
+export type Video = { id: string; project_id: string; filename: string; size_bytes: number; duration: number; resolution: string; fps: number; has_audio: boolean; has_preview: boolean; has_transcript: boolean; hdr: boolean; status: string; created_at: string };
 export type ExportT = { id: string; clip_id: string; format: string; resolution: string; size_bytes: number; created_at: string; clip_title: string; project_id: string; project_name: string };
 export type Clip = { id: string; video_id: string; title: string; hook: string; start_time: number; end_time: number; duration: number; transcript: string; rationale: string; cta: string; editorial_score: number; category: string; warnings: string[]; status: string; render_options: Record<string, unknown>; exports: ExportT[] };
 export type Job = { id: string; project_id: string; video_id: string | null; clip_id: string | null; job_type: string; status: string; progress: number; stage: string; attempts: number; error_message: string | null; created_at: string; updated_at: string; elapsed_seconds: number; log?: string };

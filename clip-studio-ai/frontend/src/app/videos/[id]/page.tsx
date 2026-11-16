@@ -38,7 +38,10 @@ export default function VideoPage() {
   const router = useRouter();
   const video = useLoad(() => api<Video>(`/videos/${id}`), [id]);
   const clips = useLoad(() => api<Clip[]>(`/videos/${id}/clips`), [id]);
-  const transcript = useLoad(() => api<{ language: string; segments: Segment[] }>(`/videos/${id}/transcript`).catch(() => null), [id]);
+  const hasTranscriptFlag = video.data?.has_transcript ?? false;
+  const transcript = useLoad(
+    () => (hasTranscriptFlag ? api<{ language: string; segments: Segment[] }>(`/videos/${id}/transcript`).catch(() => null) : Promise.resolve(null)),
+    [id, hasTranscriptFlag]);
   const subs = useLoad(() => api<SubtitleSettings>("/settings/subtitles"));
   const brand = useLoad(() => api<Brand>("/settings/brand"));
   const reloadAll = useCallback(() => { video.reload(); clips.reload(); transcript.reload(); }, [video, clips, transcript]);

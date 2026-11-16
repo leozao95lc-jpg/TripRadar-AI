@@ -29,8 +29,10 @@ Ambiente em que o projeto foi construído e testado (container Linux, 4 vCPUs, 1
 | 7 | Travas de arquivo do SQLite não são confiáveis em pastas compartilhadas do Docker Desktop (Windows/macOS) | Análise de risco | No Docker o banco fica em volume nomeado; os vídeos continuam na pasta `storage/` |
 | 8 | Em redes restritas o download do modelo Whisper falha no protocolo Xet do Hugging Face | Download real do modelo | `HF_HUB_DISABLE_XET=1` usa o download HTTP comum |
 | 9 | Docker Hub devolve `429 Too Many Requests` para downloads anônimos em IP compartilhado | Build das imagens | Repetir após alguns minutos ou `docker login` |
+| 10 | No modo streaming, o SDK da Anthropic valida o JSON antes de informar por que a resposta terminou; uma resposta cortada por tamanho aparecia como "formato inválido" | Teste com o SDK real e transporte simulado | O schema é enviado com o utilitário público do SDK e a validação é feita pelo backend, depois de checar recusa e corte por tamanho |
 
-Os itens 1, 2 e 3 só apareceram quando o pipeline rodou com o modelo real. É o motivo de o
+Os itens 1, 2 e 3 só apareceram quando o pipeline rodou com o modelo real, e o item 10, quando a
+chamada passou pelo SDK de verdade. É o motivo de o
 projeto ter um teste opcional de transcrição real e uma amostra de saída real do Whisper nos
 testes de regressão.
 
@@ -93,7 +95,7 @@ Comportamento da fila:
 | Identificação única | O ID do job no banco é o mesmo ID no Redis/RQ |
 | Logs | Cada job guarda o log das etapas; erros inesperados guardam o stack trace no log, e o usuário vê uma mensagem simples |
 | Tentativas controladas | Erros de negócio (arquivo inválido, chave ausente) falham na hora, com mensagem clara. Erros inesperados são repetidos até `JOB_MAX_ATTEMPTS` |
-| Cancelamento | Job na fila é removido; job em execução é interrompido no próximo ponto de checagem (o FFmpeg é encerrado em menos de 1 s) |
+| Cancelamento | Job na fila é removido; job em execução é interrompido no próximo ponto de checagem (durante o render, a cada meio segundo) |
 | Recuperação | Ao subir, o worker reenfileira ou encerra os jobs que ficaram órfãos |
 | Limpeza de temporários | Cada job trabalha em `storage/temp/job_<id>`, apagada ao final (sucesso, erro ou cancelamento). Uploads parciais (`.part`) antigos são removidos na subida da API |
 
@@ -130,8 +132,9 @@ clip-studio-ai/
 ### 5.1 A IA aponta trechos; o backend monta o corte
 
 A Claude recebe a transcrição numerada por frase e devolve, para cada corte, o índice da primeira
-e da última frase, além de título, gancho, justificativa, CTA, pontuação e categoria. O backend
-valida a resposta com Pydantic e aplica regras determinísticas:
+e da última frase, além de título, gancho, justificativa, CTA, pontuação e categoria. A saída é
+restrita a um schema JSON (structured outputs) e a chamada usa streaming, porque a análise de um
+vídeo longo leva minutos. O backend valida a resposta com Pydantic e aplica regras determinísticas:
 
 | Requisito do produto | Garantia |
 |---|---|
@@ -255,5 +258,5 @@ consultada em novembro de 2026), isso dá de US$ 0,20 a 0,50 por análise. Cada 
 uma nova cobrança. Oito episódios de uma hora por mês ficariam em torno de US$ 2 a 4.
 
 Alavancas de custo, todas no `.env`: `ANTHROPIC_MODEL` (modelos menores custam uma fração) e
-`ANTHROPIC_EFFORT`. O valor real aparece no console da Anthropic; vale conferir a primeira fatura
-contra esta estimativa.
+`ANTHROPIC_EFFORT`. O log de cada análise registra os tokens de entrada e de saída consumidos, o
+que permite conferir esta estimativa já na primeira execução e acompanhar o custo por vídeo.

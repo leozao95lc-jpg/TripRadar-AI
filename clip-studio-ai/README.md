@@ -157,45 +157,52 @@ Atualizar depois de baixar uma versão nova do código:
 docker compose up --build -d
 ```
 
-Cópia de segurança do banco de dados (os arquivos de vídeo ficam na pasta `storage/`):
+Cópia de segurança do banco de dados. O arquivo é gravado em `storage/clipstudio-backup.db`; os
+vídeos e exportações já ficam na pasta `storage/`, então copiar essa pasta depois do comando
+guarda tudo:
 
 ```bash
-docker compose cp api:/db/clipstudio.db ./clipstudio-backup.db
+docker compose exec api python -c "import sqlite3; o=sqlite3.connect('/db/clipstudio.db'); d=sqlite3.connect('/storage/clipstudio-backup.db'); o.backup(d); d.close()"
 ```
 
 Rodar os testes automatizados:
 
 ```bash
-docker compose run --rm --no-deps -v ./backend/tests:/app/tests api sh -c "pip install -q pytest httpx && pytest -q"
+docker compose run --rm --no-deps -v ./backend/tests:/app/tests api sh -c "pip install -q pytest==9.2.0 httpx==0.28.1 && pytest -q"
 ```
+
+Os testes usam um banco e uma pasta temporários; não tocam nos seus projetos.
 
 Gerar um vídeo de teste curto (30 s, com fala sintetizada) para validar o pipeline:
 
 ```bash
-docker compose run --rm --no-deps -v ./backend/tests:/app/tests -v ./storage:/storage api python -m tests.make_test_video /storage/video_teste.mp4
+docker compose run --rm --no-deps -v ./backend/tests:/app/tests api python -m tests.make_test_video /storage/video_teste.mp4
 ```
+
+O arquivo aparece em `storage/video_teste.mp4`; importe-o pela interface. A fala é em inglês
+(é o que o sintetizador embutido no FFmpeg oferece), suficiente para conferir o fluxo.
 
 ## 7. Rodando sem Docker (desenvolvimento)
 
-Instalar e criar o banco:
+Instalar e criar o banco, a partir da pasta `clip-studio-ai` (o `.env` da seção 2 também vale aqui):
 
 ```bash
 cd backend && pip install -r requirements-dev.txt && alembic upgrade head
 ```
 
-API:
+API (dentro de `backend/`):
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
-Worker, em outro terminal (precisa de um Redis em `localhost:6379`):
+Worker, em outro terminal, também dentro de `backend/` (precisa de um Redis em `localhost:6379`):
 
 ```bash
 python -m app.worker
 ```
 
-Frontend, em outro terminal:
+Frontend, em outro terminal, a partir da pasta `clip-studio-ai`:
 
 ```bash
 cd frontend && npm install && npm run dev
