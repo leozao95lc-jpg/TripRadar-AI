@@ -19,7 +19,7 @@ def mocks(monkeypatch):
                    editorial_score=88, category="historia"),
             LLMCut(start_segment=5, end_segment=7, title="Seguro viagem", hook="Dinheiro jogado fora?",
                    rationale="Opinião clara.", cta="Comente", editorial_score=71, category="dica")]
-    monkeypatch.setattr(editorial, "call_claude", lambda prompt: LLMResponse(cuts=cuts))
+    monkeypatch.setattr(editorial, "call_claude", lambda prompt, on_usage=None: LLMResponse(cuts=cuts))
 
 
 def test_auth_required(client):

@@ -114,7 +114,10 @@ def _analyze(ctx: JobContext, video: Video, params: dict, lo: float) -> None:
     brand = _brand()
     context = " — ".join(x for x in (brand.get("channel_name"), brand.get("channel_description")) if x)
     ctx.log("Enviando à API Claude apenas a transcrição (texto e timestamps).")
-    suggestions = editorial.analyze(transcript, video.duration, cfg, context, exclude)
+    suggestions = editorial.analyze(
+        transcript, video.duration, cfg, context, exclude,
+        on_usage=lambda u: ctx.log(f"Consumo da análise: {u['input_tokens']} tokens de entrada e "
+                                   f"{u['output_tokens']} de saída (modelo {u['model']})"))
     ctx.check_cancel()
     with SessionLocal() as db:
         # nova análise substitui apenas sugestões não revisadas; aprovados/renderizados são preservados

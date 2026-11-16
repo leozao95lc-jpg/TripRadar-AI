@@ -9,7 +9,7 @@ A resposta é validada com Pydantic e depois passa por regras determinísticas (
 duplicidade, frases incompletas).
 """
 import re
-from typing import Literal
+from typing import Callable, Literal
 
 from pydantic import BaseModel, Field, ValidationError, model_validator
 
@@ -42,14 +42,16 @@ class AnalysisConfig(BaseModel):
 
 
 class LLMCut(BaseModel):
-    """Formato pedido à IA (sem restrições numéricas no schema; a validação estrita é a de baixo)."""
-    start_segment: int
-    end_segment: int
-    title: str
-    hook: str
-    rationale: str
-    cta: str
-    editorial_score: int
+    """Um corte sugerido, delimitado pelos índices do primeiro e do último segmento (inclusive)."""
+    # Este schema é enviado à IA (as descrições também). Sem restrições numéricas aqui: a
+    # validação estrita acontece em ClipSuggestion, no backend.
+    start_segment: int = Field(description="Índice do primeiro segmento do corte")
+    end_segment: int = Field(description="Índice do último segmento do corte (inclusive)")
+    title: str = Field(description="Título curto do corte")
+    hook: str = Field(description="Gancho: frase curta para a tela ou a legenda do post")
+    rationale: str = Field(description="Por que este trecho foi escolhido")
+    cta: str = Field(description="Chamada para ação sugerida")
+    editorial_score: int = Field(description="Avaliação editorial de 0 a 100 (não é previsão de visualizações)")
     category: Category
 
 
@@ -118,36 +120,63 @@ def build_prompt(segments: list[dict], cfg: AnalysisConfig, language: str, chann
     return "\n\n".join(parts)
 
 
-def call_claude(prompt: str) -> LLMResponse:
+def _client():
+    import anthropic
+
+    return anthropic.Anthropic(api_key=get_settings().anthropic_api_key, timeout=900.0)
+
+
+def _api_message(e) -> str:
+    body = getattr(e, "body", None)
+    msg = (body.get("error") or {}).get("message") if isinstance(body, dict) else None
+    return str(msg or getattr(e, "message", "") or e)[:300]
+
+
+def call_claude(prompt: str, on_usage: Callable[[dict], None] | None = None) -> LLMResponse:
     import anthropic
 
     s = get_settings()
     if not s.anthropic_api_key:
         raise EditorialError("ANTHROPIC_API_KEY não configurada. Defina a chave no arquivo .env.")
-    client = anthropic.Anthropic(api_key=s.anthropic_api_key, timeout=900.0)
     try:
-        resp = client.messages.parse(
+        # Streaming: a análise de um vídeo longo leva minutos, e uma conexão parada tanto tempo
+        # costuma ser derrubada no caminho. A saída é restrita ao schema de LLMResponse; a
+        # validação do JSON fica por nossa conta, depois de checar por que a resposta terminou.
+        with _client().messages.stream(
             model=s.anthropic_model,
-            max_tokens=16000,
+            max_tokens=32000,
             thinking={"type": "adaptive"},
-            output_config={"effort": s.anthropic_effort},
+            output_config={"effort": s.anthropic_effort,
+                           "format": {"type": "json_schema", "schema": anthropic.transform_schema(LLMResponse)}},
             system=SYSTEM,
             messages=[{"role": "user", "content": prompt}],
-            output_format=LLMResponse,
-        )
+        ) as stream:
+            resp = stream.get_final_message()
     except anthropic.AuthenticationError as e:
-        raise EditorialError("Chave da API Anthropic inválida.") from e
+        raise EditorialError("Chave da API Anthropic inválida. Confira ANTHROPIC_API_KEY no arquivo .env.") from e
     except anthropic.RateLimitError as e:
         raise EditorialError("Limite de uso da API Anthropic atingido. Tente novamente em alguns minutos.") from e
     except anthropic.APIStatusError as e:
-        raise EditorialError(f"A API Anthropic recusou a requisição (HTTP {e.status_code}).") from e
+        if e.status_code >= 500:
+            raise EditorialError(f"A API Anthropic está indisponível no momento (HTTP {e.status_code}). "
+                                 "Tente novamente em alguns minutos.") from e
+        raise EditorialError(f"A API Anthropic rejeitou a requisição (HTTP {e.status_code}): {_api_message(e)}") from e
     except anthropic.APIConnectionError as e:
-        raise EditorialError("Não foi possível conectar à API Anthropic.") from e
+        raise EditorialError("Não foi possível conectar à API Anthropic. Verifique a internet do servidor.") from e
+    except anthropic.APIError as e:  # erro enviado no meio do stream (ex.: sobrecarga)
+        raise EditorialError(f"A API Anthropic interrompeu a análise: {_api_message(e)}") from e
+    if on_usage and resp.usage:  # a chamada é cobrada mesmo quando a resposta não serve
+        on_usage({"model": resp.model, "input_tokens": resp.usage.input_tokens,
+                  "output_tokens": resp.usage.output_tokens})
     if resp.stop_reason == "refusal":
         raise EditorialError("A IA recusou analisar este conteúdo.")
-    if resp.stop_reason == "max_tokens" or resp.parsed_output is None:
-        raise EditorialError("A IA não devolveu uma resposta estruturada completa. Tente novamente.")
-    return resp.parsed_output
+    if resp.stop_reason == "max_tokens":
+        raise EditorialError("A resposta da IA foi cortada por limite de tamanho. Peça menos cortes e tente de novo.")
+    text = next((block.text for block in resp.content if block.type == "text"), "")
+    try:
+        return LLMResponse.model_validate_json(text)
+    except ValidationError as e:
+        raise EditorialError("A IA devolveu uma resposta fora do formato esperado. Tente novamente.") from e
 
 
 # ---------- Regras determinísticas ----------
@@ -236,12 +265,13 @@ def postprocess(resp: LLMResponse, segments: list[dict], video_duration: float, 
 
 
 def analyze(transcript: dict, video_duration: float, cfg: AnalysisConfig, channel_context: str = "",
-            exclude: list[tuple[float, float]] | None = None) -> list[ClipSuggestion]:
+            exclude: list[tuple[float, float]] | None = None,
+            on_usage: Callable[[dict], None] | None = None) -> list[ClipSuggestion]:
     segments = transcript.get("segments") or []
     if not segments:
         raise EditorialError("A transcrição está vazia; não há conteúdo para analisar.")
     prompt = build_prompt(segments, cfg, transcript.get("language", ""), channel_context, exclude)
-    clips = postprocess(call_claude(prompt), segments, video_duration, cfg, exclude)
+    clips = postprocess(call_claude(prompt, on_usage), segments, video_duration, cfg, exclude)
     if not clips:
         raise EditorialError("Nenhum trecho atendeu aos critérios de qualidade e duração. "
                              "Ajuste as configurações e tente novamente.")
