@@ -1,0 +1,12 @@
+.env
+storage/*/*
+!storage/*/.gitkeep
+storage/*.db*
+storage/models/
+storage/brand/
+__pycache__/
+.pytest_cache/
+node_modules/
+.next/
+next-env.d.ts
+*.tsbuildinfo

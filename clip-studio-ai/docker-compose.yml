@@ -1,0 +1,68 @@
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: ./backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      # O banco fica em volume nomeado (e não na pasta ./storage) porque o SQLite depende de
+      # travas de arquivo que não são confiáveis em pastas compartilhadas do Docker Desktop.
+      DATABASE_URL: sqlite:////db/clipstudio.db
+    volumes:
+      - ./storage:/storage
+      - db-data:/db
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  # MVP: um único worker (a recuperação de jobs interrompidos assume isso).
+  worker:
+    build: ./backend
+    restart: unless-stopped
+    command: python -m app.worker
+    env_file: .env
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      DATABASE_URL: sqlite:////db/clipstudio.db
+    volumes:
+      - ./storage:/storage
+      - db-data:/db
+    depends_on:
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_healthy  # garante que as migrações já rodaram
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:8000}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      - api
+
+volumes:
+  redis-data:
+  db-data:
